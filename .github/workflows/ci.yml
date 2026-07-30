@@ -59,7 +59,7 @@ jobs:
       - run: npx expo prebuild --platform android --clean
       - name: Set Gradle version
         run: |
-          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-all.zip" > android/gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.3-all.zip" > android/gradle/wrapper/gradle-wrapper.properties
       - name: Generate Keystore
         run: |
           keytool -genkeypair \
