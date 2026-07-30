@@ -56,6 +56,9 @@ jobs:
           cmdline-tools-version: '12.0'
           accept-android-sdk-licenses: true
       - run: npm ci --legacy-peer-deps
+      - name: Set Gradle version
+        run: |
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-all.zip" > android/gradle/wrapper/gradle-wrapper.properties
       - run: npx expo prebuild --platform android --clean
       - name: Generate Keystore
         run: |
