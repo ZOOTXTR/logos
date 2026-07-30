@@ -1,0 +1,7 @@
+node_modules/
+.expo/
+dist/
+__tests__/
+coverage/
+.git/
+*.tsbuildinfo

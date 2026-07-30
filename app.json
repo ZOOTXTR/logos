@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "Logos",
+    "slug": "logos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "logos",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0D0D1A"
+    },
+    "ios": {
+      "bundleIdentifier": "com.zovtex.logos",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSUserActivityTypes": [
+          "INSendMessageIntent"
+        ],
+        "CFBundleAllowMixedLocalizations": true
+      }
+    },
+    "android": {
+      "package": "com.zovtex.logos",
+      "versionCode": 1,
+      "permissions": [
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "POST_NOTIFICATIONS"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#0D0D1A"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/fd9e4ebe-4289-4e29-924b-1b5dda68c2ed",
+      "fallbackToCacheTimeout": 0,
+      "enabled": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "fd9e4ebe-4289-4e29-924b-1b5dda68c2ed"
+      },
+      "router": {
+        "origin": false
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      "expo-updates"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "owner": "zootxtr"
+  }
+}
