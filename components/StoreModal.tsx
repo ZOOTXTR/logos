@@ -8,16 +8,22 @@ import {
   StyleSheet,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  connectAsync,
-  purchaseItemAsync,
-  getProductsAsync,
-  finishTransactionAsync,
-  setPurchaseListener,
-  getPurchaseHistoryAsync,
-  IAPItemDetails,
-  IAPResponseCode,
-} from 'expo-in-app-purchases';
+import RNIap, {
+  initConnection,
+  endConnection,
+  getProducts,
+  getSubscriptions,
+  requestPurchase,
+  requestSubscription,
+  finishTransaction,
+  purchaseUpdatedListener,
+  purchaseErrorListener,
+  getAvailablePurchases,
+  type ProductPurchase,
+  type SubscriptionPurchase,
+  type Product,
+  type Subscription,
+} from 'react-native-iap';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { GEM_PACKAGES, GemPackage, PRODUCT_IDS } from '../constants/products';
 import { useTheme } from '../hooks/useTheme';
@@ -50,7 +56,7 @@ export function StoreModal({
   const { theme, language } = useTheme();
   const t = TRANSLATIONS[language];
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [products, setProducts] = useState<IAPItemDetails[]>([]);
+  const [products, setProducts] = useState<(Product | Subscription)[]>([]);
   const [customAlert, setCustomAlert] = useState<{
     visible: boolean;
     title: string;
@@ -87,7 +93,6 @@ export function StoreModal({
   languageRef.current = language;
   const showAlertRef = useRef(showCustomAlert);
   showAlertRef.current = showCustomAlert;
-  const listenerSet = useRef(false);
 
   useEffect(() => {
     if (!visible) return;
@@ -95,15 +100,15 @@ export function StoreModal({
 
     const initIAP = async () => {
       try {
-        await connectAsync();
-        const allIds = [
-          ...GEM_PACKAGES.map(p => p.id),
-          PRODUCT_IDS.PREMIUM_LIFETIME,
-          PRODUCT_IDS.PREMIUM_MONTHLY,
-        ];
-        const { responseCode, results } = await getProductsAsync(allIds);
-        if (!cancelled && responseCode === IAPResponseCode.OK && results) {
-          setProducts(results);
+        await initConnection();
+        await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
+        const gemIds = GEM_PACKAGES.map(p => p.id);
+        const [productResults, subscriptionResults] = await Promise.all([
+          getProducts({ skus: gemIds }),
+          getSubscriptions({ skus: [PRODUCT_IDS.PREMIUM_MONTHLY] }),
+        ]);
+        if (!cancelled) {
+          setProducts([...productResults, ...subscriptionResults]);
         }
       } catch {
         // IAP not available
@@ -112,48 +117,48 @@ export function StoreModal({
 
     initIAP();
 
-    if (!listenerSet.current) {
-      listenerSet.current = true;
-      setPurchaseListener(async ({ responseCode, results }) => {
-        if (responseCode === IAPResponseCode.OK && results) {
-          for (const purchase of results) {
-            if (!purchase.acknowledged) {
-              try {
-                const isGem = GEM_PACKAGES.some(p => p.id === purchase.productId);
-                if (isGem) {
-                  const pkg = GEM_PACKAGES.find(p => p.id === purchase.productId);
-                  if (pkg) {
-                    await onPurchaseRef.current(purchase.productId, pkg.gems);
-                  }
-                } else {
-                  await onPurchasePremiumRef.current();
-                }
-                await finishTransactionAsync(purchase, isGem);
-                showAlertRef.current(
-                  '✅',
-                  languageRef.current === 'en' ? 'Purchase successful!' : 'Satın alma başarılı!'
-                );
-              } catch {
-                showAlertRef.current(
-                  '❌',
-                  languageRef.current === 'en' ? 'Purchase failed!' : 'Satın alma başarısız!'
-                );
-              }
-            }
+    const handlePurchase = async (purchase: ProductPurchase | SubscriptionPurchase) => {
+      try {
+        const isGem = GEM_PACKAGES.some(p => p.id === purchase.productId);
+        if (!purchase.isAcknowledgedAndroid) {
+          const pkg = GEM_PACKAGES.find(p => p.id === purchase.productId);
+          if (isGem && pkg) {
+            await onPurchaseRef.current(purchase.productId, pkg.gems);
+          } else if (!isGem && purchase.productId === PRODUCT_IDS.PREMIUM_LIFETIME) {
+            await onPurchasePremiumRef.current();
           }
+          await finishTransaction({ purchase, isConsumable: isGem });
+          showAlertRef.current(
+            '✅',
+            languageRef.current === 'en' ? 'Purchase successful!' : 'Satın alma başarılı!'
+          );
         }
-      });
-    }
+      } catch {
+        showAlertRef.current(
+          '❌',
+          languageRef.current === 'en' ? 'Purchase failed!' : 'Satın alma başarısız!'
+        );
+      }
+    };
+
+    const purchaseSub = purchaseUpdatedListener(handlePurchase);
+    const errorSub = purchaseErrorListener(() => {
+      setPurchasing(null);
+    });
 
     return () => {
       cancelled = true;
+      purchaseSub.remove();
+      errorSub.remove();
+      endConnection();
     };
   }, [visible]);
 
   const handleBuyGems = async (pkg: GemPackage) => {
     setPurchasing(pkg.id);
     try {
-      await purchaseItemAsync(pkg.id);
+      await requestPurchase({ sku: pkg.id });
+      // Result comes through purchaseUpdatedListener
     } catch {
       try {
         await onPurchase(pkg.id, pkg.gems);
@@ -174,7 +179,8 @@ export function StoreModal({
   const handlePremium = async () => {
     setPurchasing('premium');
     try {
-      await purchaseItemAsync(PRODUCT_IDS.PREMIUM_LIFETIME);
+      await requestSubscription({ sku: PRODUCT_IDS.PREMIUM_MONTHLY });
+      // Result comes through purchaseUpdatedListener
     } catch {
       try {
         await onPurchasePremium();
@@ -194,26 +200,27 @@ export function StoreModal({
 
   const handleRestore = async () => {
     try {
-      const { responseCode, results } = await getPurchaseHistoryAsync();
-      if (responseCode === IAPResponseCode.OK && results) {
-        for (const purchase of results) {
-          const isGem = GEM_PACKAGES.some(p => p.id === purchase.productId);
-          if (isGem) {
-            const pkg = GEM_PACKAGES.find(p => p.id === purchase.productId);
-            if (pkg) {
-              await onPurchase(purchase.productId, pkg.gems);
-            }
-          } else {
-            await onPurchasePremium();
+      const purchases = await getAvailablePurchases();
+      let restored = 0;
+      for (const purchase of purchases) {
+        const isGem = GEM_PACKAGES.some(p => p.id === purchase.productId);
+        if (isGem) {
+          const pkg = GEM_PACKAGES.find(p => p.id === purchase.productId);
+          if (pkg) {
+            await onPurchase(purchase.productId, pkg.gems);
+            restored++;
           }
+        } else if (purchase.productId === PRODUCT_IDS.PREMIUM_LIFETIME || purchase.productId === PRODUCT_IDS.PREMIUM_MONTHLY) {
+          await onPurchasePremium();
+          restored++;
         }
-        showCustomAlert(
-          '✅',
-          results.length
-            ? (language === 'en' ? 'Purchases restored!' : 'Satın alımlar geri yüklendi!')
-            : (language === 'en' ? 'No purchases to restore.' : 'Geri yüklenecek satın alma bulunamadı.')
-        );
       }
+      showCustomAlert(
+        '✅',
+        restored
+          ? (language === 'en' ? 'Purchases restored!' : 'Satın alımlar geri yüklendi!')
+          : (language === 'en' ? 'No purchases to restore.' : 'Geri yüklenecek satın alma bulunamadı.')
+      );
     } catch {
       showCustomAlert(
         '✅',

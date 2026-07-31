@@ -57,9 +57,6 @@ jobs:
           accept-android-sdk-licenses: true
       - run: npm ci --legacy-peer-deps
       - run: npx expo prebuild --platform android --clean
-      - name: Exclude incompatible expo-in-app-purchases (SDK 52 removed legacy core API)
-        run: |
-          sed -i 's/useExpoModules()/useExpoModules([exclude: ["expo-in-app-purchases"]])/' android/settings.gradle
       - name: Build Release AAB
         run: |
           cd android

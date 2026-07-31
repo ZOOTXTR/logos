@@ -29,7 +29,8 @@
       "permissions": [
         "VIBRATE",
         "RECEIVE_BOOT_COMPLETED",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "com.android.vending.BILLING"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -59,15 +60,11 @@
     "plugins": [
       "expo-router",
       "expo-notifications",
-      "expo-updates"
+      "expo-updates",
+      "react-native-iap"
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "autolinking": {
-      "exclude": [
-        "expo-in-app-purchases"
-      ]
     },
     "owner": "zootxtr"
   }
