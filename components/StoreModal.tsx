@@ -24,6 +24,14 @@ import RNIap, {
   type Product,
   type Subscription,
 } from 'react-native-iap';
+
+const getLocalizedPrice = (item: Product | Subscription): string => {
+  if ('localizedPrice' in item) {
+    return item.localizedPrice || item.price || '';
+  }
+  const offer = item.subscriptionOfferDetails?.[0];
+  return offer?.pricingPhases.pricingPhaseList[0]?.formattedPrice ?? '';
+};
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { GEM_PACKAGES, GemPackage, PRODUCT_IDS } from '../constants/products';
 import { useTheme } from '../hooks/useTheme';
@@ -56,7 +64,7 @@ export function StoreModal({
   const { theme, language } = useTheme();
   const t = TRANSLATIONS[language];
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [products, setProducts] = useState<(Product | Subscription)[]>([]);
+  const [prices, setPrices] = useState<Record<string, string> | null>(null);
   const [customAlert, setCustomAlert] = useState<{
     visible: boolean;
     title: string;
@@ -108,7 +116,16 @@ export function StoreModal({
           getSubscriptions({ skus: [PRODUCT_IDS.PREMIUM_MONTHLY] }),
         ]);
         if (!cancelled) {
-          setProducts([...productResults, ...subscriptionResults]);
+          setPrices(
+            [...productResults, ...subscriptionResults].reduce<Record<string, string>>(
+              (acc, item) => {
+                const price = getLocalizedPrice(item);
+                if (price) acc[item.productId] = price;
+                return acc;
+              },
+              {}
+            )
+          );
         }
       } catch {
         // IAP not available
@@ -294,6 +311,7 @@ export function StoreModal({
                 onPremium={handlePremium}
                 onPurchaseGem={handleBuyGems}
                 purchasing={purchasing}
+                prices={prices ?? undefined}
                 theme={theme}
                 language={language}
               />

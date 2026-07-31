@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import { GEM_PACKAGES, GemPackage } from '../constants/products';
+import { GEM_PACKAGES, GemPackage, PRODUCT_IDS } from '../constants/products';
 import { Theme } from '../constants/themes';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { TRANSLATIONS } from '../constants/translations';
@@ -33,6 +33,7 @@ interface StorePackListProps {
   onPremium: () => void;
   onPurchaseGem: (pkg: GemPackage) => void;
   purchasing: string | null;
+  prices?: Record<string, string>;
   theme: Theme;
   language: 'tr' | 'en';
 }
@@ -44,6 +45,7 @@ export function StorePackList({
   onPremium,
   onPurchaseGem,
   purchasing,
+  prices,
   theme,
   language,
 }: StorePackListProps) {
@@ -54,6 +56,7 @@ export function StorePackList({
       <StorePremiumCard
         isPremium={isPremium}
         onPurchasePremium={onPremium}
+        price={prices?.[PRODUCT_IDS.PREMIUM_MONTHLY]}
         theme={theme}
         language={language}
       />
@@ -101,6 +104,7 @@ export function StorePackList({
             gemPackage={pkg}
             onPurchase={onPurchaseGem}
             isPurchasing={purchasing === pkg.id}
+            price={prices?.[pkg.id]}
             theme={theme}
             language={language}
           />

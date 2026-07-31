@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ interface StoreGemPackCardProps {
   isPurchasing: boolean;
   theme: Theme;
   language: 'tr' | 'en';
+  price?: string;
 }
 
 export function StoreGemPackCard({
@@ -24,7 +25,9 @@ export function StoreGemPackCard({
   isPurchasing,
   theme,
   language,
+  price,
 }: StoreGemPackCardProps) {
+  const displayPrice = price ?? pkg.price;
   return (
     <TouchableOpacity
       style={[
@@ -35,12 +38,12 @@ export function StoreGemPackCard({
       onPress={() => onPurchase(pkg)}
       activeOpacity={0.8}
       disabled={isPurchasing}
-      accessibilityLabel={pkg.gems ? `Buy ${pkg.gems} gems for ${pkg.price}` : 'Purchase item'}
+      accessibilityLabel={pkg.gems ? `Buy ${pkg.gems} gems for ${displayPrice}` : 'Purchase item'}
     >
       {pkg.popular && (
         <View style={styles.popularBadge}>
           <Text style={styles.popularText}>
-            {language === 'en' ? 'BEST VALUE' : 'EN POPÜLER'}
+            {language === 'en' ? 'BEST VALUE' : 'EN POPÃœLER'}
           </Text>
         </View>
       )}
@@ -54,7 +57,7 @@ export function StoreGemPackCard({
       {isPurchasing ? (
         <ActivityIndicator color={COLORS.gem} />
       ) : (
-        <Text style={styles.gemPrice}>{pkg.price}</Text>
+        <Text style={styles.gemPrice}>{displayPrice}</Text>
       )}
     </TouchableOpacity>
   );

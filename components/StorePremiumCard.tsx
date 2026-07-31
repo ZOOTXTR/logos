@@ -15,6 +15,7 @@ interface StorePremiumCardProps {
   onPurchasePremium: () => void;
   theme: Theme;
   language: 'tr' | 'en';
+  price?: string;
 }
 
 export function StorePremiumCard({
@@ -22,6 +23,7 @@ export function StorePremiumCard({
   onPurchasePremium,
   theme,
   language,
+  price,
 }: StorePremiumCardProps) {
   const t = TRANSLATIONS[language];
 
@@ -60,7 +62,7 @@ export function StorePremiumCard({
               <Text key={i} style={styles.premiumFeature}>{f}</Text>
             ))}
           </View>
-          <Text style={styles.premiumPrice}>{t.pricePromo}</Text>
+          <Text style={styles.premiumPrice}>{price ?? t.pricePromo}</Text>
         </LinearGradient>
       </TouchableOpacity>
     </View>
