@@ -64,6 +64,11 @@
     "experiments": {
       "typedRoutes": true
     },
+    "autolinking": {
+      "exclude": [
+        "expo-in-app-purchases"
+      ]
+    },
     "owner": "zootxtr"
   }
 }

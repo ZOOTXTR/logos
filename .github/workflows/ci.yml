@@ -57,31 +57,13 @@ jobs:
           accept-android-sdk-licenses: true
       - run: npm ci --legacy-peer-deps
       - run: npx expo prebuild --platform android --clean
-      - name: Set Gradle version
+      - name: Exclude incompatible expo-in-app-purchases (SDK 52 removed legacy core API)
         run: |
-          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.3-all.zip" > android/gradle/wrapper/gradle-wrapper.properties
-      - name: Generate Keystore
-        run: |
-          keytool -genkeypair \
-            -alias upload \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=ZOVTEX, OU=ZOVTEX, O=ZOVTEX, L=City, S=State, C=TR" \
-            -keystore keystore.jks \
-            -storepass ${{ secrets.KEYSTORE_PASSWORD }} \
-            -keypass ${{ secrets.KEY_PASSWORD }}
+          sed -i 's/useExpoModules()/useExpoModules([exclude: ["expo-in-app-purchases"]])/' android/settings.gradle
       - name: Build Release AAB
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
-          ./gradlew bundleRelease \
-            -Pandroid.injected.signing.store.file=../keystore.jks \
-            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
-            -Pandroid.injected.signing.key.alias=upload \
-            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+          ./gradlew bundleRelease
       - uses: actions/upload-artifact@v4
         with:
           name: app-release.aab
