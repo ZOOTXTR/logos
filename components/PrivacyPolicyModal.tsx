@@ -57,8 +57,8 @@ export function PrivacyPolicyModal({ visible, onClose, theme, language }: Privac
             </Text>
             <Text style={styles.policyText}>
               {language === 'en'
-                ? 'In-app purchases are handled securely via Google Play Billing API. Ad displays are managed by Google AdMob services. These services may use anonymous device identifiers to show relevant content.'
-                : 'Uygulama içi satın alımlar Google Play Billing API aracılığıyla güvenli şekilde gerçekleştirilir. Reklam gösterimleri için Google AdMob servisleri kullanılmaktadır. Bu servisler size uygun içerikler göstermek amacıyla anonim cihaz tanımlayıcıları kullanabilir.'}
+                ? 'The app does not display third-party ads. Crash reports are processed anonymously via Sentry for stability improvements. Optional cloud save, leaderboard, and referral features use Firebase services. These services may process anonymous device identifiers for security and functionality purposes.'
+                : 'Uygulama üçüncü taraf reklam göstermez. Çökme raporları, kararlılık iyileştirmeleri için Sentry üzerinden anonim olarak işlenir. Opsiyonel bulut kayıt, liderlik tablosu ve davet özellikleri Firebase servislerini kullanır. Bu servisler, güvenlik ve işlevsellik amacıyla anonim cihaz tanımlayıcılarını işleyebilir.'}
             </Text>
 
             <Text style={[styles.policyHeading, { color: c.primaryLight }]}>
