@@ -65,7 +65,7 @@ Developed by ZOVTEX. Questions? support@zovtex.com
 - Uygulama türü: **Oyun → Eğitici/Öğretici**
 - Şiddet: **Yok** | Kaba dil: **Yok** | Cinsellik: **Yok** | Uyuşturucu: **Yok** | Kumar: **Yok** | Korku: **Yok**
 - Sonuç: **3+ (E)** — her yaş için uygun
-- Not: İleride gerçek IAP eklendiğinde anket "satın almalar içerir" seçeneğiyle güncellenmeli
+- Not: IAP kodu entegre edildi (react-native-iap). Play Console'da ürünler tanımlanınca anket "satın almalar içerir / kullanıcı etkileşimleri" seçeneğiyle güncellenmeli — IAP tek başına dereceyi 3+ üzerine çıkarmaz, sadece "in-app purchases" etiketi eklenir
 
 ## Veri Güvenliği Formu (Data Safety)
 
@@ -75,7 +75,7 @@ Developed by ZOVTEX. Questions? support@zovtex.com
 |---|---|---|
 | E-posta adresi (kişisel) | EVET | Opsiyonel hesap oluşturma (email ile kayıt) |
 | Diğer kişisel bilgiler | HAYIR | |
-| Finansal bilgiler | HAYIR | IAP aktif değil |
+| Finansal bilgiler | EVET | Google Play IAP kullanılıyor → "Satın alımlar" veri türü işaretlenmeli |
 | Konum | HAYIR | |
 | Kullanıcı tarafından üretilen içerik | EVET | Liderlik tablosu skorları, geri bildirim mesajları |
 | Diğer uygulama etkinliği | EVET | Oyun ilerlemesi (bulut kayıt özelliği), istatistikler |
@@ -112,4 +112,4 @@ Emülatörde (`npx expo run:android` ile debug APK) veya gerçek cihazda çekile
 
 - **Kontrollü yayın (Staged rollout)**: İlk sürüm %5-10 ile başlatın
 - **Testers**: Dahili test (internal testing) kanalıyla önce kendi cihazınızda doğrulayın
-- **IAP durumu**: Şu an simulated modda; gerçek IAP için react-native-iap entegrasyonu gerekli (IAP eklenince bu dosyadaki "finansal bilgiler: hayır" ve "3+ içerik" notları güncellenmeli)
+- **IAP durumu**: react-native-iap 12.16.4 entegre edildi ve imzalı AAB'de derlendi. Play Console'da şu ürünler tanımlanmalı: `com.zovtex.logos.gems.small|medium|large` (consumable), `com.zovtex.logos.premium.lifetime` (non-consumable), `com.zovtex.logos.premium.monthly` (subscription). Doğrulama için Play Console "License Testing" sayfasında test kartlarıyla (yayınlanmış dahili/üretim track'te) satın alma akışı test edilmeli. Ürünler tanımlanana kadar app simulated modda çalışır (store açıkken IAP yoksa fallback'ler devreye girer).
