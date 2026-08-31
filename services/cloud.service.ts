@@ -70,6 +70,9 @@ class CloudService {
   }
 
   async syncStorageToCloud(email: string): Promise<boolean> {
+    const isChild = await AsyncStorage.getItem('gq_age_gate_passed');
+    if (isChild === 'child') return false; // COPPA block
+
     try {
       const [gems, premium, xp, stats, streakResult, achievements, scores, categories] = await Promise.all([
         getGems(),
@@ -154,6 +157,9 @@ class CloudService {
   }
 
   async submitFeedback(email: string, message: string, rating: number): Promise<boolean> {
+    const isChild = await AsyncStorage.getItem('gq_age_gate_passed');
+    if (isChild === 'child') return false; // COPPA block
+
     try {
       const db = this.getDb();
       await addDoc(collection(db, FIRESTORE_COLLECTIONS.FEEDBACK), {

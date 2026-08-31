@@ -172,6 +172,12 @@ export function StoreModal({
   }, [visible]);
 
   const handleBuyGems = async (pkg: GemPackage) => {
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    const isChild = await AsyncStorage.getItem('gq_age_gate_passed');
+    if (isChild === 'child') {
+      showCustomAlert('👶', language === 'en' ? 'In-app purchases are disabled for children.' : 'Uygulama içi satın alımlar çocuklar için kapalıdır.');
+      return;
+    }
     setPurchasing(pkg.id);
     try {
       await requestPurchase({ sku: pkg.id });
@@ -188,6 +194,12 @@ export function StoreModal({
   };
 
   const handlePremium = async () => {
+    const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+    const isChild = await AsyncStorage.getItem('gq_age_gate_passed');
+    if (isChild === 'child') {
+      showCustomAlert('👶', language === 'en' ? 'In-app purchases are disabled for children.' : 'Uygulama içi satın alımlar çocuklar için kapalıdır.');
+      return;
+    }
     setPurchasing('premium');
     try {
       await requestSubscription({ sku: PRODUCT_IDS.PREMIUM_MONTHLY });

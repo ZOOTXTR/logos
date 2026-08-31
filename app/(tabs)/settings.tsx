@@ -249,6 +249,34 @@ export default function SettingsScreen() {
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
               </TouchableOpacity>
               <View style={[styles.divider, { backgroundColor: c.border }]} />
+              <TouchableOpacity style={styles.accountRow}
+                onPress={() => {
+                  Alert.alert(
+                    language === 'en' ? 'Delete Account' : 'Hesabı Sil',
+                    language === 'en'
+                      ? 'Are you sure you want to permanently delete your account, cloud saves, and personal data? This action cannot be undone.'
+                      : 'Hesabınızı, bulut kayıtlarınızı ve kişisel verilerinizi kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+                    [
+                      { text: language === 'en' ? 'Cancel' : 'İptal', style: 'cancel' },
+                      { 
+                        text: language === 'en' ? 'Delete' : 'Sil', 
+                        style: 'destructive',
+                        onPress: async () => {
+                          const { signOut } = require('../../services/auth.service');
+                          const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+                          await signOut();
+                          await AsyncStorage.clear();
+                          Alert.alert('✅', language === 'en' ? 'Account deleted.' : 'Hesabınız silindi.');
+                        }
+                      }
+                    ]
+                  );
+                }}>
+                <Text style={styles.accountEmoji}>🗑️</Text>
+                <Text style={[styles.accountLabel, { color: '#EF4444' }]}>{language === 'en' ? 'Delete Account' : 'Hesabı Sil'}</Text>
+                <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
+              </TouchableOpacity>
+              <View style={[styles.divider, { backgroundColor: c.border }]} />
               <TouchableOpacity style={styles.accountRow} onPress={() => setShowInvite(true)}>
                 <Text style={styles.accountEmoji}>🎉</Text>
                 <Text style={[styles.accountLabel, { color: c.text }]}>

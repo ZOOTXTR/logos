@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { COLORS } from '../constants/theme';
@@ -9,11 +9,18 @@ import { preloadDictionaries } from '../services/dictionary.service';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { setupDeepLinkHandler } from '../services/deeplink.service';
 import { initErrorReporting } from '../services/error-reporting.service';
+import { AgeGateModal } from '../components/AgeGateModal';
 
 function RootLayoutContent() {
   const { language, notifEnabled } = useTheme();
+  const [ageChecked, setAgeChecked] = useState(false);
 
-  useEffect(() => { initErrorReporting(); }, []);
+  const handleAgeComplete = (isChild: boolean) => {
+    setAgeChecked(true);
+    if (!isChild) {
+      initErrorReporting();
+    }
+  };
 
   useEffect(() => {
     const initNotifications = async () => {
@@ -46,16 +53,19 @@ function RootLayoutContent() {
   return (
     <ErrorBoundary>
       <StatusBar style="light" backgroundColor={COLORS.background} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="anagram" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="blitz" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="chain" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="dordle" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="wordconnect" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="duel" options={{ animation: 'slide_from_right' }} />
-        <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
-      </Stack>
+      <AgeGateModal onComplete={handleAgeComplete} />
+      {ageChecked && (
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="anagram" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="blitz" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="chain" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="dordle" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="wordconnect" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="duel" options={{ animation: 'slide_from_right' }} />
+          <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+        </Stack>
+      )}
     </ErrorBoundary>
   );
 }
