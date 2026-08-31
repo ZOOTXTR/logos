@@ -39,12 +39,22 @@ export default function BlitzScreen() {
     } else {
       audioService.triggerHaptic('warning');
     }
+  };
+
+  useEffect(() => {
+    let mounted = true;
     if (game.status === 'ended') {
       audioService.play('loss');
-      await progress.earnXP(game.score / 10);
-      await progress.addGems(Math.floor(game.wordsSolved * 5));
+      const award = async () => {
+        const xp = Math.floor(game.score / 10);
+        const gems = Math.floor(game.wordsSolved * 5);
+        if (xp > 0) await progress.earnXP(xp);
+        if (gems > 0) await progress.addGems(gems);
+      };
+      award();
     }
-  };
+    return () => { mounted = false; };
+  }, [game.status]);
 
   // Physical keyboard support on Web
   useEffect(() => {

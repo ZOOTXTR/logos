@@ -153,6 +153,11 @@ export function GamePlayScreen({
   };
 
   const handleSpendGems = async (): Promise<boolean> => {
+    if (premium) {
+      const hint = game.useHint();
+      showCustomAlert('💡 İpucu', hint ?? (language === 'en' ? 'All letters found!' : 'Tüm harfler zaten bulundu!'));
+      return true;
+    }
     const ok = await onSpendGems(HINT_GEM_COST);
     if (ok) {
       const hint = game.useHint();

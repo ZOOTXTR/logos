@@ -15,6 +15,7 @@ export default function ChainScreen() {
   const game = useWordChain();
   const progress = useProgress();
   const inputRef = useRef<TextInput>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   if (progress.loading) {
     return <LoadingView />;
@@ -81,7 +82,8 @@ export default function ChainScreen() {
         {/* Zincir Listesi */}
         <ScrollView
           style={styles.chainList}
-          ref={ref => { if (ref) setTimeout(() => ref.scrollToEnd({ animated: true }), 100); }}
+          ref={scrollRef}
+          onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
         >
           {game.chain.map((word, i) => (
             <View key={i} style={[styles.chainItem, i === game.chain.length - 1 && styles.chainItemLast]}>

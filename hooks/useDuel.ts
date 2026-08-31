@@ -103,16 +103,30 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
       // Check guess and color cells
       const nextOpponentBoard = prev.opponentBoard.map((row, rIndex) => {
         if (rIndex !== currentRow) return row;
-        return row.map((cell, cIndex) => {
-          const char = guessedWord[cIndex];
-          let status: LetterStatus = 'absent';
-          if (target[cIndex] === char) {
-            status = 'correct';
-          } else if (target.includes(char)) {
-            status = 'present';
+        
+        const newRow = row.map((_, cIndex) => ({ char: guessedWord[cIndex], status: 'absent' as LetterStatus }));
+        const targetChars = target.split('');
+        
+        // Pass 1: Mark corrects
+        newRow.forEach((cell, cIndex) => {
+          if (cell.char === targetChars[cIndex]) {
+            cell.status = 'correct';
+            targetChars[cIndex] = null as any;
           }
-          return { char, status };
         });
+        
+        // Pass 2: Mark presents
+        newRow.forEach((cell) => {
+          if (cell.status !== 'correct') {
+            const matchIndex = targetChars.indexOf(cell.char);
+            if (matchIndex !== -1) {
+              cell.status = 'present';
+              targetChars[matchIndex] = null as any;
+            }
+          }
+        });
+        
+        return newRow;
       });
 
       const won = guessedWord === target;
@@ -193,15 +207,30 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
 
       const nextBoard = prev.playerBoard.map((row, rIdx) => {
         if (rIdx !== currentRow) return row;
-        return row.map((cell, cIdx) => {
-          let status: LetterStatus = 'absent';
-          if (prev.targetWord[cIdx] === cell.char) {
-            status = 'correct';
-          } else if (prev.targetWord.includes(cell.char)) {
-            status = 'present';
+        
+        const newRow = row.map(cell => ({ ...cell, status: 'absent' as LetterStatus }));
+        const targetChars = prev.targetWord.split('');
+        
+        // Pass 1: Mark corrects
+        newRow.forEach((cell, cIdx) => {
+          if (cell.char === targetChars[cIdx]) {
+            cell.status = 'correct';
+            targetChars[cIdx] = null as any;
           }
-          return { ...cell, status: status as LetterStatus };
         });
+        
+        // Pass 2: Mark presents
+        newRow.forEach((cell) => {
+          if (cell.status !== 'correct') {
+            const matchIndex = targetChars.indexOf(cell.char);
+            if (matchIndex !== -1) {
+              cell.status = 'present';
+              targetChars[matchIndex] = null as any;
+            }
+          }
+        });
+        
+        return newRow;
       });
 
       const nextStatus = correct ? 'won' : (currentRow + 1 >= MAX_GUESSES ? 'lost' : 'playing');
