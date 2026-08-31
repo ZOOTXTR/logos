@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Theme, THEMES, getThemeById } from '../constants/themes';
 import { storageGet, storageSet, storageSetJSON, storageGetJSON } from '../services/storage.service';
+import { audioService } from '../services/audio.service';
 
 interface ThemeContextType {
   theme: Theme;
@@ -65,12 +66,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         storageGet('gq_dyslexia_font'),
       ]);
       
-      
       if (saved) setThemeId(saved);
       if (unlocked) setUnlockedThemes(JSON.parse(unlocked) as string[]);
       if (cb !== null) setColorBlindState(cb === 'true');
-      if (sound !== null) setSoundEnabledState(sound === 'true');
-      if (haptic !== null) setHapticEnabledState(haptic === 'true');
+      if (sound !== null) {
+        const isS = sound === 'true';
+        setSoundEnabledState(isS);
+        audioService.setSoundEnabled(isS);
+      }
+      if (haptic !== null) {
+        const isH = haptic === 'true';
+        setHapticEnabledState(isH);
+        audioService.setHapticEnabled(isH);
+      }
       if (notif !== null) setNotifEnabledState(notif === 'true');
       if (lang !== null) setLanguageState(lang as 'tr' | 'en');
       if (df !== null) setDyslexiaFontState(df === 'true');
@@ -110,11 +118,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setSoundEnabled = useCallback((v: boolean) => {
     setSoundEnabledState(v);
+    audioService.setSoundEnabled(v);
     storageSet('gq_sound_enabled', String(v));
   }, []);
 
   const setHapticEnabled = useCallback((v: boolean) => {
     setHapticEnabledState(v);
+    audioService.setHapticEnabled(v);
     storageSet('gq_haptic_enabled', String(v));
   }, []);
 
@@ -133,28 +143,33 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     storageSet('gq_dyslexia_font', String(v));
   }, []);
 
+  const contextValue = useMemo(() => ({
+    theme: getThemeById(themeId),
+    setTheme,
+    unlockedThemes,
+    unlockTheme,
+    unlockAndSetTheme,
+    colorBlind,
+    setColorBlind,
+    soundEnabled,
+    setSoundEnabled,
+    hapticEnabled,
+    setHapticEnabled,
+    notifEnabled,
+    setNotifEnabled,
+    language,
+    setLanguage,
+    dyslexiaFont,
+    setDyslexiaFont,
+  }), [
+    themeId, setTheme, unlockedThemes, unlockTheme, unlockAndSetTheme,
+    colorBlind, setColorBlind, soundEnabled, setSoundEnabled,
+    hapticEnabled, setHapticEnabled, notifEnabled, setNotifEnabled,
+    language, setLanguage, dyslexiaFont, setDyslexiaFont
+  ]);
+
   return (
-    <ThemeContext.Provider
-      value={{
-        theme: getThemeById(themeId),
-        setTheme,
-        unlockedThemes,
-        unlockTheme,
-        unlockAndSetTheme,
-        colorBlind,
-        setColorBlind,
-        soundEnabled,
-        setSoundEnabled,
-        hapticEnabled,
-        setHapticEnabled,
-        notifEnabled,
-        setNotifEnabled,
-        language,
-        setLanguage,
-        dyslexiaFont,
-        setDyslexiaFont,
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

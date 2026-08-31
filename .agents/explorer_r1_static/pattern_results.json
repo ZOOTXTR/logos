@@ -1,0 +1,1089 @@
+{
+  "explicitAny": [
+    {
+      "file": "app/(tabs)/index.tsx",
+      "line": 128,
+      "text": "game={game as any} gameConfig={gameConfig}"
+    },
+    {
+      "file": "app/(tabs)/modes.tsx",
+      "line": 34,
+      "text": "router.push(mode.route as any);"
+    },
+    {
+      "file": "app/dordle.tsx",
+      "line": 30,
+      "text": "theme: any;"
+    },
+    {
+      "file": "app/dordle.tsx",
+      "line": 33,
+      "text": "const getCellBg = (status: LetterStatus, isSolved: boolean, colorBlind: boolean, theme: any) => {"
+    },
+    {
+      "file": "app/duel.tsx",
+      "line": 35,
+      "text": "theme: any; language: string;"
+    },
+    {
+      "file": "app/wordconnect.tsx",
+      "line": 38,
+      "text": "theme: any; language: string; onClose?: () => void;"
+    },
+    {
+      "file": "components/AnimatedCell.tsx",
+      "line": 27,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/AnimatedCell.tsx",
+      "line": 30,
+      "text": "function getLetterBg(status: LetterStatus | undefined, colorBlind: boolean, theme: any): string {"
+    },
+    {
+      "file": "components/AnimatedCell.tsx",
+      "line": 41,
+      "text": "function getLetterBorder(status: LetterStatus | undefined, theme: any): string {"
+    },
+    {
+      "file": "components/CloudLoginForm.tsx",
+      "line": 10,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/CloudSyncStatus.tsx",
+      "line": 15,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/DailySpinModal.tsx",
+      "line": 48,
+      "text": "const showCustomAlert = (title: string, message: string, buttons?: any[]) => {"
+    },
+    {
+      "file": "components/DefinitionCard.tsx",
+      "line": 9,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/FeedbackForm.tsx",
+      "line": 11,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/FeedbackTypeSelector.tsx",
+      "line": 10,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/FilterChips.tsx",
+      "line": 15,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/GameEndCertificate.tsx",
+      "line": 13,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/GameResultOverlay.tsx",
+      "line": 21,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/GuessDistributionChart.tsx",
+      "line": 6,
+      "text": "export function GuessDistributionChart({ distribution, theme }: { distribution: Record<number, number>; theme: any }) {"
+    },
+    {
+      "file": "components/HintOptionCard.tsx",
+      "line": 12,
+      "text": "theme?: any;"
+    },
+    {
+      "file": "components/ScoreRow.tsx",
+      "line": 9,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/SpinPrizeTable.tsx",
+      "line": 8,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/SpinWheel.tsx",
+      "line": 10,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/SpinWheelCanvas.tsx",
+      "line": 39,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/StickerFlipCard.tsx",
+      "line": 16,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/StickerGridCard.tsx",
+      "line": 16,
+      "text": "theme: any;"
+    },
+    {
+      "file": "components/StoreModal.tsx",
+      "line": 51,
+      "text": "onUnlockCategory: (cat: string) => Promise<any>;"
+    },
+    {
+      "file": "components/TimeHistoryChart.tsx",
+      "line": 6,
+      "text": "export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; theme: any; language: string }) {"
+    },
+    {
+      "file": "services/definition.service.ts",
+      "line": 16,
+      "text": "return data[0].anlamlarListe.map((item: any) => ({"
+    },
+    {
+      "file": "services/definition.service.ts",
+      "line": 35,
+      "text": "data[0].meanings.forEach((meaning: any) => {"
+    },
+    {
+      "file": "services/definition.service.ts",
+      "line": 36,
+      "text": "meaning.definitions.forEach((def: any) => {"
+    },
+    {
+      "file": "screens/GameMenuScreen.tsx",
+      "line": 19,
+      "text": "theme: any;"
+    },
+    {
+      "file": "screens/GamePlayScreen.tsx",
+      "line": 26,
+      "text": "theme: any;"
+    },
+    {
+      "file": "screens/GamePlayScreen.tsx",
+      "line": 30,
+      "text": "board: any[][];"
+    },
+    {
+      "file": "screens/GamePlayScreen.tsx",
+      "line": 54,
+      "text": "newAchievement: any;"
+    },
+    {
+      "file": "screens/GamePlayScreen.tsx",
+      "line": 279,
+      "text": "<GameBoard board={game.board as any} currentRow={game.currentRow} />"
+    }
+  ],
+  "unsafeCasts": [],
+  "nonNullAssertions": [
+    {
+      "file": "hooks/useGame.ts",
+      "line": 38,
+      "text": "const stateRef = useRef<GameState>(null!);"
+    },
+    {
+      "file": "hooks/useGame.ts",
+      "line": 79,
+      "text": "clearInterval(timerRef.current!);"
+    },
+    {
+      "file": "services/storage.service.ts",
+      "line": 13,
+      "text": "release!();"
+    }
+  ],
+  "emptyCatchBlocks": [
+    {
+      "file": "app/dordle.tsx",
+      "line": 164,
+      "text": "} catch {}"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 173,
+      "text": "catch (e) {\r // Haptics not supported in simulator / web, fail silently\r }"
+    },
+    {
+      "file": "services/notification.service.ts",
+      "line": 55,
+      "text": "} catch (_) {}"
+    },
+    {
+      "file": "services/share.service.ts",
+      "line": 34,
+      "text": "} catch {}"
+    },
+    {
+      "file": "services/share.service.ts",
+      "line": 44,
+      "text": "} catch {}"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 241,
+      "text": "catch(e) { // silently ignore cloud score failure }"
+    }
+  ],
+  "silentCatches": [
+    {
+      "file": "app/dordle.tsx",
+      "line": 148,
+      "text": "catch (e) {\r console.warn(e);\r }"
+    },
+    {
+      "file": "app/dordle.tsx",
+      "line": 155,
+      "text": "catch (e) {\r if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {\r try {\r await navigator.clipboard.writeText(share"
+    },
+    {
+      "file": "app/duel.tsx",
+      "line": 128,
+      "text": "catch (e) {\r console.error('Game end handling failed:', e);\r }"
+    },
+    {
+      "file": "app/_layout.tsx",
+      "line": 27,
+      "text": "catch (e) {\r console.warn('Notification init failed:', e);\r }"
+    },
+    {
+      "file": "components/StickerAlbumModal.tsx",
+      "line": 40,
+      "text": "catch (e) {\r console.warn('Failed to load sticker album:', e);\r }"
+    },
+    {
+      "file": "components/StickerAlbumModal.tsx",
+      "line": 49,
+      "text": "catch (e) {\r console.warn('Failed to save sticker album:', e);\r }"
+    },
+    {
+      "file": "hooks/useCloudSync.ts",
+      "line": 47,
+      "text": "catch (e) {\r setSyncStatus('error');\r }"
+    },
+    {
+      "file": "hooks/useCloudSync.ts",
+      "line": 71,
+      "text": "catch (e) {\r setSyncStatus('error');\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 36,
+      "text": "catch (e) {\r console.error('Failed to load progress:', e);\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 50,
+      "text": "catch (e) {\r console.error('addGems failed:', e);\r return gems;\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 61,
+      "text": "catch (e) {\r console.error('spendGems failed:', e);\r return false;\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 73,
+      "text": "catch (e) {\r console.error('earnXP failed:', e);\r return xp;\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 84,
+      "text": "catch (e) {\r console.error('unlockPremium failed:', e);\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 158,
+      "text": "catch (e) {\r console.error('recordWin failed:', e);\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 169,
+      "text": "catch (e) {\r console.error('recordLoss failed:', e);\r }"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 181,
+      "text": "catch (e) {\r console.error('unlockCategory failed:', e);\r return unlockedCategories;\r }"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 82,
+      "text": "catch (e) {\r console.warn('Audio preloading failed:', e);\r }"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 107,
+      "text": "catch (e) {\r console.warn('Background music failed to start:', e);\r }"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 119,
+      "text": "catch (e) {\r console.warn('Background music pause failed:', e);\r }"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 149,
+      "text": "catch (e) {\r console.warn('Audio play failed:', e);\r }"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 190,
+      "text": "catch (e) {\r console.warn('Audio unload error:', e);\r }"
+    },
+    {
+      "file": "services/auth.service.ts",
+      "line": 43,
+      "text": "catch (e) {\r console.warn('Auth init failed:', e);\r notifyListeners(null);\r return null;\r }"
+    },
+    {
+      "file": "services/auth.service.ts",
+      "line": 66,
+      "text": "catch (e) {\r console.warn('Failed to create user profile:', e);\r }"
+    },
+    {
+      "file": "services/auth.service.ts",
+      "line": 99,
+      "text": "catch (e) {\r console.warn('Logout failed:', e);\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 38,
+      "text": "catch (error) {\r console.error('Firestore syncToCloud failed, falling back to AsyncStorage:', error);\r try {\r await AsyncStorage.setItem(`gq_cloud_db_"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 44,
+      "text": "catch (fallbackError) {\r console.error('AsyncStorage fallback also failed:', fallbackError);\r return false;\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 59,
+      "text": "catch (error) {\r console.error('Firestore restoreFromCloud failed, falling back to AsyncStorage:', error);\r try {\r const val = await AsyncStorage.getI"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 65,
+      "text": "catch (fallbackError) {\r console.error('AsyncStorage fallback also failed:', fallbackError);\r return null;\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 106,
+      "text": "catch (firestoreError) {\r console.error('Firestore syncStorageToCloud failed, falling back to AsyncStorage:', firestoreError);\r await AsyncStorage.set"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 112,
+      "text": "catch (e) {\r console.error('syncStorageToCloud failed:', e);\r return false;\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 125,
+      "text": "catch (error) {\r console.error('Firestore restoreStorageFromCloud failed, falling back to AsyncStorage:', error);\r try {\r const val = await AsyncStora"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 131,
+      "text": "catch (fallbackError) {\r console.error('AsyncStorage fallback also failed:', fallbackError);\r return false;\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 150,
+      "text": "catch (e) {\r console.error('Restore storage from cloud failed:', e);\r return false;\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 166,
+      "text": "catch (error) {\r console.error('Firestore submitFeedback failed:', error);\r try {\r const key = `gq_feedback_${Date.now()}"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 173,
+      "text": "catch (fallbackError) {\r console.error('AsyncStorage fallback failed:', fallbackError);\r return false;\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 191,
+      "text": "catch (e) {\r console.warn('submitScore failed:', e);\r return false;\r }"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 219,
+      "text": "catch (e) {\r console.warn('getTopScores failed:', e);\r return [];\r }"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 33,
+      "text": "catch (e) { console.warn('[IAP] initConnection failed:', e); return false; }"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 45,
+      "text": "catch (e) { console.warn('[IAP] fetchProducts failed:', e); return []; }"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 68,
+      "text": "catch (finishErr) { console.warn('[IAP] finishTransaction failed:', finishErr); }"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 73,
+      "text": "catch (e: unknown) { const err = e as { code?: string; message?: string }"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 90,
+      "text": "catch (e) { console.warn('[IAP] restorePurchases failed:', e); return []; }"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 102,
+      "text": "catch (e) { console.warn('[IAP] endConnection failed:', e); }"
+    },
+    {
+      "file": "services/leaderboard.service.ts",
+      "line": 37,
+      "text": "catch (e) {\r console.warn('Failed to submit score:', e);\r return false;\r }"
+    },
+    {
+      "file": "services/leaderboard.service.ts",
+      "line": 75,
+      "text": "catch (e) {\r console.warn('Failed to get leaderboard:', e);\r return [];\r }"
+    },
+    {
+      "file": "services/leaderboard.service.ts",
+      "line": 107,
+      "text": "catch (e) {\r console.warn('Failed to get my scores:', e);\r return [];\r }"
+    },
+    {
+      "file": "services/notification.service.ts",
+      "line": 22,
+      "text": "catch (e) {\r console.warn('Failed to register push notification token:', e);\r return null;\r }"
+    },
+    {
+      "file": "services/notification.service.ts",
+      "line": 86,
+      "text": "catch (e) {\r console.warn('Failed to schedule notifications:', e);\r }"
+    },
+    {
+      "file": "services/referral.service.ts",
+      "line": 70,
+      "text": "catch (e) { console.warn('Referral claim failed:', e); return { success: false, message: 'Something went wrong. Try again!' }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 87,
+      "text": "catch (e) { console.error('Failed to hydrate progress store:', e); set({ hydrationError: true }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 100,
+      "text": "catch (e) { console.error('addGems failed:', e); return get().gems; }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 111,
+      "text": "catch (e) { console.error('spendGems failed:', e); return false; }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 122,
+      "text": "catch (e) { console.error('earnXP failed:', e); return get().xp; }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 133,
+      "text": "catch (e) { console.error('unlockPremium failed:', e); }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 143,
+      "text": "catch (e) { console.error('unlockCategory failed:', e); return get().unlockedCategories; }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 156,
+      "text": "catch (e) { console.error('purchaseCategory failed:', e); return false; }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 244,
+      "text": "catch (e) { console.error('recordWin failed:', e); }"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 256,
+      "text": "catch (e) { console.error('recordLoss failed:', e); }"
+    },
+    {
+      "file": "store/settingsStore.ts",
+      "line": 70,
+      "text": "catch (e) { console.error('Failed to hydrate settings store:', e); }"
+    }
+  ],
+  "consoleUsage": [
+    {
+      "file": "app/dordle.tsx",
+      "line": 149,
+      "text": "console.warn(e);"
+    },
+    {
+      "file": "app/duel.tsx",
+      "line": 129,
+      "text": "console.error('Game end handling failed:', e);"
+    },
+    {
+      "file": "app/_layout.tsx",
+      "line": 28,
+      "text": "console.warn('Notification init failed:', e);"
+    },
+    {
+      "file": "components/ErrorBoundary.tsx",
+      "line": 25,
+      "text": "console.error('ErrorBoundary caught:', error, errorInfo);"
+    },
+    {
+      "file": "components/StickerAlbumModal.tsx",
+      "line": 41,
+      "text": "console.warn('Failed to load sticker album:', e);"
+    },
+    {
+      "file": "components/StickerAlbumModal.tsx",
+      "line": 50,
+      "text": "console.warn('Failed to save sticker album:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 37,
+      "text": "console.error('Failed to load progress:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 51,
+      "text": "console.error('addGems failed:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 62,
+      "text": "console.error('spendGems failed:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 74,
+      "text": "console.error('earnXP failed:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 85,
+      "text": "console.error('unlockPremium failed:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 159,
+      "text": "console.error('recordWin failed:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 170,
+      "text": "console.error('recordLoss failed:', e);"
+    },
+    {
+      "file": "hooks/useProgress.ts",
+      "line": 182,
+      "text": "console.error('unlockCategory failed:', e);"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 83,
+      "text": "console.warn('Audio preloading failed:', e);"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 108,
+      "text": "console.warn('Background music failed to start:', e);"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 120,
+      "text": "console.warn('Background music pause failed:', e);"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 150,
+      "text": "console.warn('Audio play failed:', e);"
+    },
+    {
+      "file": "services/audio.service.ts",
+      "line": 191,
+      "text": "console.warn('Audio unload error:', e);"
+    },
+    {
+      "file": "services/auth.service.ts",
+      "line": 44,
+      "text": "console.warn('Auth init failed:', e);"
+    },
+    {
+      "file": "services/auth.service.ts",
+      "line": 67,
+      "text": "console.warn('Failed to create user profile:', e);"
+    },
+    {
+      "file": "services/auth.service.ts",
+      "line": 100,
+      "text": "console.warn('Logout failed:', e);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 39,
+      "text": "console.error('Firestore syncToCloud failed, falling back to AsyncStorage:', error);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 45,
+      "text": "console.error('AsyncStorage fallback also failed:', fallbackError);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 60,
+      "text": "console.error('Firestore restoreFromCloud failed, falling back to AsyncStorage:', error);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 66,
+      "text": "console.error('AsyncStorage fallback also failed:', fallbackError);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 107,
+      "text": "console.error('Firestore syncStorageToCloud failed, falling back to AsyncStorage:', firestoreError);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 113,
+      "text": "console.error('syncStorageToCloud failed:', e);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 126,
+      "text": "console.error('Firestore restoreStorageFromCloud failed, falling back to AsyncStorage:', error);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 132,
+      "text": "console.error('AsyncStorage fallback also failed:', fallbackError);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 151,
+      "text": "console.error('Restore storage from cloud failed:', e);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 167,
+      "text": "console.error('Firestore submitFeedback failed:', error);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 174,
+      "text": "console.error('AsyncStorage fallback failed:', fallbackError);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 192,
+      "text": "console.warn('submitScore failed:', e);"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 220,
+      "text": "console.warn('getTopScores failed:', e);"
+    },
+    {
+      "file": "services/error-reporting.service.ts",
+      "line": 16,
+      "text": "console.warn('[ErrorReporting]', error.message, context);"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 34,
+      "text": "console.warn('[IAP] initConnection failed:', e);"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 46,
+      "text": "console.warn('[IAP] fetchProducts failed:', e);"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 55,
+      "text": "console.warn('[IAP] Purchases not available on web platform.');"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 59,
+      "text": "console.warn('[IAP] Connection not established. Call initIAP() first.');"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 69,
+      "text": "console.warn('[IAP] finishTransaction failed:', finishErr);"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 78,
+      "text": "console.warn('[IAP] requestPurchase failed:', err.message);"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 91,
+      "text": "console.warn('[IAP] restorePurchases failed:', e);"
+    },
+    {
+      "file": "services/iap.service.ts",
+      "line": 103,
+      "text": "console.warn('[IAP] endConnection failed:', e);"
+    },
+    {
+      "file": "services/leaderboard.service.ts",
+      "line": 38,
+      "text": "console.warn('Failed to submit score:', e);"
+    },
+    {
+      "file": "services/leaderboard.service.ts",
+      "line": 76,
+      "text": "console.warn('Failed to get leaderboard:', e);"
+    },
+    {
+      "file": "services/leaderboard.service.ts",
+      "line": 108,
+      "text": "console.warn('Failed to get my scores:', e);"
+    },
+    {
+      "file": "services/notification.service.ts",
+      "line": 23,
+      "text": "console.warn('Failed to register push notification token:', e);"
+    },
+    {
+      "file": "services/notification.service.ts",
+      "line": 87,
+      "text": "console.warn('Failed to schedule notifications:', e);"
+    },
+    {
+      "file": "services/referral.service.ts",
+      "line": 71,
+      "text": "console.warn('Referral claim failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 88,
+      "text": "console.error('Failed to hydrate progress store:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 101,
+      "text": "console.error('addGems failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 112,
+      "text": "console.error('spendGems failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 123,
+      "text": "console.error('earnXP failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 134,
+      "text": "console.error('unlockPremium failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 144,
+      "text": "console.error('unlockCategory failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 157,
+      "text": "console.error('purchaseCategory failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 245,
+      "text": "console.error('recordWin failed:', e);"
+    },
+    {
+      "file": "store/progressStore.ts",
+      "line": 257,
+      "text": "console.error('recordLoss failed:', e);"
+    },
+    {
+      "file": "store/settingsStore.ts",
+      "line": 71,
+      "text": "console.error('Failed to hydrate settings store:', e);"
+    }
+  ],
+  "todoFixme": [
+    {
+      "file": "constants/validation_dictionary.ts",
+      "line": 32842,
+      "text": "'HACK',"
+    }
+  ],
+  "potentialLeaks": [
+    {
+      "file": "app/(tabs)/index.tsx",
+      "line": 104,
+      "text": "setTimeout(() => game.resetGame(difficulty, mode, category), 50);"
+    },
+    {
+      "file": "app/(tabs)/settings.tsx",
+      "line": 117,
+      "text": "setTimeout(() => {"
+    },
+    {
+      "file": "app/(tabs)/settings.tsx",
+      "line": 121,
+      "text": "setTimeout(() => {"
+    },
+    {
+      "file": "app/anagram.tsx",
+      "line": 153,
+      "text": "window.addEventListener('keydown', handleKeyDown);"
+    },
+    {
+      "file": "app/blitz.tsx",
+      "line": 67,
+      "text": "window.addEventListener('keydown', handleKeyDown);"
+    },
+    {
+      "file": "app/chain.tsx",
+      "line": 84,
+      "text": "ref={ref => { if (ref) setTimeout(() => ref.scrollToEnd({ animated: true }), 100); }}"
+    },
+    {
+      "file": "app/dordle.tsx",
+      "line": 236,
+      "text": "window.addEventListener('keydown', handleKeyDown);"
+    },
+    {
+      "file": "app/duel.tsx",
+      "line": 197,
+      "text": "window.addEventListener('keydown', handleKeyDown);"
+    },
+    {
+      "file": "components/AchievementToast.tsx",
+      "line": 22,
+      "text": "const timer = setTimeout(() => {"
+    },
+    {
+      "file": "components/AnimatedCell.tsx",
+      "line": 67,
+      "text": "const timer = setTimeout(() => { scaleVal.value = withTiming(1, { duration: 100 }); }, 80);"
+    },
+    {
+      "file": "components/GemShower.tsx",
+      "line": 52,
+      "text": "const timer = setTimeout(() => {"
+    },
+    {
+      "file": "components/StoreModal.tsx",
+      "line": 275,
+      "text": "setTimeout(() => {"
+    },
+    {
+      "file": "hooks/useBlitz.ts",
+      "line": 32,
+      "text": "timerRef.current = setInterval(() => {"
+    },
+    {
+      "file": "hooks/useBlitz.ts",
+      "line": 60,
+      "text": "const sub = AppState.addEventListener('change', (nextState: AppStateStatus) => {"
+    },
+    {
+      "file": "hooks/useCloudSync.ts",
+      "line": 37,
+      "text": "await new Promise(r => setTimeout(r, 1200));"
+    },
+    {
+      "file": "hooks/useDuel.ts",
+      "line": 59,
+      "text": "botTimerRef.current = setTimeout(() => {"
+    },
+    {
+      "file": "hooks/useGame.ts",
+      "line": 46,
+      "text": "const check = setInterval(() => {"
+    },
+    {
+      "file": "hooks/useGame.ts",
+      "line": 76,
+      "text": "timerRef.current = setInterval(() => {"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 42,
+      "text": "await new Promise(resolve => setTimeout(resolve, 500));"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 63,
+      "text": "await new Promise(resolve => setTimeout(resolve, 500));"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 109,
+      "text": "await new Promise(resolve => setTimeout(resolve, 800));"
+    },
+    {
+      "file": "services/cloud.service.ts",
+      "line": 171,
+      "text": "await new Promise(resolve => setTimeout(resolve, 800));"
+    },
+    {
+      "file": "services/deeplink.service.ts",
+      "line": 5,
+      "text": "Linking.addEventListener('url', handleDeepLink);"
+    },
+    {
+      "file": "screens/GamePlayScreen.tsx",
+      "line": 150,
+      "text": "await new Promise(r => setTimeout(r, 1500));"
+    },
+    {
+      "file": "screens/GamePlayScreen.tsx",
+      "line": 237,
+      "text": "window.addEventListener('keydown', handleKeyDown);"
+    }
+  ],
+  "hookDependencyIssues": [],
+  "circularDeps": [
+    [
+      "constants/words.ts",
+      "constants/words_en.ts",
+      "constants/words.ts"
+    ]
+  ],
+  "unhandledAsync": [],
+  "fileList": [
+    "app/(tabs)/index.tsx",
+    "app/(tabs)/leaderboard.tsx",
+    "app/(tabs)/modes.tsx",
+    "app/(tabs)/profile.tsx",
+    "app/(tabs)/settings.tsx",
+    "app/(tabs)/_layout.tsx",
+    "app/anagram.tsx",
+    "app/blitz.tsx",
+    "app/chain.tsx",
+    "app/dordle.tsx",
+    "app/duel.tsx",
+    "app/onboarding.tsx",
+    "app/wordconnect.tsx",
+    "app/_layout.tsx",
+    "components/AboutModal.tsx",
+    "components/AchievementToast.tsx",
+    "components/AlertButton.tsx",
+    "components/AnimatedCell.tsx",
+    "components/CloudLoginForm.tsx",
+    "components/CloudSyncModal.tsx",
+    "components/CloudSyncStatus.tsx",
+    "components/Confetti.tsx",
+    "components/CustomAlert.tsx",
+    "components/DailySpinModal.tsx",
+    "components/DefinitionCard.tsx",
+    "components/design/AppButton.tsx",
+    "components/design/GemPill.tsx",
+    "components/design/PlayerCard.tsx",
+    "components/design/ScreenHeader.tsx",
+    "components/design/SectionTitle.tsx",
+    "components/ErrorBoundary.tsx",
+    "components/FeedbackForm.tsx",
+    "components/FeedbackModal.tsx",
+    "components/FeedbackTypeSelector.tsx",
+    "components/FilterChips.tsx",
+    "components/GameBoard.tsx",
+    "components/GameEndCertificate.tsx",
+    "components/GameResultOverlay.tsx",
+    "components/GemShower.tsx",
+    "components/GuessDistributionChart.tsx",
+    "components/HelpModal.tsx",
+    "components/HintModal.tsx",
+    "components/HintOptionCard.tsx",
+    "components/InviteModal.tsx",
+    "components/Keyboard.tsx",
+    "components/LeaderboardModal.tsx",
+    "components/LevelBar.tsx",
+    "components/LoadingView.tsx",
+    "components/ModeCard.tsx",
+    "components/ModeSelector.tsx",
+    "components/PrivacyPolicyModal.tsx",
+    "components/ProfileAchievementList.tsx",
+    "components/ProfileStatsCard.tsx",
+    "components/ScoreRow.tsx",
+    "components/SettingToggle.tsx",
+    "components/SpinPrizeTable.tsx",
+    "components/SpinWheel.tsx",
+    "components/SpinWheelCanvas.tsx",
+    "components/StickerAlbumModal.tsx",
+    "components/StickerFlipCard.tsx",
+    "components/StickerGridCard.tsx",
+    "components/StoreGemPackCard.tsx",
+    "components/StoreModal.tsx",
+    "components/StorePackList.tsx",
+    "components/StorePremiumCard.tsx",
+    "components/StoreRestoreButton.tsx",
+    "components/StreakBanner.tsx",
+    "components/TimeHistoryChart.tsx",
+    "components/Timer.tsx",
+    "components/WordDefinitionModal.tsx",
+    "hooks/useAnagram.ts",
+    "hooks/useBlitz.ts",
+    "hooks/useCloudSync.ts",
+    "hooks/useCustomAlert.ts",
+    "hooks/useDordle.ts",
+    "hooks/useDuel.ts",
+    "hooks/useGame.ts",
+    "hooks/useGameSession.ts",
+    "hooks/useProgress.ts",
+    "hooks/useTheme.tsx",
+    "hooks/useWordChain.ts",
+    "hooks/useWordConnect.ts",
+    "services/audio.service.ts",
+    "services/auth.service.ts",
+    "services/cloud.service.ts",
+    "services/deeplink.service.ts",
+    "services/definition.service.ts",
+    "services/dictionary.service.ts",
+    "services/error-reporting.service.ts",
+    "services/iap.service.ts",
+    "services/leaderboard.service.ts",
+    "services/notification.service.ts",
+    "services/referral.service.ts",
+    "services/share.service.ts",
+    "services/storage.service.ts",
+    "store/progressStore.ts",
+    "store/settingsStore.ts",
+    "constants/achievements.ts",
+    "constants/levels.ts",
+    "constants/modes.ts",
+    "constants/products.ts",
+    "constants/stickers.ts",
+    "constants/theme.ts",
+    "constants/themes.ts",
+    "constants/translations.ts",
+    "constants/validation_dictionary.ts",
+    "constants/words.ts",
+    "constants/words_en.ts",
+    "screens/GameMenuScreen.tsx",
+    "screens/GamePlayScreen.tsx",
+    "config/firebase.ts"
+  ]
+}

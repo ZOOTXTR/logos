@@ -42,7 +42,12 @@ export const COLORS = {
 
 export const FONTS = {
   regular: 'System',
+  medium: 'System',
+  semibold: 'System',
   bold: 'System',
+  extrabold: 'System',
+  display: 'System',
+  displayMedium: 'System',
   size: {
     xs: 10,
     sm: 12,

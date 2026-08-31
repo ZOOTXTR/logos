@@ -26,16 +26,24 @@ export function Timer({ timeLeft, totalTime = 90 }: TimerProps) {
   }, [timeLeft]);
 
   useEffect(() => {
+    let loopAnim: Animated.CompositeAnimation | null = null;
     if (isDanger) {
-      Animated.loop(
+      loopAnim = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, { toValue: 1.15, duration: 300, useNativeDriver: true }),
           Animated.timing(pulseAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
         ])
-      ).start();
+      );
+      loopAnim.start();
     } else {
       pulseAnim.setValue(1);
     }
+
+    return () => {
+      if (loopAnim) {
+        loopAnim.stop();
+      }
+    };
   }, [isDanger]);
 
   const minutes = Math.floor(timeLeft / 60);

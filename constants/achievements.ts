@@ -6,6 +6,8 @@ export interface Achievement {
   descriptionEn?: string;
   emoji: string;
   condition: (stats: AchievementStats) => boolean;
+  rewardGems?: number;
+  rewardXP?: number;
 }
 
 export interface AchievementStats {

@@ -31,22 +31,22 @@ interface LevelConfig {
 const LEVELS_TR: LevelConfig[] = [
   {
     letters: ['K', 'A', 'L', 'E', 'M'],
-    targetWords: ['KALEM', 'KALE', 'ELMA', 'LEKE'],
+    targetWords: ['KALEM', 'KALE', 'ELMA', 'KAME'],
     layout: [
       ['KALEM', 2, 1, 'H'],
       ['KALE', 2, 1, 'V'],
       ['ELMA', 4, 3, 'H'],
-      ['LEKE', 1, 3, 'V'],
+      ['KAME', 1, 3, 'V'],
     ]
   },
   {
     letters: ['T', 'A', 'S', 'M', 'A'],
-    targetWords: ['TASMA', 'MASAT', 'SAAT', 'MALA'],
+    targetWords: ['TASMA', 'MASAT', 'SAAT', 'ASMA'],
     layout: [
       ['TASMA', 0, 1, 'H'],
       ['MASAT', 0, 4, 'V'],
       ['SAAT', 2, 2, 'H'],
-      ['MALA', 0, 1, 'V'],
+      ['ASMA', 0, 1, 'V'],
     ]
   }
 ];
@@ -132,7 +132,9 @@ export function useWordConnect(levelIndex = 0, lang: 'tr' | 'en' = 'tr') {
   }, []);
 
   const submitWord = useCallback((): 'correct' | 'wrong' | 'already_found' => {
-    const word = state.currentGuess.toUpperCase();
+    const word = lang === 'tr'
+      ? state.currentGuess.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')
+      : state.currentGuess.toUpperCase();
     
     if (state.wordsFound.includes(word)) {
       return 'already_found';

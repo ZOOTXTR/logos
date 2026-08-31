@@ -26,9 +26,9 @@ export default function AnagramScreen() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [resultOverlay, setResultOverlay] = useState<{ visible: boolean; title: string; emoji: string; message: string; word?: string; gemsAwarded?: number; xpAwarded?: number; buttons: Array<{ label: string; onPress: () => void; primary?: boolean }> }>({ visible: false, title: '', emoji: '', message: '', buttons: [] });
 
-  if (progress.loading) {
-    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
-  }
+
+
+
 
   const t = TRANSLATIONS[language];
   const categories: Category[] = ['random', 'hayvanlar', 'sehirler', 'yiyecek', 'meslekler', 'doga', 'spor'];
@@ -155,6 +155,10 @@ export default function AnagramScreen() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [game.status, game.shuffledLetters, game.selectedIndices, handleSubmit]);
+
+  if (progress.loading) {
+    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
+  }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>

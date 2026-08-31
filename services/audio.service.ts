@@ -2,32 +2,91 @@ import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Public high-quality Sfx and Music assets
+// Local bundled high-quality Sfx and Music assets
 const SOUNDS = {
-  click: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav',
-  win: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-84.wav',
-  loss: 'https://assets.mixkit.co/active_storage/sfx/2018/2018-84.wav',
+  click: require('../assets/audio/click.wav'),
+  win: require('../assets/audio/win.wav'),
+  loss: require('../assets/audio/loss.wav'),
 };
 
-const BG_MUSIC_URL = 'https://assets.mixkit.co/active_storage/music/2422/2422-500.mp3'; // Chill Zen Lofi
+const BG_MUSIC = require('../assets/audio/bg_music.wav');
+
+export type SoundType = keyof typeof SOUNDS;
 
 class AudioService {
+  private soundPool: Partial<Record<SoundType, Audio.Sound>> = {};
   private bgMusicSound: Audio.Sound | null = null;
   private isMusicPlaying = false;
 
-  private async checkSetting(key: string): Promise<boolean> {
+  // In-memory cached settings to eliminate SQLite/bridge latency on rapid user interactions
+  private soundEnabled = true;
+  private hapticEnabled = true;
+  private musicEnabled = true;
+  private settingsInitialized = false;
+
+  constructor() {
+    this.loadSettings();
+  }
+
+  private async loadSettings() {
+    if (this.settingsInitialized) return;
     try {
-      const v = await AsyncStorage.getItem(key);
-      return v === null ? true : v === 'true';
+      const [sound, haptic, music] = await Promise.all([
+        AsyncStorage.getItem('gq_sound_enabled'),
+        AsyncStorage.getItem('gq_haptic_enabled'),
+        AsyncStorage.getItem('gq_music_enabled'),
+      ]);
+      if (sound !== null) this.soundEnabled = sound === 'true';
+      if (haptic !== null) this.hapticEnabled = haptic === 'true';
+      if (music !== null) this.musicEnabled = music === 'true';
+      this.settingsInitialized = true;
     } catch {
-      return true;
+      this.settingsInitialized = true;
+    }
+  }
+
+  initSettings(sound: boolean, haptic: boolean, music: boolean) {
+    this.soundEnabled = sound;
+    this.hapticEnabled = haptic;
+    this.musicEnabled = music;
+    this.settingsInitialized = true;
+  }
+
+  setSoundEnabled(enabled: boolean) {
+    this.soundEnabled = enabled;
+    AsyncStorage.setItem('gq_sound_enabled', String(enabled)).catch(() => {});
+  }
+
+  setHapticEnabled(enabled: boolean) {
+    this.hapticEnabled = enabled;
+    AsyncStorage.setItem('gq_haptic_enabled', String(enabled)).catch(() => {});
+  }
+
+  setMusicEnabled(enabled: boolean) {
+    this.musicEnabled = enabled;
+    AsyncStorage.setItem('gq_music_enabled', String(enabled)).catch(() => {});
+  }
+
+  // Preload sound instances into the pool for instant low-latency playback
+  async preloadSounds() {
+    try {
+      const types: SoundType[] = ['click', 'win', 'loss'];
+      await Promise.all(
+        types.map(async (type) => {
+          if (!this.soundPool[type]) {
+            const { sound } = await Audio.Sound.createAsync(SOUNDS[type], { volume: 0.7 });
+            this.soundPool[type] = sound;
+          }
+        })
+      );
+    } catch (e) {
+      console.warn('Audio preloading failed:', e);
     }
   }
 
   // ── BACKGROUND MUSIC ──────────────────────────────────────
   async startBgMusic() {
-    const isMusicEnabled = await this.checkSetting('gq_music_enabled');
-    if (!isMusicEnabled) {
+    if (!this.musicEnabled) {
       this.stopBgMusic();
       return;
     }
@@ -37,7 +96,7 @@ class AudioService {
     try {
       if (!this.bgMusicSound) {
         const { sound } = await Audio.Sound.createAsync(
-          { uri: BG_MUSIC_URL },
+          BG_MUSIC,
           { shouldPlay: true, isLooping: true, volume: 0.25 }
         );
         this.bgMusicSound = sound;
@@ -51,7 +110,7 @@ class AudioService {
   }
 
   async stopBgMusic() {
-    if (!this.isMusicPlaying) return;
+    if (!this.isMusicPlaying && !this.bgMusicSound) return;
     try {
       if (this.bgMusicSound) {
         await this.bgMusicSound.pauseAsync();
@@ -63,7 +122,7 @@ class AudioService {
   }
 
   async toggleBgMusic(enabled: boolean) {
-    await AsyncStorage.setItem('gq_music_enabled', String(enabled));
+    this.setMusicEnabled(enabled);
     if (enabled) {
       this.startBgMusic();
     } else {
@@ -71,21 +130,22 @@ class AudioService {
     }
   }
 
-  // ── SOUNDS ───────────────────────────────────────────────
-  async play(type: keyof typeof SOUNDS) {
-    const isSoundEnabled = await this.checkSetting('gq_sound_enabled');
-    if (!isSoundEnabled) return;
+  // ── SOUNDS (POOLED & REUSED) ──────────────────────────────
+  async play(type: SoundType) {
+    if (!this.soundEnabled) return;
 
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: SOUNDS[type] },
-        { shouldPlay: true, volume: 0.7 }
-      );
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          sound.unloadAsync();
-        }
-      });
+      let sound = this.soundPool[type];
+      if (!sound) {
+        const result = await Audio.Sound.createAsync(
+          SOUNDS[type],
+          { shouldPlay: true, volume: 0.7 }
+        );
+        sound = result.sound;
+        this.soundPool[type] = sound;
+      } else {
+        await sound.replayAsync();
+      }
     } catch (e) {
       console.warn('Audio play failed:', e);
     }
@@ -93,8 +153,7 @@ class AudioService {
 
   // ── HAPTICS ──────────────────────────────────────────────
   async triggerHaptic(style: 'light' | 'medium' | 'success' | 'warning' = 'light') {
-    const isHapticEnabled = await this.checkSetting('gq_haptic_enabled');
-    if (!isHapticEnabled) return;
+    if (!this.hapticEnabled) return;
 
     try {
       switch (style) {
@@ -112,7 +171,24 @@ class AudioService {
           break;
       }
     } catch (e) {
-      // Haptics not supported in simulator, fail silently
+      // Haptics not supported in simulator / web, fail silently
+    }
+  }
+
+  // Cleanup all pooled sound instances on termination
+  async unloadAll() {
+    try {
+      const sounds = Object.values(this.soundPool);
+      await Promise.all(sounds.map(s => s?.unloadAsync()));
+      this.soundPool = {};
+
+      if (this.bgMusicSound) {
+        await this.bgMusicSound.unloadAsync();
+        this.bgMusicSound = null;
+        this.isMusicPlaying = false;
+      }
+    } catch (e) {
+      console.warn('Audio unload error:', e);
     }
   }
 }

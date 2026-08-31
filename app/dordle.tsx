@@ -1,12 +1,12 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView,
-  TouchableOpacity, StatusBar, Dimensions, Share, Platform, Clipboard,
+  TouchableOpacity, StatusBar, Dimensions, Share, Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
-import { LetterStatus, WORD_LENGTH } from '../constants/words';
+import { Board, LetterStatus, WORD_LENGTH } from '../constants/words';
 import { useDordle } from '../hooks/useDordle';
 import { useProgress } from '../hooks/useProgress';
 import { useTheme } from '../hooks/useTheme';
@@ -20,6 +20,66 @@ import { LoadingView } from '../components/LoadingView';
 const { width } = Dimensions.get('window');
 const CELL_SIZE = Math.floor((width - 48) / 11); // Side by side cell sizing
 
+interface MiniBoardProps {
+  board: Board;
+  targetWord: string;
+  isSolved: boolean;
+  currentRow: number;
+  colorBlind: boolean;
+  dyslexiaFont: boolean;
+  theme: any;
+}
+
+const getCellBg = (status: LetterStatus, isSolved: boolean, colorBlind: boolean, theme: any) => {
+  if (isSolved) return colorBlind ? '#0072B2' : theme.colors.correct;
+  switch (status) {
+    case 'correct': return colorBlind ? '#0072B2' : theme.colors.correct;
+    case 'present': return colorBlind ? '#E69F00' : theme.colors.present;
+    case 'absent': return theme.colors.absent;
+    case 'tbd': return theme.colors.surfaceLight;
+    default: return theme.colors.empty;
+  }
+};
+
+const MiniBoard = React.memo(function MiniBoard({
+  board,
+  targetWord,
+  isSolved,
+  currentRow,
+  colorBlind,
+  dyslexiaFont,
+  theme,
+}: MiniBoardProps) {
+  return (
+    <View style={styles.board}>
+      {board.map((row, rIdx) => (
+        <View key={rIdx} style={styles.row}>
+          {row.map((cell, cIdx) => {
+            const bg = getCellBg(cell.status, isSolved && rIdx >= currentRow, colorBlind, theme);
+            return (
+              <View
+                key={cIdx}
+                style={[
+                  styles.cell,
+                  {
+                    backgroundColor: bg,
+                    borderColor: cell.status === 'empty' ? theme.colors.border : 'transparent',
+                    borderWidth: cell.status === 'empty' ? 1.5 : 0
+                  }
+                ]}
+              >
+                <Text style={[styles.cellText, { color: theme.colors.text }, dyslexiaFont && { fontFamily: 'monospace' }]}>
+                  {isSolved && rIdx >= currentRow ? targetWord[cIdx] : cell.char}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      ))}
+    </View>
+  );
+});
+
 export default function DordleScreen() {
   const router = useRouter();
   const progress = useProgress();
@@ -29,9 +89,7 @@ export default function DordleScreen() {
   const [resultOverlay, setResultOverlay] = useState<GameResultOverlayProps>({ visible: false, title: '', emoji: '', message: '', buttons: [], theme: theme, language: language });
   const dismissOverlay = () => setResultOverlay({ visible: false, title: '', emoji: '', message: '', buttons: [], theme: theme, language: language });
 
-  if (progress.loading) {
-    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
-  }
+
 
   const t = TRANSLATIONS[language];
 
@@ -95,12 +153,16 @@ export default function DordleScreen() {
     try {
       await Share.share({ message: shareText });
     } catch (e) {
-      Clipboard.setString(shareText);
-      setResultOverlay({
-        visible: true, title: language === 'en' ? 'Copied!' : 'Kopyalandı!', emoji: '📋',
-        message: language === 'en' ? 'Score copied to clipboard!' : 'Skorunuz panoya kopyalandı!',
-        buttons: [{ label: language === 'en' ? 'OK' : 'Tamam', onPress: dismissOverlay }], onClose: dismissOverlay, theme, language,
-      });
+      if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(shareText);
+          setResultOverlay({
+            visible: true, title: language === 'en' ? 'Copied!' : 'Kopyalandı!', emoji: '📋',
+            message: language === 'en' ? 'Score copied to clipboard!' : 'Skorunuz panoya kopyalandı!',
+            buttons: [{ label: language === 'en' ? 'OK' : 'Tamam', onPress: dismissOverlay }], onClose: dismissOverlay, theme, language,
+          });
+        } catch {}
+      }
     }
   };
 
@@ -112,46 +174,58 @@ export default function DordleScreen() {
       setResultOverlay({ visible: true, title: '', emoji: '⚠️', message: language === 'en' ? 'Complete the words!' : 'Kelimeleri tamamlayın!', buttons: [{ label: language === 'en' ? 'OK' : 'Tamam', onPress: dismissOverlay }], onClose: dismissOverlay, theme, language });
       return;
     }
-    if (game.gameStatus === 'won') {
-      setShowConfetti(true);
-      audioService.play('win');
-      audioService.triggerHaptic('success');
-      await progress.earnXP(150);
-      await progress.addGems(50);
-      setResultOverlay({
-        visible: true,
-        title: language === 'en' ? 'Dordle Victory!' : 'Dordle Zaferi!',
-        emoji: '🎉',
-        message: language === 'en' ? 'You earned +50 💎 +150 XP!' : '+50 💎 +150 XP kazandınız!',
-        gemsAwarded: 50,
-        xpAwarded: 150,
-        buttons: [
-          { label: language === 'en' ? 'Share 📤' : 'Paylaş 📤', onPress: handleShare },
-          { label: language === 'en' ? 'Continue' : 'Devam', primary: true, onPress: () => { setShowConfetti(false); dismissOverlay(); game.reset(language); } }
-        ],
-        onClose: dismissOverlay,
-        theme,
-        language,
-      });
-    } else if (game.gameStatus === 'lost') {
-      audioService.play('loss');
-      audioService.triggerHaptic('warning');
-      setResultOverlay({
-        visible: true,
-        title: language === 'en' ? 'You Lost' : 'Kaybettiniz',
-        emoji: '😢',
-        message: language === 'en' ? `Word 1: ${game.targetWord1}\nWord 2: ${game.targetWord2}` : `1. Kelime: ${game.targetWord1}\n2. Kelime: ${game.targetWord2}`,
-        buttons: [
-          { label: language === 'en' ? 'Share 📤' : 'Paylaş 📤', onPress: handleShare },
-          { label: language === 'en' ? 'Try Again' : 'Tekrar Dene', primary: true, onPress: () => { setShowConfetti(false); dismissOverlay(); game.reset(language); } },
-          { label: language === 'en' ? 'Menu' : 'Menü', onPress: () => { dismissOverlay(); router.back(); } }
-        ],
-        onClose: dismissOverlay,
-        theme,
-        language,
-      });
-    }
-  }, [game, colorBlind, language]);
+  }, [game, dismissOverlay, theme, language]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const handleGameEnd = async () => {
+      if (game.gameStatus === 'won') {
+        setShowConfetti(true);
+        audioService.play('win');
+        audioService.triggerHaptic('success');
+        await progress.earnXP(150);
+        await progress.addGems(50);
+        if (isMounted) {
+          setResultOverlay({
+            visible: true,
+            title: language === 'en' ? 'Dordle Victory!' : 'Dordle Zaferi!',
+            emoji: '🎉',
+            message: language === 'en' ? 'You earned +50 💎 +150 XP!' : '+50 💎 +150 XP kazandınız!',
+            gemsAwarded: 50,
+            xpAwarded: 150,
+            buttons: [
+              { label: language === 'en' ? 'Share 📤' : 'Paylaş 📤', onPress: handleShare },
+              { label: language === 'en' ? 'Continue' : 'Devam', primary: true, onPress: () => { setShowConfetti(false); dismissOverlay(); game.reset(language); } }
+            ],
+            onClose: dismissOverlay,
+            theme,
+            language,
+          });
+        }
+      } else if (game.gameStatus === 'lost') {
+        audioService.play('loss');
+        audioService.triggerHaptic('warning');
+        if (isMounted) {
+          setResultOverlay({
+            visible: true,
+            title: language === 'en' ? 'You Lost' : 'Kaybettiniz',
+            emoji: '😢',
+            message: language === 'en' ? `Word 1: ${game.targetWord1}\nWord 2: ${game.targetWord2}` : `1. Kelime: ${game.targetWord1}\n2. Kelime: ${game.targetWord2}`,
+            buttons: [
+              { label: language === 'en' ? 'Share 📤' : 'Paylaş 📤', onPress: handleShare },
+              { label: language === 'en' ? 'Try Again' : 'Tekrar Dene', primary: true, onPress: () => { setShowConfetti(false); dismissOverlay(); game.reset(language); } },
+              { label: language === 'en' ? 'Menu' : 'Menü', onPress: () => { dismissOverlay(); router.back(); } }
+            ],
+            onClose: dismissOverlay,
+            theme,
+            language,
+          });
+        }
+      }
+    };
+    handleGameEnd();
+    return () => { isMounted = false; };
+  }, [game.gameStatus]);
 
   // Physical keyboard support on Web
   useEffect(() => {
@@ -177,8 +251,11 @@ export default function DordleScreen() {
     };
   }, [game.gameStatus, handleSubmit, handleDelete, handleKey]);
 
-  // Combine revealed letters for the keyboard color coding
-  const getMergedRevealedLetters = () => {
+  if (progress.loading) {
+    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
+  }
+
+  const mergedRevealedLetters = useMemo(() => {
     const merged: Record<string, LetterStatus> = {};
     const keys = new Set([...Object.keys(game.revealedLetters1), ...Object.keys(game.revealedLetters2)]);
     
@@ -195,47 +272,7 @@ export default function DordleScreen() {
       }
     });
     return merged;
-  };
-
-  const getCellBg = (status: LetterStatus, isSolved: boolean, targetChar: string) => {
-    if (isSolved) return colorBlind ? '#0072B2' : theme.colors.correct;
-    switch (status) {
-      case 'correct': return colorBlind ? '#0072B2' : theme.colors.correct;
-      case 'present': return colorBlind ? '#E69F00' : theme.colors.present;
-      case 'absent': return theme.colors.absent;
-      case 'tbd': return theme.colors.surfaceLight;
-      default: return theme.colors.empty;
-    }
-  };
-
-  const MiniBoard = ({ board, targetWord, isSolved }: { board: any[][], targetWord: string, isSolved: boolean }) => (
-    <View style={styles.board}>
-      {board.map((row, rIdx) => (
-        <View key={rIdx} style={styles.row}>
-          {row.map((cell, cIdx) => {
-            const bg = getCellBg(cell.status, isSolved && rIdx >= game.currentRow, targetWord[cIdx]);
-            return (
-              <View
-                key={cIdx}
-                style={[
-                  styles.cell,
-                  {
-                    backgroundColor: bg,
-                    borderColor: cell.status === 'empty' ? theme.colors.border : 'transparent',
-                    borderWidth: cell.status === 'empty' ? 1.5 : 0
-                  }
-                ]}
-              >
-                <Text style={[styles.cellText, { color: theme.colors.text }, dyslexiaFont && { fontFamily: 'monospace' }]}>
-                  {isSolved && rIdx >= game.currentRow ? targetWord[cIdx] : cell.char}
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-      ))}
-    </View>
-  );
+  }, [game.revealedLetters1, game.revealedLetters2]);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
@@ -256,9 +293,25 @@ export default function DordleScreen() {
 
         {/* Side-by-Side Boards */}
         <View style={styles.boardsContainer}>
-          <MiniBoard board={game.board1} targetWord={game.targetWord1} isSolved={game.word1Solved} />
+          <MiniBoard
+            board={game.board1}
+            targetWord={game.targetWord1}
+            isSolved={game.word1Solved}
+            currentRow={game.currentRow}
+            colorBlind={colorBlind}
+            dyslexiaFont={dyslexiaFont}
+            theme={theme}
+          />
           <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
-          <MiniBoard board={game.board2} targetWord={game.targetWord2} isSolved={game.word2Solved} />
+          <MiniBoard
+            board={game.board2}
+            targetWord={game.targetWord2}
+            isSolved={game.word2Solved}
+            currentRow={game.currentRow}
+            colorBlind={colorBlind}
+            dyslexiaFont={dyslexiaFont}
+            theme={theme}
+          />
         </View>
 
         {/* Keyboard */}
@@ -267,7 +320,7 @@ export default function DordleScreen() {
             onKey={handleKey}
             onDelete={handleDelete}
             onSubmit={handleSubmit}
-            revealedLetters={getMergedRevealedLetters()}
+            revealedLetters={mergedRevealedLetters}
           />
         </View>
         <Confetti active={showConfetti} />

@@ -98,7 +98,14 @@ export const addXP = async (n: number): Promise<number> => mutex(async () => {
 // ── Stats ────────────────────────────────────────────────
 export const getStats = async (): Promise<FullStats> => {
   const v = await AsyncStorage.getItem(KEYS.STATS);
-  return v ? { ...DEFAULT_STATS, ...JSON.parse(v) } : DEFAULT_STATS;
+  if (!v) return DEFAULT_STATS;
+  try {
+    return { ...DEFAULT_STATS, ...JSON.parse(v) };
+  } catch {
+    console.warn('[Storage] Corrupt stats data, resetting to defaults');
+    await AsyncStorage.removeItem(KEYS.STATS);
+    return DEFAULT_STATS;
+  }
 };
 export const updateStats = async (patch: Partial<FullStats>): Promise<FullStats> => mutex(async () => {
   const cur = await getStats();
@@ -140,6 +147,7 @@ export const updateStreak = async (won: boolean): Promise<{ current: number; max
     }
   } else {
     newCurrent = 0;
+    await AsyncStorage.setItem(KEYS.STREAK_DATE, today);
   }
 
   const newMax = Math.max(max, newCurrent);
@@ -154,7 +162,8 @@ export const updateStreak = async (won: boolean): Promise<{ current: number; max
 // ── Achievements ─────────────────────────────────────────
 export const getUnlockedAchievements = async (): Promise<string[]> => {
   const v = await AsyncStorage.getItem(KEYS.ACHIEVEMENTS);
-  return v ? JSON.parse(v) : [];
+  if (!v) return [];
+  try { return JSON.parse(v); } catch { return []; }
 };
 export const unlockAchievement = async (id: string) => mutex(async () => {
   const cur = await getUnlockedAchievements();
@@ -183,7 +192,8 @@ export const markDailyDone = async () => {
 // ── Scores ───────────────────────────────────────────────
 export const getScores = async (): Promise<ScoreEntry[]> => {
   const v = await AsyncStorage.getItem(KEYS.SCORES);
-  return v ? JSON.parse(v) : [];
+  if (!v) return [];
+  try { return JSON.parse(v); } catch { return []; }
 };
 export const addScore = async (entry: ScoreEntry) => mutex(async () => {
   const scores = await getScores();
@@ -206,7 +216,8 @@ export const storageRemove = async (key: string): Promise<void> => {
 
 export const storageGetJSON = async <T>(key: string): Promise<T | null> => {
   const v = await AsyncStorage.getItem(key);
-  return v ? JSON.parse(v) : null;
+  if (!v) return null;
+  try { return JSON.parse(v); } catch { return null; }
 };
 
 export const storageSetJSON = async (key: string, value: unknown): Promise<void> => {
@@ -216,7 +227,8 @@ export const storageSetJSON = async (key: string, value: unknown): Promise<void>
 // ── Categories ───────────────────────────────────────────
 export const getUnlockedCategories = async (): Promise<string[]> => {
   const v = await AsyncStorage.getItem('gq_unlocked_categories');
-  return v ? JSON.parse(v) : ['random', 'hayvanlar', 'yiyecek', 'spor'];
+  if (!v) return ['random', 'hayvanlar', 'yiyecek', 'spor'];
+  try { return JSON.parse(v); } catch { return ['random', 'hayvanlar', 'yiyecek', 'spor']; }
 };
 
 export const unlockCategory = async (cat: string): Promise<string[]> => mutex(async () => {

@@ -58,4 +58,27 @@ describe('Keyboard', () => {
     expect(getByText('A')).toBeTruthy();
     expect(getByText('B')).toBeTruthy();
   });
+
+  it('renders English layout when language is en', () => {
+    const onKey = jest.fn();
+    const onDelete = jest.fn();
+    const onSubmit = jest.fn();
+    const { getByText } = render(
+      <Keyboard onKey={onKey} onDelete={onDelete} onSubmit={onSubmit} revealedLetters={{}} language="en" />
+    );
+    expect(getByText('Q')).toBeTruthy();
+    expect(getByText('W')).toBeTruthy();
+    expect(getByText('X')).toBeTruthy();
+    expect(getByText('ENTER')).toBeTruthy();
+    expect(getByText('DEL')).toBeTruthy();
+
+    fireEvent.press(getByText('Q'));
+    expect(onKey).toHaveBeenCalledWith('Q');
+
+    fireEvent.press(getByText('DEL'));
+    expect(onDelete).toHaveBeenCalled();
+
+    fireEvent.press(getByText('ENTER'));
+    expect(onSubmit).toHaveBeenCalled();
+  });
 });

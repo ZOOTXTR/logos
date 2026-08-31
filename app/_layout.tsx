@@ -34,8 +34,9 @@ function RootLayoutContent() {
   useEffect(() => { setupDeepLinkHandler(); }, []);
 
   useEffect(() => {
-    // Start background music loop on app startup
+    // Start background music loop and preload SFX on app startup
     audioService.startBgMusic();
+    audioService.preloadSounds();
     preloadDictionaries();
     return () => {
       audioService.stopBgMusic();

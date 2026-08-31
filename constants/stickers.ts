@@ -26,6 +26,12 @@ export const STICKERS: Sticker[] = [
   { id: 'st15', emoji: '⏳', nameTr: 'Zaman Makinesi', nameEn: 'Time Machine', rarity: 'legendary', descTr: 'Zaman boyutları arasında geçiş kapısı.', descEn: 'Gateway between time dimensions.' },
 ];
 
+const STICKERS_BY_RARITY: Record<'common' | 'rare' | 'legendary', Sticker[]> = {
+  common: STICKERS.filter(s => s.rarity === 'common'),
+  rare: STICKERS.filter(s => s.rarity === 'rare'),
+  legendary: STICKERS.filter(s => s.rarity === 'legendary'),
+};
+
 export function getStickerById(id: string): Sticker | undefined {
   return STICKERS.find(s => s.id === id);
 }
@@ -34,10 +40,8 @@ export function rollRandomStickers(count: number): Sticker[] {
   const rolled: Sticker[] = [];
   for (let i = 0; i < count; i++) {
     const rnd = Math.random() * 100;
-    let filterRarity: 'common' | 'rare' | 'legendary' = 'common';
-    if (rnd > 90) filterRarity = 'legendary';
-    else if (rnd > 55) filterRarity = 'rare';
-    const pool = STICKERS.filter(s => s.rarity === filterRarity);
+    const rarity: 'common' | 'rare' | 'legendary' = rnd > 90 ? 'legendary' : rnd > 55 ? 'rare' : 'common';
+    const pool = STICKERS_BY_RARITY[rarity];
     rolled.push(pool[Math.floor(Math.random() * pool.length)]);
   }
   return rolled;

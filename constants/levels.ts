@@ -17,10 +17,20 @@ export const LEVELS: LevelInfo[] = [
   { level: 8,  title: 'Kelime Savaşçısı', minXP: 1900,  maxXP: 2500,  color: '#A78BFA' },
   { level: 9,  title: 'Dil Profesörü',    minXP: 2500,  maxXP: 3200,  color: '#F59E0B' },
   { level: 10, title: 'Usta',             minXP: 3200,  maxXP: 4000,  color: '#F59E0B' },
-  { level: 15, title: 'Büyük Usta',       minXP: 7000,  maxXP: 12000, color: '#EF4444' },
-  { level: 20, title: 'Efsane',           minXP: 12000, maxXP: 20000, color: '#EF4444' },
+  { level: 11, title: 'Usta II',          minXP: 4000,  maxXP: 4900,  color: '#F97316' },
+  { level: 12, title: 'Usta III',         minXP: 4900,  maxXP: 5900,  color: '#F97316' },
+  { level: 13, title: 'Bilge',            minXP: 5900,  maxXP: 7000,  color: '#EF4444' },
+  { level: 14, title: 'Bilge II',         minXP: 7000,  maxXP: 8200,  color: '#EF4444' },
+  { level: 15, title: 'Büyük Usta',       minXP: 8200,  maxXP: 9500,  color: '#EF4444' },
+  { level: 16, title: 'Büyük Usta II',    minXP: 9500,  maxXP: 11000, color: '#DC2626' },
+  { level: 17, title: 'Büyük Usta III',   minXP: 11000, maxXP: 12500, color: '#DC2626' },
+  { level: 18, title: 'Efsane',           minXP: 12500, maxXP: 14500, color: '#B91C1C' },
+  { level: 19, title: 'Efsane II',        minXP: 14500, maxXP: 17000, color: '#B91C1C' },
+  { level: 20, title: 'Efsane III',       minXP: 17000, maxXP: 20000, color: '#B91C1C' },
+  { level: 25, title: 'Destan',           minXP: 20000, maxXP: 30000, color: '#7C3AED' },
   { level: 30, title: 'Tanrı Seviyesi',   minXP: 30000, maxXP: 50000, color: '#7C3AED' },
-  { level: 50, title: 'Logos Şampiyonu', minXP: 100000, maxXP: Infinity, color: '#F59E0B' },
+  { level: 40, title: 'İmparator',        minXP: 50000, maxXP: 100000,color: '#6D28D9' },
+  { level: 50, title: 'Logos Şampiyonu', minXP: 100000, maxXP: 999999999, color: '#F59E0B' },
 ];
 
 export const XP_REWARDS = {
@@ -42,23 +52,24 @@ export const XP_REWARDS = {
 };
 
 export const getLevelFromXP = (xp: number): LevelInfo => {
-  // Basit hesaplama: her level 150xp * level
+  const match = LEVELS.find(l => xp >= l.minXP && xp < l.maxXP);
+  if (match) return match;
+
   let level = 1;
   let accumulated = 0;
   while (accumulated + level * 150 <= xp) {
     accumulated += level * 150;
     level++;
-    if (level > 50) break;
+    if (level >= 50) break;
   }
   const minXP = accumulated;
   const maxXP = accumulated + level * 150;
-  const existing = LEVELS.find(l => l.level === level);
-  return existing ?? {
+  return {
     level,
     title: `Level ${level}`,
     minXP,
     maxXP,
-    color: '#7C3AED',
+    color: '#F59E0B',
   };
 };
 

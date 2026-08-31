@@ -14,27 +14,33 @@ import { Timer } from '../components/Timer';
 import { Keyboard } from '../components/Keyboard';
 import { LoadingView } from '../components/LoadingView';
 
+import { audioService } from '../services/audio.service';
+
 export default function BlitzScreen() {
   const router = useRouter();
   const game = useBlitz('random');
   const progress = useProgress();
   const { theme, language } = useTheme();
 
-  if (progress.loading) {
-    return <LoadingView />;
-  }
+
 
   const handleKey = (key: string) => {
     if (game.status !== 'playing') return;
+    audioService.play('click');
     game.addLetter(key);
   };
 
   const handleSubmit = async () => {
     const result = game.submitGuess();
     if (result === 'correct') {
+      audioService.play('win');
+      audioService.triggerHaptic('success');
       await progress.earnXP(game.streak >= 3 ? 60 : 30);
+    } else {
+      audioService.triggerHaptic('warning');
     }
     if (game.status === 'ended') {
+      audioService.play('loss');
       await progress.earnXP(game.score / 10);
       await progress.addGems(Math.floor(game.wordsSolved * 5));
     }

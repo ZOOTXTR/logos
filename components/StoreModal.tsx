@@ -177,18 +177,12 @@ export function StoreModal({
       await requestPurchase({ sku: pkg.id });
       // Result comes through purchaseUpdatedListener
     } catch {
-      try {
-        await onPurchase(pkg.id, pkg.gems);
-        showCustomAlert(
-          '✅',
-          language === 'en' ? 'Purchase Successful!' : 'Satın alma başarılı!'
-        );
-      } catch {
-        showCustomAlert(
-          '❌',
-          language === 'en' ? 'Purchase failed!' : 'Satın alma başarısız!'
-        );
-      }
+      // Purchase was cancelled or failed — do NOT award anything.
+      // Fulfillment only happens via purchaseUpdatedListener after Google Play verification.
+      showCustomAlert(
+        '❌',
+        language === 'en' ? 'Purchase cancelled or failed.' : 'Satın alma iptal edildi veya başarısız oldu.'
+      );
     }
     setPurchasing(null);
   };
@@ -199,18 +193,12 @@ export function StoreModal({
       await requestSubscription({ sku: PRODUCT_IDS.PREMIUM_MONTHLY });
       // Result comes through purchaseUpdatedListener
     } catch {
-      try {
-        await onPurchasePremium();
-        showCustomAlert(
-          '✅',
-          language === 'en' ? 'Premium activated!' : 'Premium başarıyla aktifleştirildi!'
-        );
-      } catch {
-        showCustomAlert(
-          '❌',
-          language === 'en' ? 'Premium purchase failed!' : 'Premium satın alma başarısız!'
-        );
-      }
+      // Subscription was cancelled or failed — do NOT activate premium.
+      // Fulfillment only happens via purchaseUpdatedListener after Google Play verification.
+      showCustomAlert(
+        '❌',
+        language === 'en' ? 'Premium purchase cancelled or failed.' : 'Premium satın alma iptal edildi veya başarısız oldu.'
+      );
     }
     setPurchasing(null);
   };

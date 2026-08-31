@@ -38,9 +38,7 @@ export default function WordConnectScreen() {
     theme: any; language: string; onClose?: () => void;
   }>({ visible: false, title: '', emoji: '', message: '', buttons: [], theme, language });
 
-  if (progress.loading) {
-    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
-  }
+
 
   const t = TRANSLATIONS[language];
 
@@ -50,6 +48,7 @@ export default function WordConnectScreen() {
   }, [levelIdx]);
 
   const [touchCoords, setTouchCoords] = useState<{ x: number; y: number } | null>(null);
+  const lastTouchUpdateRef = useRef<{ time: number; x: number; y: number }>({ time: 0, x: 0, y: 0 });
 
   const handleSubmitRef = useRef<() => void>(() => {});
   handleSubmitRef.current = () => handleSubmit();
@@ -80,12 +79,20 @@ export default function WordConnectScreen() {
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt) => {
         const { locationX, locationY } = evt.nativeEvent;
+        lastTouchUpdateRef.current = { time: Date.now(), x: locationX, y: locationY };
         setTouchCoords({ x: locationX, y: locationY });
         checkTouchCollisionRef.current(locationX, locationY);
       },
       onPanResponderMove: (evt) => {
         const { locationX, locationY } = evt.nativeEvent;
-        setTouchCoords({ x: locationX, y: locationY });
+        const now = Date.now();
+        const dx = Math.abs(locationX - lastTouchUpdateRef.current.x);
+        const dy = Math.abs(locationY - lastTouchUpdateRef.current.y);
+        // Throttle coordinate re-renders to ~30 FPS (32ms) or significant spatial delta (> 6px)
+        if (now - lastTouchUpdateRef.current.time > 32 || dx > 6 || dy > 6) {
+          lastTouchUpdateRef.current = { time: now, x: locationX, y: locationY };
+          setTouchCoords({ x: locationX, y: locationY });
+        }
         checkTouchCollisionRef.current(locationX, locationY);
       },
       onPanResponderRelease: () => {
@@ -163,6 +170,10 @@ export default function WordConnectScreen() {
     const y = WHEEL_SIZE / 2 + radius * Math.sin(angle) - LETTER_BTN_SIZE / 2;
     return { x, y };
   };
+
+  if (progress.loading) {
+    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
+  }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>

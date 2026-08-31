@@ -45,14 +45,20 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
       if (prev.gameStatus !== 'playing') return prev;
       if (prev.currentCol >= WORD_LENGTH) return prev;
 
-      const newBoard1 = prev.board1.map(r => r.map(l => ({ ...l })));
-      const newBoard2 = prev.board2.map(r => r.map(l => ({ ...l })));
+      let newBoard1 = prev.board1;
+      let newBoard2 = prev.board2;
 
       if (!prev.word1Solved) {
-        newBoard1[prev.currentRow][prev.currentCol] = { char: letter, status: 'tbd' };
+        newBoard1 = [...prev.board1];
+        const newRow1 = [...newBoard1[prev.currentRow]];
+        newRow1[prev.currentCol] = { char: letter, status: 'tbd' };
+        newBoard1[prev.currentRow] = newRow1;
       }
       if (!prev.word2Solved) {
-        newBoard2[prev.currentRow][prev.currentCol] = { char: letter, status: 'tbd' };
+        newBoard2 = [...prev.board2];
+        const newRow2 = [...newBoard2[prev.currentRow]];
+        newRow2[prev.currentCol] = { char: letter, status: 'tbd' };
+        newBoard2[prev.currentRow] = newRow2;
       }
 
       return {
@@ -68,14 +74,20 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
     setState(prev => {
       if (prev.currentCol === 0) return prev;
 
-      const newBoard1 = prev.board1.map(r => r.map(l => ({ ...l })));
-      const newBoard2 = prev.board2.map(r => r.map(l => ({ ...l })));
+      let newBoard1 = prev.board1;
+      let newBoard2 = prev.board2;
 
       if (!prev.word1Solved) {
-        newBoard1[prev.currentRow][prev.currentCol - 1] = { char: '', status: 'empty' };
+        newBoard1 = [...prev.board1];
+        const newRow1 = [...newBoard1[prev.currentRow]];
+        newRow1[prev.currentCol - 1] = { char: '', status: 'empty' };
+        newBoard1[prev.currentRow] = newRow1;
       }
       if (!prev.word2Solved) {
-        newBoard2[prev.currentRow][prev.currentCol - 1] = { char: '', status: 'empty' };
+        newBoard2 = [...prev.board2];
+        const newRow2 = [...newBoard2[prev.currentRow]];
+        newRow2[prev.currentCol - 1] = { char: '', status: 'empty' };
+        newBoard2[prev.currentRow] = newRow2;
       }
 
       return {
@@ -169,8 +181,8 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
     }
 
     setState(prev => {
-      const newBoard1 = prev.board1.map(r => r.map(l => ({ ...l })));
-      const newBoard2 = prev.board2.map(r => r.map(l => ({ ...l })));
+      let newBoard1 = [...prev.board1];
+      let newBoard2 = [...prev.board2];
 
       if (!prev.word1Solved) {
         newBoard1[prev.currentRow] = guess.split('').map((c, i) => ({ char: c, status: w1Status[i] }));

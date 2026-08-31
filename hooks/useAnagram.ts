@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { getRandomWord, Category } from '../constants/words';
+import { getRandomWord, Category, ALL_WORDS, ALL_WORDS_EN } from '../constants/words';
+import { toTurkishUpper } from '../utils/turkish';
 
 export type AnagramStatus = 'idle' | 'playing' | 'won' | 'lost';
 
@@ -14,14 +15,20 @@ export interface AnagramState {
   hintsUsed: number;
 }
 
+const VALID_WORDS_TR_SET = new Set(ALL_WORDS.map(w => toTurkishUpper(w).replace(/\s/g, '')));
+const VALID_WORDS_EN_SET = new Set(ALL_WORDS_EN.map(w => w.toUpperCase().replace(/\s/g, '')));
+
 const shuffle = (arr: string[]): string[] => {
+  if (arr.length <= 1) return [...arr];
   const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+  for (let attempt = 0; attempt < 5; attempt++) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    if (a.join('') !== arr.join('')) return a;
   }
-  if (a.join('') === arr.join('')) return shuffle(arr);
-  return a;
+  return a; // Return best effort if all chars identical
 };
 
 export function useAnagram(category: Category = 'random', lang: 'tr' | 'en' = 'tr') {
@@ -67,21 +74,34 @@ export function useAnagram(category: Category = 'random', lang: 'tr' | 'en' = 't
   }, []);
 
   const submitGuess = useCallback((): 'correct' | 'wrong' | 'gameover' => {
-    const result = state.currentGuess === state.targetWord ? 'correct' : 'wrong';
-    setState(prev => {
-      const newAttempts = prev.attempts + 1;
-      const won = result === 'correct';
-      const lost = !won && newAttempts >= prev.maxAttempts;
-      return {
-        ...prev,
-        attempts: newAttempts,
-        status: won ? 'won' : lost ? 'lost' : 'playing',
-        selectedIndices: won ? prev.selectedIndices : [],
-        currentGuess: won ? prev.currentGuess : '',
-      };
-    });
-    return result === 'correct' ? 'correct' : state.attempts + 1 >= state.maxAttempts ? 'gameover' : 'wrong';
-  }, [state]);
+    const guess = state.currentGuess;
+    const target = state.targetWord;
+
+    let isCorrect = guess === target;
+    if (!isCorrect && guess.length === target.length) {
+      const sortedGuess = guess.split('').sort().join('');
+      const sortedTarget = target.split('').sort().join('');
+      if (sortedGuess === sortedTarget) {
+        const poolSet = lang === 'en' ? VALID_WORDS_EN_SET : VALID_WORDS_TR_SET;
+        isCorrect = poolSet.has(guess);
+      }
+    }
+
+    const result = isCorrect ? 'correct' : 'wrong';
+    const newAttempts = state.attempts + 1;
+    const won = result === 'correct';
+    const lost = !won && newAttempts >= state.maxAttempts;
+
+    setState(prev => ({
+      ...prev,
+      attempts: newAttempts,
+      status: won ? 'won' : lost ? 'lost' : 'playing',
+      selectedIndices: won ? prev.selectedIndices : [],
+      currentGuess: won ? prev.currentGuess : '',
+    }));
+
+    return won ? 'correct' : lost ? 'gameover' : 'wrong';
+  }, [state, lang]);
 
   const useHint = useCallback((): string => {
     setState(prev => ({ ...prev, hintsUsed: prev.hintsUsed + 1 }));

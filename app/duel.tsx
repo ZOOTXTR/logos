@@ -38,9 +38,7 @@ export default function DuelScreen() {
     buttons: [], gemsAwarded: 0, xpAwarded: 0, theme, language,
   });
 
-  if (progress.loading) {
-    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
-  }
+
 
   const t = TRANSLATIONS[language];
 
@@ -201,6 +199,10 @@ export default function DuelScreen() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [game.winner, handleSubmit, handleDelete, handleKey]);
+
+  if (progress.loading) {
+    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
+  }
 
   // Keyboard letter colors merged from player board
   const getRevealedLetters = () => {

@@ -99,16 +99,41 @@ export const createEmptyBoard = (maxGuesses: number, wordLength: number = 5): Bo
     Array(wordLength).fill(null).map(() => ({ char: '', status: 'empty' as LetterStatus }))
   );
 
-export const getRandomWord = (category: Category = 'random', lang: 'tr' | 'en' = 'tr'): string => {
-  const bank = lang === 'en' ? WORD_BANK_EN : WORD_BANK;
-  const all = lang === 'en' ? ALL_WORDS_EN : ALL_WORDS;
-  const pool = category === 'random' ? all : bank[category];
-  const validWords = pool.filter(w => {
+const filterWordList = (list: string[]): string[] => {
+  const filtered = list.filter(w => {
     const len = w.replace(/\s/g, '').length;
-    return len >= 4 && len <= 6;
+    return len === WORD_LENGTH; // Strictly 5 letters only
   });
-  const words = validWords.length > 0 ? validWords : all.filter(w => w.length >= 4 && w.length <= 6);
-  const selected = words[Math.floor(Math.random() * words.length)];
+  return filtered.length > 0 ? filtered : list;
+};
+
+const FILTERED_ALL_WORDS_TR = filterWordList(ALL_WORDS);
+const FILTERED_ALL_WORDS_EN = filterWordList(ALL_WORDS_EN);
+
+const FILTERED_BANK_TR: Record<string, string[]> = {
+  random: FILTERED_ALL_WORDS_TR,
+  hayvanlar: filterWordList(WORD_BANK.hayvanlar),
+  sehirler: filterWordList(WORD_BANK.sehirler),
+  yiyecek: filterWordList(WORD_BANK.yiyecek),
+  meslekler: filterWordList(WORD_BANK.meslekler),
+  doga: filterWordList(WORD_BANK.doga),
+  spor: filterWordList(WORD_BANK.spor),
+};
+
+const FILTERED_BANK_EN: Record<string, string[]> = {
+  random: FILTERED_ALL_WORDS_EN,
+  hayvanlar: filterWordList(WORD_BANK_EN.hayvanlar),
+  sehirler: filterWordList(WORD_BANK_EN.sehirler),
+  yiyecek: filterWordList(WORD_BANK_EN.yiyecek),
+  meslekler: filterWordList(WORD_BANK_EN.meslekler),
+  doga: filterWordList(WORD_BANK_EN.doga),
+  spor: filterWordList(WORD_BANK_EN.spor),
+};
+
+export const getRandomWord = (category: Category = 'random', lang: 'tr' | 'en' = 'tr'): string => {
+  const bank = lang === 'en' ? FILTERED_BANK_EN : FILTERED_BANK_TR;
+  const pool = bank[category] || bank.random;
+  const selected = pool[Math.floor(Math.random() * pool.length)];
   return lang === 'tr'
     ? selected.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')
     : selected.toUpperCase();
@@ -118,8 +143,7 @@ export const getRandomWord = (category: Category = 'random', lang: 'tr' | 'en' =
 export const getDailyWord = (lang: 'tr' | 'en' = 'tr'): string => {
   const date = new Date();
   const seed = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
-  const all = lang === 'en' ? ALL_WORDS_EN : ALL_WORDS;
-  const words = all.filter(w => w.length >= 4 && w.length <= 6);
+  const words = lang === 'en' ? FILTERED_ALL_WORDS_EN : FILTERED_ALL_WORDS_TR;
   const selected = words[seed % words.length];
   return lang === 'tr'
     ? selected.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')

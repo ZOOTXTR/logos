@@ -64,7 +64,8 @@ function AnimatedCellComponent({ letter, colIndex, rowIndex, currentRow, cellSiz
   useEffect(() => {
     if (isTyping) {
       scaleVal.value = withTiming(1.08, { duration: 80 });
-      setTimeout(() => { scaleVal.value = withTiming(1, { duration: 100 }); }, 80);
+      const timer = setTimeout(() => { scaleVal.value = withTiming(1, { duration: 100 }); }, 80);
+      return () => clearTimeout(timer);
     }
   }, [isTyping, letter.char]);
 

@@ -1,4 +1,4 @@
-import { Share, Platform, Clipboard } from 'react-native';
+import { Share, Platform } from 'react-native';
 import { GAME_MODE_INFO, LetterStatus } from '../constants/words';
 
 export async function shareScoreGrid(
@@ -27,7 +27,7 @@ export async function shareScoreGrid(
 
   if (Platform.OS === 'web') {
     try {
-      if (navigator.clipboard) {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
         await navigator.clipboard.writeText(shareText);
         return language === 'en' ? 'Copied to clipboard!' : 'Panoya kopyalandı!';
       }
@@ -37,8 +37,12 @@ export async function shareScoreGrid(
   try {
     await Share.share({ message: shareText });
   } catch {
-    Clipboard.setString(shareText);
-    return language === 'en' ? 'Copied to clipboard!' : 'Panoya kopyalandı!';
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        return language === 'en' ? 'Copied to clipboard!' : 'Panoya kopyalandı!';
+      } catch {}
+    }
   }
 
   return null;

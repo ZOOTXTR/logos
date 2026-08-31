@@ -35,12 +35,12 @@ export function PrivacyPolicyModal({ visible, onClose, theme, language }: Privac
           </View>
           <ScrollView style={styles.modalBody}>
             <Text style={[styles.policyHeading, { color: c.primaryLight }]}>
-              {language === 'en' ? '1. Data Retention' : '1. Verilerin Saklanması'}
+              {language === 'en' ? '1. Data Collection & Storage' : '1. Veri Toplama ve Saklama'}
             </Text>
             <Text style={styles.policyText}>
               {language === 'en'
-                ? 'All stats (level, XP, completed achievements, and Gem balance) are saved securely on your device (Local Storage / AsyncStorage). We (ZOVTEX) do not collect or store personal data on our servers.'
-                : 'Logos oyunundaki tüm istatistikleriniz (seviyeniz, XP miktarınız, tamamladığınız başarımlar ve biriktirdiğiniz Gem bakiyesi) tamamen cihazınızda (Local Storage / AsyncStorage) şifrelenmiş olarak saklanır. Sunucularımızda (ZOVTEX) hiçbir kişisel bilginiz tutulmamaktadır.'}
+                ? 'Your game progress is primarily stored locally on your device. However, if you use Cloud Sync, Leaderboards, or Feedback features, your email address and device identifiers are collected and securely transmitted to third-party processors (Firebase and Sentry).'
+                : 'Oyun ilerlemeniz birincil olarak cihazınızda saklanır. Ancak Bulut Yedekleme, Skor Tabloları veya Geri Bildirim özelliklerini kullandığınızda, e-posta adresiniz ve cihaz tanımlayıcılarınız toplanarak güvenli üçüncü taraf altyapılarına (Firebase ve Sentry) iletilir.'}
             </Text>
 
             <Text style={[styles.policyHeading, { color: c.primaryLight }]}>
@@ -48,8 +48,8 @@ export function PrivacyPolicyModal({ visible, onClose, theme, language }: Privac
             </Text>
             <Text style={styles.policyText}>
               {language === 'en'
-                ? 'Playing Logos does not require registering an email address, phone number, or name. You can play anonymously and securely.'
-                : 'Oyunumuzu oynamak için herhangi bir e-posta adresi, telefon numarası veya isim kaydetmeniz gerekmez. Anonim olarak tamamen güvenli şekilde oynayabilirsiniz.'}
+                ? 'We only collect your email address when necessary to provide cloud-based features and technical support. You can delete your account data at any time from the settings menu.'
+                : 'Bulut tabanlı özellikler ve teknik destek sağlamak için gerekli olduğunda e-posta adresinizi topluyoruz. Hesap verilerinizi dilediğiniz zaman ayarlar menüsünden silebilirsiniz.'}
             </Text>
 
             <Text style={[styles.policyHeading, { color: c.primaryLight }]}>
@@ -57,8 +57,8 @@ export function PrivacyPolicyModal({ visible, onClose, theme, language }: Privac
             </Text>
             <Text style={styles.policyText}>
               {language === 'en'
-                ? 'The app does not display third-party ads. Crash reports are processed anonymously via Sentry for stability improvements. Optional cloud save, leaderboard, and referral features use Firebase services. These services may process anonymous device identifiers for security and functionality purposes.'
-                : 'Uygulama üçüncü taraf reklam göstermez. Çökme raporları, kararlılık iyileştirmeleri için Sentry üzerinden anonim olarak işlenir. Opsiyonel bulut kayıt, liderlik tablosu ve davet özellikleri Firebase servislerini kullanır. Bu servisler, güvenlik ve işlevsellik amacıyla anonim cihaz tanımlayıcılarını işleyebilir.'}
+                ? 'The app does not display third-party ads. Crash reports are processed via Sentry for stability improvements. Cloud save, leaderboard, and referral features use Firebase services. These services process your email and device identifiers for security and functionality purposes.'
+                : 'Uygulama üçüncü taraf reklam göstermez. Çökme raporları, kararlılık iyileştirmeleri için Sentry üzerinden işlenir. Bulut kayıt, skor tablosu ve davet özellikleri Firebase servislerini kullanır. Bu servisler, güvenlik ve işlevsellik amacıyla e-posta ve cihaz tanımlayıcılarınızı işler.'}
             </Text>
 
             <Text style={[styles.policyHeading, { color: c.primaryLight }]}>

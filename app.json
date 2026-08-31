@@ -2,7 +2,7 @@
   "expo": {
     "name": "Logos",
     "slug": "logos",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.zovtex.logos",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "supportsTablet": true,
       "infoPlist": {
         "NSUserActivityTypes": [
@@ -25,7 +25,8 @@
     },
     "android": {
       "package": "com.zovtex.logos",
-      "versionCode": 1,
+      "versionCode": 3,
+      "targetSdkVersion": 35,
       "permissions": [
         "VIBRATE",
         "RECEIVE_BOOT_COMPLETED",

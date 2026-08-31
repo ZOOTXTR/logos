@@ -9,13 +9,21 @@ interface KeyboardProps {
   onDelete: () => void;
   onSubmit: () => void;
   revealedLetters: Record<string, LetterStatus>;
+  language?: 'tr' | 'en';
 }
 
 // Türkçe klavye düzeni
-const KEYBOARD_ROWS = [
+const KEYBOARD_ROWS_TR = [
   ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ğ', 'Ü'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ş', 'İ'],
   ['SİL', 'Z', 'C', 'V', 'B', 'N', 'M', 'Ö', 'Ç', 'GÖNDER'],
+];
+
+// English QWERTY keyboard layout
+const KEYBOARD_ROWS_EN = [
+  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+  ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'DEL'],
 ];
 
 const COLORBLIND_COLORS = {
@@ -23,12 +31,21 @@ const COLORBLIND_COLORS = {
   present: '#E69F00',
 };
 
-function KeyboardComponent({ onKey, onDelete, onSubmit, revealedLetters }: KeyboardProps) {
-  const { theme, colorBlind, dyslexiaFont } = useTheme();
+const isDeleteKey = (key: string) => key === 'SİL' || key === 'DEL' || key === '⌫';
+const isSubmitKey = (key: string) => key === 'GÖNDER' || key === 'ENTER' || key === 'SUBMIT';
+
+function KeyboardComponent({ onKey, onDelete, onSubmit, revealedLetters, language }: KeyboardProps) {
+  const themeContext = useTheme();
+  const theme = themeContext?.theme ?? { colors: { correct: COLORS.correct, present: COLORS.present, card: COLORS.card, text: COLORS.text } };
+  const colorBlind = themeContext?.colorBlind ?? false;
+  const dyslexiaFont = themeContext?.dyslexiaFont ?? false;
+  const activeLanguage = language ?? themeContext?.language ?? 'tr';
+
+  const rows = activeLanguage === 'en' ? KEYBOARD_ROWS_EN : KEYBOARD_ROWS_TR;
 
   const handlePress = (key: string) => {
-    if (key === 'SİL') onDelete();
-    else if (key === 'GÖNDER') onSubmit();
+    if (isDeleteKey(key)) onDelete();
+    else if (isSubmitKey(key)) onSubmit();
     else onKey(key);
   };
 
@@ -43,10 +60,10 @@ function KeyboardComponent({ onKey, onDelete, onSubmit, revealedLetters }: Keybo
 
   return (
     <View style={styles.container}>
-      {KEYBOARD_ROWS.map((row, rowIndex) => (
+      {rows.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.row}>
           {row.map((key) => {
-            const isSpecial = key === 'SİL' || key === 'GÖNDER';
+            const isSpecial = isDeleteKey(key) || isSubmitKey(key);
             const status = revealedLetters[key];
             return (
               <TouchableOpacity
@@ -58,7 +75,7 @@ function KeyboardComponent({ onKey, onDelete, onSubmit, revealedLetters }: Keybo
                   { backgroundColor: getKeyBg(status) },
                 ]}
                 activeOpacity={0.7}
-                accessibilityLabel={key === 'SİL' ? 'Delete' : key === 'GÖNDER' ? 'Submit' : key}
+                accessibilityLabel={isDeleteKey(key) ? 'Delete' : isSubmitKey(key) ? 'Submit' : key}
               >
                 <Text style={[
                   styles.keyText,

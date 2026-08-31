@@ -87,7 +87,7 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
       } else {
         // Generate an intelligent incorrect guess containing some target letters
         const targetLetters = target.split('');
-        const alphabet = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
+        const alphabet = (lang === 'en' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ').split('');
         const chars: string[] = [];
 
         for (let i = 0; i < WORD_LENGTH; i++) {

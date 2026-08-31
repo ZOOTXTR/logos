@@ -114,8 +114,10 @@ export function useGame(
   const addLetter = useCallback((letter: string) => {
     setState(prev => {
       if (prev.gameStatus !== 'playing' || prev.currentCol >= prev.targetWord.length) return prev;
-      const newBoard = prev.board.map(r => r.map(l => ({ ...l })));
-      newBoard[prev.currentRow][prev.currentCol] = { char: letter, status: 'tbd' };
+      const newBoard = [...prev.board];
+      const newRow = [...newBoard[prev.currentRow]];
+      newRow[prev.currentCol] = { char: letter, status: 'tbd' };
+      newBoard[prev.currentRow] = newRow;
       return { ...prev, board: newBoard, currentCol: prev.currentCol + 1 };
     });
   }, []);
@@ -123,8 +125,10 @@ export function useGame(
   const deleteLetter = useCallback(() => {
     setState(prev => {
       if (prev.currentCol === 0) return prev;
-      const newBoard = prev.board.map(r => r.map(l => ({ ...l })));
-      newBoard[prev.currentRow][prev.currentCol - 1] = { char: '', status: 'empty' };
+      const newBoard = [...prev.board];
+      const newRow = [...newBoard[prev.currentRow]];
+      newRow[prev.currentCol - 1] = { char: '', status: 'empty' };
+      newBoard[prev.currentRow] = newRow;
       return { ...prev, board: newBoard, currentCol: prev.currentCol - 1 };
     });
   }, []);
@@ -161,7 +165,7 @@ export function useGame(
     });
 
     setState(prev => {
-      const newBoard = prev.board.map(r => r.map(l => ({ ...l })));
+      const newBoard = [...prev.board];
       newBoard[prev.currentRow] = guessChars.map((c, i) => ({ char: c, status: newStatuses[i] }));
       const newRevealed = { ...prev.revealedLetters };
       guessChars.forEach((c, i) => {
@@ -206,7 +210,7 @@ export function useGame(
     const target = p.lang === 'tr'
       ? s.targetWord.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')
       : s.targetWord.toUpperCase();
-    const alphabet = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ'.split('');
+    const alphabet = (p.lang === 'en' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ').split('');
     const wrongLetters = alphabet.filter(l => !target.includes(l) && s.revealedLetters[l] !== 'absent');
 
     const toSweep: string[] = [];

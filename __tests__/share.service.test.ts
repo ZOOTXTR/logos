@@ -4,7 +4,6 @@ import { shareScoreGrid } from '../services/share.service';
 jest.mock('react-native', () => ({
   Share: { share: jest.fn() },
   Platform: { OS: 'ios' },
-  Clipboard: { setString: jest.fn() },
 }));
 
 describe('shareScoreGrid', () => {

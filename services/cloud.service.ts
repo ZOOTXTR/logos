@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirebaseDb, FIRESTORE_COLLECTIONS } from '../config/firebase';
 import { getGems, getXP, getStats, getStreak, getUnlockedAchievements, getScores, getUnlockedCategories, isPremium } from './storage.service';
-import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
 
 export interface UserProgressData {
   gems: number;
@@ -11,6 +11,15 @@ export interface UserProgressData {
   isPremium: boolean;
   unlockedAchievements: string[];
   lastSavedAt: string;
+}
+
+export interface CloudScoreEntry {
+  id: string;
+  playerName?: string;
+  photoURL?: string;
+  mode: string;
+  category?: string;
+  score: number;
 }
 
 class CloudService {
@@ -165,6 +174,51 @@ class CloudService {
         console.error('AsyncStorage fallback failed:', fallbackError);
         return false;
       }
+    }
+  }
+
+  async submitScore(score: number, mode: string = 'classic', category: string = 'random'): Promise<boolean> {
+    try {
+      const db = this.getDb();
+      await addDoc(collection(db, FIRESTORE_COLLECTIONS.SCORES), {
+        score,
+        mode,
+        category,
+        playerName: 'Anonim',
+        createdAt: serverTimestamp(),
+      });
+      return true;
+    } catch (e) {
+      console.warn('submitScore failed:', e);
+      return false;
+    }
+  }
+
+  async getTopScores(limitCount: number = 20): Promise<CloudScoreEntry[]> {
+    try {
+      const db = this.getDb();
+      const q = query(
+        collection(db, FIRESTORE_COLLECTIONS.SCORES),
+        orderBy('score', 'desc'),
+        limit(limitCount)
+      );
+      const snapshot = await getDocs(q);
+      const entries: CloudScoreEntry[] = [];
+      snapshot.forEach(d => {
+        const data = d.data();
+        entries.push({
+          id: d.id,
+          playerName: data.playerName || data.displayName || 'Anonim',
+          photoURL: data.photoURL,
+          mode: data.mode || 'classic',
+          category: data.category || 'random',
+          score: data.score || 0,
+        });
+      });
+      return entries;
+    } catch (e) {
+      console.warn('getTopScores failed:', e);
+      return [];
     }
   }
 }

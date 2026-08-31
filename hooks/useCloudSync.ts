@@ -101,6 +101,13 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
           );
         }
         setLoading(false);
+      }).catch(() => {
+        setSyncStatus('error');
+        Alert.alert(
+          language === 'en' ? 'Restore Failed' : 'Geri Yükleme Başarısız',
+          language === 'en' ? 'Failed to restore backup from cloud.' : 'Buluttan yedek geri yüklenemedi.'
+        );
+        setLoading(false);
       });
     };
 

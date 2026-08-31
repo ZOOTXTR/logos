@@ -80,6 +80,14 @@ export function GamePlayScreen({
 
   const { alert, showAlert: showCustomAlert, hideAlert } = useCustomAlert();
 
+  useEffect(() => {
+    if (game.gameStatus === 'won') {
+      audioService.play('win');
+    } else if (game.gameStatus === 'lost') {
+      audioService.play('loss');
+    }
+  }, [game.gameStatus]);
+
   const modeInfo = GAME_MODE_INFO[gameConfig.mode];
   const categoryInfo = CATEGORY_INFO[gameConfig.category];
   const diffInfo = DIFFICULTY_INFO[gameConfig.difficulty];

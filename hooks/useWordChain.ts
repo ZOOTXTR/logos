@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { ALL_WORDS } from '../constants/words';
+import { ALL_WORDS, ALL_WORDS_EN } from '../constants/words';
+import { toTurkishUpper } from '../utils/turkish';
 
 export interface WordChainState {
   chain: string[];
@@ -12,16 +13,22 @@ export interface WordChainState {
   lastWord: string;
 }
 
-const VALID_WORDS = new Set(ALL_WORDS.map(w => w.toUpperCase().replace(/\s/g, '')).filter(w => w.length >= 3));
+const VALID_WORDS_TR_ARRAY = ALL_WORDS.map(w => toTurkishUpper(w).replace(/\s/g, '')).filter(w => w.length >= 3);
+const VALID_WORDS_EN_ARRAY = ALL_WORDS_EN.map(w => w.toUpperCase().replace(/\s/g, '')).filter(w => w.length >= 3);
 
-export function useWordChain() {
-  const getStartWord = (): string => {
-    const words = Array.from(VALID_WORDS);
-    return words[Math.floor(Math.random() * words.length)];
-  };
+const VALID_WORDS_TR = new Set(VALID_WORDS_TR_ARRAY);
+const VALID_WORDS_EN = new Set(VALID_WORDS_EN_ARRAY);
+
+const getRandomStartWord = (lang: 'tr' | 'en'): string => {
+  const words = lang === 'en' ? VALID_WORDS_EN_ARRAY : VALID_WORDS_TR_ARRAY;
+  return words[Math.floor(Math.random() * words.length)];
+};
+
+export function useWordChain(lang: 'tr' | 'en' = 'tr') {
+  const validWords = lang === 'en' ? VALID_WORDS_EN : VALID_WORDS_TR;
 
   const [state, setState] = useState<WordChainState>(() => {
-    const start = getStartWord();
+    const start = getRandomStartWord(lang);
     return {
       chain: [start],
       currentInput: '',
@@ -35,11 +42,11 @@ export function useWordChain() {
   });
 
   const setInput = useCallback((text: string) => {
-    setState(prev => ({ ...prev, currentInput: text.toUpperCase() }));
+    setState(prev => ({ ...prev, currentInput: toTurkishUpper(text) }));
   }, []);
 
   const submitWord = useCallback((): 'ok' | 'invalid' | 'used' | 'wrong_start' => {
-    const word = state.currentInput.trim().toUpperCase();
+    const word = toTurkishUpper(state.currentInput.trim());
     const lastWord = state.lastWord;
     const lastChar = lastWord[lastWord.length - 1];
 
@@ -63,7 +70,7 @@ export function useWordChain() {
       }));
       return 'used';
     }
-    if (!VALID_WORDS.has(word)) {
+    if (!validWords.has(word)) {
       setState(prev => ({
         ...prev,
         lives: prev.lives - 1,
@@ -83,10 +90,11 @@ export function useWordChain() {
       errorMessage: '',
     }));
     return 'ok';
-  }, [state]);
+  }, [state, validWords]);
 
-  const reset = useCallback(() => {
-    const start = getStartWord();
+  const reset = useCallback((newLang?: string) => {
+    const activeLang = (newLang === 'en' || newLang === 'tr') ? newLang : lang;
+    const start = getRandomStartWord(activeLang);
     setState({
       chain: [start],
       currentInput: '',
@@ -97,7 +105,7 @@ export function useWordChain() {
       errorMessage: '',
       lastWord: start,
     });
-  }, []);
+  }, [lang]);
 
   return { ...state, setInput, submitWord, reset };
 }
