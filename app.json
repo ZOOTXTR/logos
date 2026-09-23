@@ -70,9 +70,7 @@
           "ios": {
             "useFrameworks": "static"
           },
-          "android": {
-            "kotlinVersion": "2.2.20"
-          }
+          "android": {}
         }
       ],
       "./plugins/withAndroidXCore.js"
