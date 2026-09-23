@@ -51,9 +51,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - uses: android-actions/setup-android@v3
         with:
-                    accept-android-sdk-licenses: true
       - run: npm ci --legacy-peer-deps
       - run: npx expo prebuild --platform android --clean
       - name: Build Release AAB
