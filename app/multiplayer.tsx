@@ -111,7 +111,7 @@ export default function MultiplayerScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <AuraBackground theme={theme} />
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} />
       
       <View style={styles.container}>
         {/* Header */}

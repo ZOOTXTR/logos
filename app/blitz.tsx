@@ -47,7 +47,7 @@ export default function BlitzScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+      <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={COLORS.background} />
       <LinearGradient colors={[COLORS.background, '#0F0F23']} style={styles.container}>
         {/* Header */}
         <View style={styles.header}>

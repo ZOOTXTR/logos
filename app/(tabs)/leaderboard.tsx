@@ -81,7 +81,7 @@ export default function LeaderboardScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
+      <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme.colors.background} />
       <AuraBackground theme={theme} />
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>

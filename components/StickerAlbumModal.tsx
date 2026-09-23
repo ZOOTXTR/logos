@@ -84,7 +84,7 @@ export function StickerAlbumModal({ visible, onClose, gems, onSpendGems }: Stick
   return (
     <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
       <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
+        <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme.colors.background} />
 
         <View style={styles.header}>
           <TouchableOpacity

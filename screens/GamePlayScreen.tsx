@@ -334,6 +334,7 @@ export function GamePlayScreen({
             onDelete={handleDelete}
             onSubmit={handleSubmit}
             revealedLetters={game.revealedLetters}
+            language={language as 'tr' | 'en'}
           />
         </View>
       )}
@@ -412,6 +413,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent', paddingHorizontal: SPACING.sm,
     paddingVertical: 6, borderRadius: BORDER_RADIUS.full,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+    minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center',
   },
   backText: { color: COLORS.textSecondary, fontSize: FONTS.size.sm, fontWeight: '600' },
   modePills: { flexDirection: 'row', gap: 4 },
@@ -428,7 +430,7 @@ const styles = StyleSheet.create({
   gemPillText: { color: COLORS.gem, fontWeight: '700', fontSize: FONTS.size.sm },
   boardContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   boosterRow: { flexDirection: 'row', gap: SPACING.md, marginBottom: SPACING.sm },
-  boosterBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: BORDER_RADIUS.md, borderWidth: 1.5 },
+  boosterBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, minHeight: 44, borderRadius: BORDER_RADIUS.md, borderWidth: 1.5 },
   boosterEmoji: { fontSize: 16 },
   boosterLabel: { fontSize: 11, fontWeight: '800' },
   keyboardWrap: { paddingBottom: SPACING.sm },

@@ -10,7 +10,8 @@ interface LoadingViewProps {
 }
 
 export function LoadingView({ message }: LoadingViewProps) {
-  const { theme } = useTheme();
+  const { theme, language } = useTheme();
+  const text = message ?? (language === 'en' ? 'Loading...' : 'Yükleniyor...');
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -18,7 +19,7 @@ export function LoadingView({ message }: LoadingViewProps) {
         <Text style={[styles.emoji]}>💎</Text>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={[styles.text, { color: theme.colors.textMuted }]}>
-          {message ?? 'Loading...'}
+          {text}
         </Text>
       </View>
     </SafeAreaView>

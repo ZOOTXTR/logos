@@ -155,7 +155,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
-      <StatusBar barStyle="light-content" backgroundColor={c.background} />
+      <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={c.background} />
       <AuraBackground theme={theme} />
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>

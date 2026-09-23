@@ -99,7 +99,7 @@ export default function GameScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
+      <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme.colors.background} />
       {screen === 'menu' ? (
         <GameMenuScreen
           theme={theme} language={language} colorBlind={colorBlind}

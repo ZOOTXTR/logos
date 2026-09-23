@@ -12,6 +12,7 @@ import { Letter, LetterStatus } from '../constants/words';
 import { BORDER_RADIUS } from '../constants/theme';
 
 import { Theme } from '../constants/themes';
+import { useTheme } from '../hooks/useTheme';
 
 const COLORBLIND_COLORS = {
   correct: { bg: '#0072B2', border: '#0072B2' },
@@ -52,11 +53,22 @@ function getLetterBorder(status: LetterStatus | undefined, theme: Theme): string
 }
 
 function AnimatedCellComponent({ letter, colIndex, rowIndex, currentRow, cellSize, cellFontSize, colorBlind, dyslexiaFont, theme }: AnimatedCellProps) {
+  const { language } = useTheme();
   const flipVal = useSharedValue(0);
   const scaleVal = useSharedValue(1);
 
   const isEvaluated = rowIndex < currentRow || (rowIndex === currentRow && (letter.status === 'correct' || letter.status === 'present' || letter.status === 'absent'));
   const isTyping = rowIndex === currentRow && letter.status === 'tbd';
+
+  const a11ySuffix = !letter.char
+    ? ''
+    : isEvaluated
+      ? letter.status === 'correct'
+        ? (language === 'en' ? ', correct' : ', doğru')
+        : letter.status === 'present'
+          ? (language === 'en' ? ', present' : ', mevcut')
+          : (language === 'en' ? ', absent' : ', yok')
+      : '';
 
   useEffect(() => {
     if (isEvaluated) {
@@ -94,8 +106,8 @@ function AnimatedCellComponent({ letter, colIndex, rowIndex, currentRow, cellSiz
       accessibilityRole="text"
       accessibilityLabel={
         letter.char
-          ? `${letter.char}${isEvaluated ? (letter.status === 'correct' ? ', doğru' : letter.status === 'present' ? ', mevcut' : ', yok') : ''}`
-          : 'boş'
+          ? `${letter.char}${a11ySuffix}`
+          : (language === 'en' ? 'empty' : 'boş')
       }
       style={[
         styles.cell,

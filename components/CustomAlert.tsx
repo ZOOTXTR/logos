@@ -14,8 +14,8 @@ interface CustomAlertProps {
 }
 
 export function CustomAlert({ visible, title, message, onClose, buttons }: CustomAlertProps) {
-  const { theme } = useTheme();
-  const btns: AlertButtonConfig[] = buttons?.length ? buttons : [{ text: 'Tamam', onPress: onClose }];
+  const { theme, language } = useTheme();
+  const btns: AlertButtonConfig[] = buttons?.length ? buttons : [{ text: language === 'en' ? 'OK' : 'Tamam', onPress: onClose }];
   const layout = btns.length > 2 ? 'column' as const : 'row' as const;
 
   return (

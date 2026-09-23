@@ -54,7 +54,7 @@ function KeyboardComponent({ onKey, onDelete, onSubmit, revealedLetters, languag
     switch (status) {
       case 'correct': return colorBlind ? COLORBLIND_COLORS.correct : theme.colors.correct;
       case 'present': return colorBlind ? COLORBLIND_COLORS.present : theme.colors.present;
-      case 'absent': return '#1F2937';
+      case 'absent': return theme.colors.absent;
       default: return theme.colors.card;
     }
   };
@@ -133,7 +133,6 @@ const styles = StyleSheet.create({
   },
   specialKey: {
     flex: 1.5,
-    backgroundColor: COLORS.primary,
   },
   keyText: {
     fontSize: FONTS.size.sm,

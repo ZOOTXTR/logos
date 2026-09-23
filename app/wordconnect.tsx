@@ -177,7 +177,7 @@ export default function WordConnectScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
+      <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme.colors.background} />
       <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.container}>
         {/* Header */}
         <View style={styles.header}>

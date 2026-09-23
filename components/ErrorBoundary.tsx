@@ -35,15 +35,17 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
         <SafeAreaView style={styles.container}>
           <View style={styles.content}>
             <Text style={styles.emoji}>💥</Text>
-            <Text style={styles.title}>Something went wrong</Text>
+            <Text style={styles.title}>Bir şeyler ters gitti · Something went wrong</Text>
             <Text style={styles.message}>
-              {this.state.error?.message ?? 'An unexpected error occurred'}
+              {this.state.error?.message ?? 'Beklenmeyen bir hata oluştu · An unexpected error occurred'}
             </Text>
             <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Tekrar dene / Try again"
               style={styles.button}
               onPress={() => this.setState({ hasError: false, error: null })}
             >
-              <Text style={styles.buttonText}>Try Again</Text>
+              <Text style={styles.buttonText}>Tekrar Dene · Try Again</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>

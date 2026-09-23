@@ -1,13 +1,20 @@
 ﻿import React from 'react';
-import { Text as RNText, TextProps, Platform } from 'react-native';
+import { Text as RNText, TextProps } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 
-export function Text({ style, ...props }: TextProps) {
+// Erişilebilirlik: sistem yazı boyutu büyütüldüğünde düzenin bozulmaması için
+// varsayılan olarak ölçeklemeyi sınırlıyoruz. Çağıran taraf isterse override eder.
+export function Text({ style, maxFontSizeMultiplier, allowFontScaling, ...props }: TextProps) {
   const { dyslexiaFont } = useTheme();
-  
-  if (!dyslexiaFont) return <RNText style={style} {...props} />;
-  
+
+  const scaleProps = {
+    allowFontScaling: allowFontScaling ?? true,
+    maxFontSizeMultiplier: maxFontSizeMultiplier ?? 1.4,
+  };
+
+  if (!dyslexiaFont) return <RNText style={style} {...scaleProps} {...props} />;
+
   const dfStyle = { fontFamily: 'monospace', fontWeight: 'normal' };
-  
-  return <RNText style={[style, dfStyle as any]} {...props} />;
+
+  return <RNText style={[style, dfStyle as any]} {...scaleProps} {...props} />;
 }
