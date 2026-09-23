@@ -87,7 +87,7 @@ export function StickerAlbumModal({ visible, onClose, gems, onSpendGems }: Stick
         <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme.colors.background} />
 
         <View style={styles.header}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={viewMode === 'pack' ? () => setViewMode('album') : onClose}
           >
@@ -114,7 +114,7 @@ export function StickerAlbumModal({ visible, onClose, gems, onSpendGems }: Stick
                   {language === 'en' ? 'Get 3 random rarity sticker cards' : '3 adet rastgele nadirlikte kart kazan!'}
                 </Text>
               </View>
-              <TouchableOpacity style={styles.buyBtn} onPress={handleBuyPack}>
+              <TouchableOpacity accessibilityRole="button" style={styles.buyBtn} onPress={handleBuyPack}>
                 <LinearGradient colors={['#F59E0B', '#D97706']} style={styles.buyGrad}>
                   <Text style={styles.buyBtnText}>100 💎</Text>
                 </LinearGradient>
@@ -166,7 +166,7 @@ export function StickerAlbumModal({ visible, onClose, gems, onSpendGems }: Stick
             </View>
 
             {openedCards.every(c => c) && (
-              <TouchableOpacity style={styles.doneBtn} onPress={() => setViewMode('album')}>
+              <TouchableOpacity accessibilityRole="button" style={styles.doneBtn} onPress={() => setViewMode('album')}>
                 <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.doneGrad}>
                   <Text style={styles.doneBtnText}>{language === 'en' ? 'Add to Album' : 'Albüme Ekle'} ✓</Text>
                 </LinearGradient>

@@ -102,17 +102,17 @@ export function ModeSelector({ onStart, gems, streak, levelTitle, level, dailyDo
         <Text style={[styles.section, { color: theme.colors.textSecondary }]}>?? {language === 'en' ? 'Category' : 'Kategori'}</Text>
         <View style={styles.cgrid}>{CATS.map(c => {
           const info = CATEGORY_INFO[c];
-          return <TouchableOpacity key={c} style={[styles.cc, { backgroundColor: theme.colors.card + '88', borderColor: theme.colors.border + '55' }, cat === c && { borderColor: info.color, borderWidth: 2, backgroundColor: info.color + '44' }]} onPress={() => handleCat(c)} activeOpacity={0.8}><Text style={styles.ce}>{unlockedCategories.includes(c) ? info.emoji : '??'}</Text><Text style={[styles.cl, { color: theme.colors.textSecondary }, cat === c && { color: info.color }]}>{language === 'en' && c === 'random' ? 'Random' : info.label}</Text></TouchableOpacity>;
+          return <TouchableOpacity accessibilityRole="button" key={c} style={[styles.cc, { backgroundColor: theme.colors.card + '88', borderColor: theme.colors.border + '55' }, cat === c && { borderColor: info.color, borderWidth: 2, backgroundColor: info.color + '44' }]} onPress={() => handleCat(c)} activeOpacity={0.8}><Text style={styles.ce}>{unlockedCategories.includes(c) ? info.emoji : '??'}</Text><Text style={[styles.cl, { color: theme.colors.textSecondary }, cat === c && { color: info.color }]}>{language === 'en' && c === 'random' ? 'Random' : info.label}</Text></TouchableOpacity>;
         })}</View>
       </>}
 
       <Text style={[styles.section, { color: theme.colors.textSecondary }]}>?? {language === 'en' ? 'Difficulty' : 'Zorluk'}</Text>
       <View style={styles.row}>{DIFFS.map(d => {
         const info = DIFFICULTY_INFO[d];
-        return <TouchableOpacity key={d} style={[styles.dc, { backgroundColor: theme.colors.card + '88', borderColor: theme.colors.border + '55' }, diff === d && { borderColor: info.color, backgroundColor: info.color + '44' }]} onPress={() => { audioService.play('click'); setDiff(d); }} activeOpacity={0.8}><Text style={styles.de}>{info.emoji}</Text><Text style={[styles.dl, { color: theme.colors.textSecondary }, diff === d && { color: info.color }]}>{language === 'en' && d === 'easy' ? 'Easy' : language === 'en' && d === 'normal' ? 'Normal' : language === 'en' && d === 'hard' ? 'Hard' : language === 'en' && d === 'expert' ? 'Expert' : info.label}</Text></TouchableOpacity>;
+        return <TouchableOpacity accessibilityRole="button" key={d} style={[styles.dc, { backgroundColor: theme.colors.card + '88', borderColor: theme.colors.border + '55' }, diff === d && { borderColor: info.color, backgroundColor: info.color + '44' }]} onPress={() => { audioService.play('click'); setDiff(d); }} activeOpacity={0.8}><Text style={styles.de}>{info.emoji}</Text><Text style={[styles.dl, { color: theme.colors.textSecondary }, diff === d && { color: info.color }]}>{language === 'en' && d === 'easy' ? 'Easy' : language === 'en' && d === 'normal' ? 'Normal' : language === 'en' && d === 'hard' ? 'Hard' : language === 'en' && d === 'expert' ? 'Expert' : info.label}</Text></TouchableOpacity>;
       })}</View>
 
-      <TouchableOpacity style={styles.btn} onPress={() => { audioService.play('click'); onStart(mode, cat, diff); }} activeOpacity={0.85}>
+      <TouchableOpacity accessibilityRole="button" style={styles.btn} onPress={() => { audioService.play('click'); onStart(mode, cat, diff); }} activeOpacity={0.85}>
         <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
           <Text style={styles.bt}>{mode === 'daily' ? '📅 OYNA' : mode === 'speed' ? '⚡ OYNA' : '📅 OYNA'}</Text>
         </LinearGradient>

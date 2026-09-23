@@ -50,7 +50,7 @@ export function AgeGateModal({ onComplete }: { onComplete: (isChild: boolean) =>
             value={year}
             onChangeText={setYear}
           />
-          <TouchableOpacity 
+          <TouchableOpacity accessibilityRole="button" 
             style={[styles.button, { backgroundColor: c.primary, opacity: year.length === 4 ? 1 : 0.5 }]}
             onPress={handleSubmit}
             disabled={year.length !== 4}

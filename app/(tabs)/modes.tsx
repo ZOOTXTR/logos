@@ -98,7 +98,7 @@ export default function ModesScreen() {
               <Text style={[styles.dailyTitle, { color: theme.colors.text }]}>{t.dailyChallenge}</Text>
               <Text style={[styles.dailyDesc, { color: theme.colors.textSecondary }]}>{t.dailyChallengeDesc}</Text>
             </View>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={[styles.dailyBtn, { backgroundColor: theme.colors.accent }]}
               onPress={() => router.push('/(tabs)')}
             >
@@ -111,7 +111,7 @@ export default function ModesScreen() {
             <Text style={[styles.themeBarLabel, { color: theme.colors.textSecondary }]}>
               {language === 'en' ? 'Active Theme:' : 'Aktif Tema:'} {theme.emoji} {theme.name}
             </Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/settings')}>
+            <TouchableOpacity accessibilityRole="button" onPress={() => router.push('/(tabs)/settings')}>
               <Text style={[styles.themeBarLink, { color: theme.colors.primaryLight }]}>{language === 'en' ? 'Change →' : 'Değiştir →'}</Text>
             </TouchableOpacity>
           </View>

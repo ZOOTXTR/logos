@@ -94,7 +94,7 @@ export default function LeaderboardScreen() {
           {/* Tab Bar */}
           <WidgetCard theme={theme} variant="glass" style={{ padding: 4, marginBottom: SPACING.lg }}>
             <View style={{ flexDirection: 'row', gap: 4 }}>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={[styles.tabButton, { backgroundColor: tab === 'local' ? theme.colors.primary : 'transparent' }]}
                 onPress={() => setTab('local')}
               >
@@ -102,7 +102,7 @@ export default function LeaderboardScreen() {
                   📱 {language === 'en' ? 'Local' : 'Yerel'}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={[styles.tabButton, { backgroundColor: tab === 'global' ? theme.colors.primary : 'transparent' }]}
                 onPress={() => setTab('global')}
               >
@@ -197,7 +197,7 @@ export default function LeaderboardScreen() {
             <View style={styles.section}>
               <View style={styles.globalHeader}>
                 <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>🌍 {language === 'en' ? 'Global Leaderboard' : 'Küresel Sıralama'}</Text>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   style={[styles.submitButton, { backgroundColor: theme.colors.primary }]}
                   onPress={handleSubmitScore}
                   disabled={loading || scores.length === 0}

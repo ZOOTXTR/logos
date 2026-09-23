@@ -61,7 +61,7 @@ export function InviteModal({ visible, onClose }: InviteModalProps) {
                   {language === 'en' ? 'Your Invite Code' : 'Davet Kodunuz'}
                 </Text>
                 <Text style={[styles.codeValue, { color: theme.colors.gem }]}>{myCode}</Text>
-                <TouchableOpacity style={[styles.shareBtn, { backgroundColor: theme.colors.primary }]} onPress={handleShare}>
+                <TouchableOpacity accessibilityRole="button" style={[styles.shareBtn, { backgroundColor: theme.colors.primary }]} onPress={handleShare}>
                   <Text style={styles.shareBtnText}>
                     📤 {language === 'en' ? 'Share Invite' : 'Daveti Paylaş'}
                   </Text>
@@ -83,7 +83,7 @@ export function InviteModal({ visible, onClose }: InviteModalProps) {
                 autoCapitalize="characters"
                 maxLength={10}
               />
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={[styles.claimBtn, { backgroundColor: theme.colors.primary }]}
                 onPress={handleClaim}
                 disabled={claiming}

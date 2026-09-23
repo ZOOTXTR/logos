@@ -39,7 +39,7 @@ export function StorePremiumCard({
   return (
     <View style={styles.section}>
       <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>👑 Premium</Text>
-      <TouchableOpacity onPress={onPurchasePremium} activeOpacity={0.8}>
+      <TouchableOpacity accessibilityRole="button" onPress={onPurchasePremium} activeOpacity={0.8}>
         <LinearGradient
           colors={[COLORS.accent, '#D97706']}
           style={styles.premiumCard}

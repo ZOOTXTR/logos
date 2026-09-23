@@ -124,7 +124,7 @@ export function HelpModal({ visible, onClose }: HelpModalProps) {
             <View style={{ height: SPACING.xl }} />
           </ScrollView>
 
-          <TouchableOpacity style={styles.closeFullBtn} onPress={onClose}>
+          <TouchableOpacity accessibilityRole="button" style={styles.closeFullBtn} onPress={onClose}>
             <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.closeGrad}>
               <Text style={styles.closeText}>Tamam, Anladım</Text>
             </LinearGradient>

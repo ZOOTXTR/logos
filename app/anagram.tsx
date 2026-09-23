@@ -174,7 +174,7 @@ export default function AnagramScreen() {
             <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← Geri</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: theme.colors.text }]}>🔀 Anagram</Text>
-          <TouchableOpacity style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]}>
+          <TouchableOpacity accessibilityRole="button" style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]}>
             <Text style={[styles.gemText, { color: theme.colors.gem }]}>💎 {progress.gems}</Text>
           </TouchableOpacity>
         </View>
@@ -185,7 +185,7 @@ export default function AnagramScreen() {
             const info = CATEGORY_INFO[c];
             const isActive = category === c;
             return (
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 key={c}
                 style={[
                   styles.catChip,
@@ -245,7 +245,7 @@ export default function AnagramScreen() {
             {game.shuffledLetters.map((letter, idx) => {
               const isSelected = game.selectedIndices.includes(idx);
               return (
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   key={idx}
                   style={[
                     styles.letterBtn,
@@ -275,7 +275,7 @@ export default function AnagramScreen() {
 
         {/* Aksiyonlar */}
         <View style={styles.actions}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[styles.clearBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={() => {
               audioService.triggerHaptic('light');
@@ -284,13 +284,13 @@ export default function AnagramScreen() {
           >
             <Text style={[styles.clearBtnText, { color: theme.colors.textSecondary }]}>🗑️ Temizle</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[styles.hintBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.primaryLight }]}
             onPress={handleHint}
           >
             <Text style={[styles.hintBtnText, { color: theme.colors.primaryLight }]}>💡 İpucu</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={game.status !== 'playing'}>
+          <TouchableOpacity accessibilityRole="button" style={styles.submitBtn} onPress={handleSubmit} disabled={game.status !== 'playing'}>
             <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.submitGrad}>
               <Text style={[styles.submitText, { color: theme.colors.text }]}>✓ Onayla</Text>
             </LinearGradient>

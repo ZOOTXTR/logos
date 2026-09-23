@@ -23,7 +23,7 @@ export function HintOptionCard({
   theme,
 }: HintOptionCardProps) {
   return (
-    <TouchableOpacity
+    <TouchableOpacity accessibilityRole="button"
       style={[
         styles.option,
         disabled && styles.disabled,

@@ -52,7 +52,7 @@ export function WidgetCard({ children, onPress, style, theme, disabled, variant 
       style,
       animatedStyle
     ]}>
-      <Pressable
+      <Pressable accessibilityRole="button"
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}

@@ -29,7 +29,7 @@ export function FeedbackTypeSelector({ selectedType, onSelect, theme, language }
         {feedbackTypes.map((item) => {
           const isActive = selectedType === item.id;
           return (
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               key={item.id}
               style={[
                 styles.typeCard,

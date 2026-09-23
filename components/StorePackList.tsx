@@ -64,7 +64,7 @@ export function StorePackList({
         {CATEGORY_PRODUCTS.map((prod) => {
           const isUnlocked = unlockedCategories.includes(prod.id);
           return (
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               key={prod.id}
               style={[styles.gemCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
               onPress={() => !isUnlocked && onUnlockCategory(prod)}

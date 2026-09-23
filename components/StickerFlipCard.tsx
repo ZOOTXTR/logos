@@ -46,7 +46,7 @@ export function StickerFlipCard({ sticker, isRevealed, theme, language, onReveal
   const rarityColor = RARITY_COLORS[sticker.rarity];
 
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onReveal} style={styles.wrapper}>
+    <TouchableOpacity accessibilityRole="button" activeOpacity={0.9} onPress={onReveal} style={styles.wrapper}>
       <Animated.View
         style={[
           styles.card,

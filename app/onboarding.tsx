@@ -95,7 +95,7 @@ export default function OnboardingScreen() {
           <Text style={styles.slideDesc}>{t[slide.descKey]}</Text>
 
           {/* Action Button */}
-          <TouchableOpacity style={styles.btn} onPress={handleNext} activeOpacity={0.85}>
+          <TouchableOpacity accessibilityRole="button" style={styles.btn} onPress={handleNext} activeOpacity={0.85}>
             <LinearGradient
               colors={slide.gradient}
               style={styles.btnGrad}
@@ -110,7 +110,7 @@ export default function OnboardingScreen() {
 
           {/* Skip option */}
           {currentSlide < SLIDES.length - 1 && (
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               onPress={async () => {
                 await storageSet('gq_onboarded', 'true');
                 // başlangıç gem ödülü kaldırıldı (varsayılan bakiye zaten 150)

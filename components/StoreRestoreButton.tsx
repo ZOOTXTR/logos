@@ -16,7 +16,7 @@ export function StoreRestoreButton({
   language,
 }: StoreRestoreButtonProps) {
   return (
-    <TouchableOpacity
+    <TouchableOpacity accessibilityRole="button"
       style={[styles.restoreBtn, { borderColor: theme.colors.border }]}
       onPress={onRestore}
       activeOpacity={0.7}

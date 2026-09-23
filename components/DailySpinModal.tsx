@@ -147,7 +147,7 @@ export function DailySpinModal({ visible, onClose, gems, onAddGems, premium = fa
                 🎡 {language === 'en' ? 'Lucky Daily Spin' : 'Günlük Şans Çarkı'}
               </Text>
               {!isSpinning && (
-                <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <TouchableOpacity accessibilityRole="button" onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                   <Text style={styles.closeBtnText}>✕</Text>
                 </TouchableOpacity>
               )}

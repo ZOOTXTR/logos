@@ -42,7 +42,7 @@ export function GameEndCertificate({
         <Text style={[styles.statusText, { color: gameStatusColor, flex: 1, marginRight: SPACING.sm }]}>
           {gameStatusText}
         </Text>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={[styles.actionBtn, { backgroundColor: theme.colors.primary + '22', maxWidth: 110, paddingVertical: 6, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: theme.colors.primary + '44' }]}
           onPress={onShowDefinition}
         >
@@ -108,19 +108,19 @@ export function GameEndCertificate({
       </View>
 
       <View style={styles.statusActions}>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={[styles.actionBtn, { backgroundColor: theme.colors.primary }]}
           onPress={onRetry}
         >
           <Text style={styles.actionBtnText}>🔄 {language === 'en' ? 'Retry' : 'Tekrar'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={[styles.actionBtn, { backgroundColor: theme.colors.accent }]}
           onPress={onShare}
         >
           <Text style={[styles.actionBtnText, { color: '#000' }]}>📤 {language === 'en' ? 'Share' : 'Paylaş'}</Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={[styles.actionBtn, { backgroundColor: theme.colors.card }]}
           onPress={onMenu}
         >

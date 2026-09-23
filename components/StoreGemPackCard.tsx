@@ -24,7 +24,7 @@ export function StoreGemPackCard({
 }: StoreGemPackCardProps) {
   const displayPrice = price ?? pkg.price;
   return (
-    <TouchableOpacity
+    <TouchableOpacity accessibilityRole="button"
       style={[
         styles.gemCard,
         { backgroundColor: theme.colors.card, borderColor: theme.colors.border },

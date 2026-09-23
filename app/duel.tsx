@@ -225,7 +225,7 @@ export default function DuelScreen() {
         
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()}>
+          <TouchableOpacity accessibilityRole="button" style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()}>
             <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← {t.back}</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: theme.colors.text }]}>

@@ -86,7 +86,7 @@ export default function BlitzScreen() {
             onSubmit={handleSubmit}
             revealedLetters={{}}
           />
-          <TouchableOpacity style={[styles.skipBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.warning }]} onPress={game.skip}>
+          <TouchableOpacity accessibilityRole="button" style={[styles.skipBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.warning }]} onPress={game.skip}>
             <Text style={[styles.skipText, { color: theme.colors.warning }]}>⏭ {language === 'en' ? 'Skip -5s' : 'ATLA -5sn'}</Text>
           </TouchableOpacity>
         </View>

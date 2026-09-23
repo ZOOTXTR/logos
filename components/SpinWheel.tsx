@@ -26,7 +26,7 @@ export function SpinWheel({
       </View>
       <View style={styles.controlArea}>
         {canSpin ? (
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[styles.spinBtn, spinning && { opacity: 0.7 }]}
             onPress={onPressSpin}
             disabled={spinning}

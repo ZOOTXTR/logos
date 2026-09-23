@@ -47,7 +47,7 @@ export function AchievementToast({ achievement, onDismiss, language = 'tr' }: Ac
       accessibilityLiveRegion="polite"
       accessibilityLabel={`${language === 'en' ? 'Achievement unlocked' : 'Başarım açıldı'}: ${title}`}
     >
-      <TouchableOpacity style={styles.inner} onPress={onDismiss} activeOpacity={0.9}>
+      <TouchableOpacity accessibilityRole="button" style={styles.inner} onPress={onDismiss} activeOpacity={0.9}>
         <Text style={styles.emoji}>{achievement.emoji}</Text>
         <View style={styles.text}>
           <Text style={styles.unlocked}>{language === 'en' ? '🏅 Achievement Unlocked!' : '🏅 Başarım Açıldı!'}</Text>

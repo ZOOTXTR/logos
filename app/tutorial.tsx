@@ -84,7 +84,7 @@ export default function TutorialScreen() {
     return (
       <View style={styles.anagramBoard}>
         {(currentStep.scrambled || []).map((char, i) => (
-          <TouchableOpacity key={i} style={[styles.anagramBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => handleKey(char)}>
+          <TouchableOpacity accessibilityRole="button" key={i} style={[styles.anagramBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => handleKey(char)}>
             <Text style={[styles.boxText, { color: theme.colors.text }]}>{char}</Text>
           </TouchableOpacity>
         ))}
@@ -120,16 +120,16 @@ export default function TutorialScreen() {
             <Text style={{ color: theme.colors.textMuted, marginBottom: 10 }}>Fiziksel veya ekran klavyesi benzetimi:</Text>
             <View style={styles.keyRow}>
               {['L','O','G','S','E','R','İ'].map(k => (
-                <TouchableOpacity key={k} style={[styles.key, { backgroundColor: theme.colors.surface }]} onPress={() => handleKey(k)}>
+                <TouchableOpacity accessibilityRole="button" key={k} style={[styles.key, { backgroundColor: theme.colors.surface }]} onPress={() => handleKey(k)}>
                   <Text style={{ color: theme.colors.text, fontSize: 18 }}>{k}</Text>
                 </TouchableOpacity>
               ))}
             </View>
             <View style={styles.keyRow}>
-              <TouchableOpacity style={[styles.actionKey, { backgroundColor: theme.colors.surface }]} onPress={handleBackspace}>
+              <TouchableOpacity accessibilityRole="button" style={[styles.actionKey, { backgroundColor: theme.colors.surface }]} onPress={handleBackspace}>
                 <Text style={{ color: theme.colors.text, fontSize: 16 }}>SİL</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionKey, { backgroundColor: theme.colors.primary }]} onPress={handleSubmit}>
+              <TouchableOpacity accessibilityRole="button" style={[styles.actionKey, { backgroundColor: theme.colors.primary }]} onPress={handleSubmit}>
                 <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>GİRİŞ</Text>
               </TouchableOpacity>
             </View>
@@ -138,10 +138,10 @@ export default function TutorialScreen() {
         
         {currentStep.id === 'anagram' && (
           <View style={styles.keyRow}>
-            <TouchableOpacity style={[styles.actionKey, { backgroundColor: theme.colors.surface, marginTop: 40 }]} onPress={handleBackspace}>
+            <TouchableOpacity accessibilityRole="button" style={[styles.actionKey, { backgroundColor: theme.colors.surface, marginTop: 40 }]} onPress={handleBackspace}>
               <Text style={{ color: theme.colors.text, fontSize: 16 }}>SİL</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.actionKey, { backgroundColor: theme.colors.primary, marginTop: 40 }]} onPress={handleSubmit}>
+            <TouchableOpacity accessibilityRole="button" style={[styles.actionKey, { backgroundColor: theme.colors.primary, marginTop: 40 }]} onPress={handleSubmit}>
               <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>GİRİŞ</Text>
             </TouchableOpacity>
           </View>

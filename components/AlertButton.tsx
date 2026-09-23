@@ -34,7 +34,7 @@ export function AlertButton({
 
   if (button.style === 'cancel') {
     return (
-      <TouchableOpacity
+      <TouchableOpacity accessibilityRole="button"
         style={[styles.btn, layout === 'column' && styles.btnFull, styles.btnCancel, { borderColor: border }]}
         onPress={press}
         activeOpacity={0.7}
@@ -45,7 +45,7 @@ export function AlertButton({
   }
 
   return (
-    <TouchableOpacity
+    <TouchableOpacity accessibilityRole="button"
       style={[styles.btn, layout === 'column' && styles.btnFull, styles.btnPrimaryWrap]}
       onPress={press}
       activeOpacity={0.8}

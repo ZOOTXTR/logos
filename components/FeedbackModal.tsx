@@ -109,7 +109,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
             />
 
             {/* Action buttons */}
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={[styles.submitBtn, loading && { opacity: 0.7 }]}
               onPress={handleSubmit}
               disabled={loading}

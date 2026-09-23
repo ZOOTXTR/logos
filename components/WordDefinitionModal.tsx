@@ -96,7 +96,7 @@ export function WordDefinitionModal({ visible, word, lang, onClose }: WordDefini
           </ScrollView>
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.closeActionBtn} onPress={onClose}>
+            <TouchableOpacity accessibilityRole="button" style={styles.closeActionBtn} onPress={onClose}>
               <LinearGradient
                 colors={[theme.colors.primary, theme.colors.primaryDark]}
                 style={styles.btnGrad}

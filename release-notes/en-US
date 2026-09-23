@@ -1,6 +1,5 @@
 What's new
 
-- New WordConnect levels
-- Expanded word pool, less repetition
-- Accessibility: contrast and labeling improvements
-- Game economy rebalanced
+- Accessibility: screen reader roles added across buttons
+- Contrast and labeling improvements
+- Stability and performance improvements

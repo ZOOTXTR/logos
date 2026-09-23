@@ -18,7 +18,7 @@ export function CloudLoginForm({ onLogin, onGoogleLogin, theme, language, initia
 
   return (
     <View style={styles.linkForm}>
-      <TouchableOpacity style={styles.googleBtn} onPress={onGoogleLogin}>
+      <TouchableOpacity accessibilityRole="button" style={styles.googleBtn} onPress={onGoogleLogin}>
         <View style={styles.googleBtnInner}>
           <Text style={styles.googleIcon}>🎮</Text>
           <Text style={styles.googleBtnText}>
@@ -75,7 +75,7 @@ export function CloudLoginForm({ onLogin, onGoogleLogin, theme, language, initia
         autoCapitalize="none"
         autoCorrect={false}
       />
-      <TouchableOpacity
+      <TouchableOpacity accessibilityRole="button"
         style={styles.actionBtn}
         onPress={() => onLogin(email.trim(), password)}
         disabled={!email.includes('@') || password.length < 6}

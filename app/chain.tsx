@@ -109,7 +109,7 @@ export default function ChainScreen() {
               onSubmitEditing={handleSubmit}
               editable={game.status === 'playing'}
             />
-            <TouchableOpacity style={styles.sendBtn} onPress={handleSubmit} disabled={game.status !== 'playing'}>
+            <TouchableOpacity accessibilityRole="button" style={styles.sendBtn} onPress={handleSubmit} disabled={game.status !== 'playing'}>
               <LinearGradient colors={['#7C3AED', '#4F46E5']} style={styles.sendGrad}>
                 <Text style={styles.sendText}>→</Text>
               </LinearGradient>

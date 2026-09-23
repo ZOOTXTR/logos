@@ -191,7 +191,7 @@ export default function WordConnectScreen() {
           <Text style={[styles.title, { color: theme.colors.text }]}>
             🌀 {t.modeConnectTitle} (Lvl {game.level})
           </Text>
-          <TouchableOpacity style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]} onPress={() => setShowStore(true)}>
+          <TouchableOpacity accessibilityRole="button" style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]} onPress={() => setShowStore(true)}>
             <Text style={[styles.gemText, { color: theme.colors.gem }]}>💎 {progress.gems}</Text>
           </TouchableOpacity>
         </View>
@@ -290,7 +290,7 @@ export default function WordConnectScreen() {
               const coords = getLetterCoords(idx, game.letters.length);
               const isSelected = game.selectedIndices.includes(idx);
               return (
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   key={idx}
                   style={[
                     styles.letterBtn,
@@ -316,13 +316,13 @@ export default function WordConnectScreen() {
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[styles.actionBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={handleClear}
           >
             <Text style={[styles.actionBtnText, { color: theme.colors.textSecondary }]}>🗑️ {t.clear}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.submitBtn}
             onPress={handleSubmit}
             disabled={game.currentGuess.length < 2}

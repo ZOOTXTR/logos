@@ -181,7 +181,7 @@ export default function SettingsScreen() {
               <SettingToggle label={t.dyslexiaFont} emoji="📖" value={dyslexiaFont} onToggle={setDyslexiaFont} colors={c} language={language} />
               <View style={[styles.divider, { backgroundColor: c.border }]} />
 
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={styles.settingRow}
                 onPress={() => {
                   audioService.triggerHaptic('light');
@@ -206,7 +206,7 @@ export default function SettingsScreen() {
                 const isUnlocked = unlockedThemes.includes(tData.id);
                 const isPremiumTheme = tData.gemCost === -1;
                 return (
-                  <TouchableOpacity
+                  <TouchableOpacity accessibilityRole="button"
                     key={tData.id}
                     style={[styles.themeCard, { backgroundColor: c.card, borderColor: c.border }, isActive && { borderColor: c.primaryLight }]}
                     onPress={() => handleThemeSelect(tData.id, tData.gemCost)}
@@ -236,7 +236,7 @@ export default function SettingsScreen() {
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: c.text }]}>🔑 {t.supportHeader}</Text>
             <WidgetCard theme={theme} variant="glass" style={{ padding: 0, overflow: 'hidden' }}>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={styles.accountRow}
                 onPress={handleRestorePurchases}
               >

@@ -265,7 +265,7 @@ export function GamePlayScreen({
       <AuraBackground theme={theme} />
       <View style={styles.container}>
       <View style={styles.topBar}>
-        <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={handleMenu}>
+        <TouchableOpacity accessibilityRole="button" style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={handleMenu}>
           <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← {language === 'en' ? 'Menu' : 'Menü'}</Text>
         </TouchableOpacity>
         <View style={styles.modePills}>
@@ -273,7 +273,7 @@ export function GamePlayScreen({
           <Text style={[styles.pill, { backgroundColor: theme.colors.card, color: theme.colors.textSecondary, borderColor: theme.colors.border }]}>{categoryInfo.emoji} {categoryInfo.label}</Text>
           <Text style={[styles.pill, { backgroundColor: theme.colors.card, color: diffInfo.color, borderColor: theme.colors.border }]}>{diffInfo.emoji} {diffInfo.label}</Text>
         </View>
-        <TouchableOpacity style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]} onPress={() => setShowStore(true)}>
+        <TouchableOpacity accessibilityRole="button" style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]} onPress={() => setShowStore(true)}>
           <Text style={[styles.gemPillText, { color: theme.colors.gem }]}>💎 {gems}</Text>
         </TouchableOpacity>
       </View>
@@ -305,7 +305,7 @@ export function GamePlayScreen({
 
       {game.gameStatus === 'playing' && (
         <View style={styles.boosterRow}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[styles.boosterBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={() => setShowHint(true)}
           >
@@ -315,7 +315,7 @@ export function GamePlayScreen({
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[styles.boosterBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
             onPress={handleSweeperPress}
           >

@@ -40,7 +40,7 @@ export function CloudSyncStatus({
             {lastSyncDate}
           </Text>
         ) : null}
-        <TouchableOpacity style={styles.unlinkBtn} onPress={onUnlink}>
+        <TouchableOpacity accessibilityRole="button" style={styles.unlinkBtn} onPress={onUnlink}>
           <Text style={[styles.unlinkText, { color: theme.colors.error }]}>
             {language === 'en' ? 'Unlink Account' : 'Hesap Bağlantısını Kes'}
           </Text>
@@ -48,7 +48,7 @@ export function CloudSyncStatus({
       </View>
 
       <View style={styles.actionsGrid}>
-        <TouchableOpacity style={styles.portalBtn} onPress={onSync} disabled={isSyncing}>
+        <TouchableOpacity accessibilityRole="button" style={styles.portalBtn} onPress={onSync} disabled={isSyncing}>
           <LinearGradient colors={[theme.colors.correct, theme.colors.correct + 'bb']} style={styles.btnGrad}>
             <Text style={styles.btnText}>
               {isSyncing ? '⏳' : '📤'} {language === 'en' ? 'Backup Data' : 'Veri Yedekle'}
@@ -56,7 +56,7 @@ export function CloudSyncStatus({
           </LinearGradient>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.portalBtn} onPress={onRestore} disabled={isSyncing}>
+        <TouchableOpacity accessibilityRole="button" style={styles.portalBtn} onPress={onRestore} disabled={isSyncing}>
           <LinearGradient colors={[theme.colors.accent, theme.colors.accent + 'bb']} style={styles.btnGrad}>
             <Text style={[styles.btnText, { color: '#000' }]}>
               🔄 {language === 'en' ? 'Restore Data' : 'Geri Yükle'}
