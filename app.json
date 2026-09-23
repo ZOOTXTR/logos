@@ -73,7 +73,8 @@
           "android": {}
         }
       ],
-      "./plugins/withAndroidXCore.js"
+      "./plugins/withAndroidXCore.js",
+      "react-native-iap"
     ],
     "experiments": {
       "typedRoutes": true
