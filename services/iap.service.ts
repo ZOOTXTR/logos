@@ -35,7 +35,7 @@ export async function fetchProducts(): Promise<RNIap.Product[]> {
   if (!connectionEstablished || Platform.OS === 'web') return [];
   try {
     const gemIds = GEM_PACKAGES.map(p => p.id);
-    const products = await RNIap.fetchProducts({ skus: gemIds, type: 'in-app' });
+    const products = await RNIap.getProducts({ skus: gemIds });
     return products as RNIap.Product[];
   } catch (e) {
     console.warn('[IAP] fetchProducts failed:', e);
@@ -54,7 +54,7 @@ export async function purchaseProduct(productId: string): Promise<string | null>
     return null;
   }
   try {
-    const purchase = await RNIap.requestPurchase({ type: 'in-app', request: { apple: { sku: productId }, google: { skus: [productId] } } });
+    const purchase = await RNIap.requestPurchase({ sku: productId });
     if (purchase && (purchase as any).transactionId) {
       try {
         await RNIap.finishTransaction({ purchase: purchase as any, isConsumable: productId !== PRODUCT_IDS.PREMIUM_MONTHLY });

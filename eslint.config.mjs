@@ -52,4 +52,13 @@ export default tseslint.config(
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
+  {
+    files: ['**/*.js', '**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs' },
+    rules: {
+      'no-undef': 'off',
+      'no-console': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
 );

@@ -3,8 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initConnection,
   endConnection,
-  fetchProducts,
+  getProducts,
+  getSubscriptions,
   requestPurchase,
+  requestSubscription,
   finishTransaction,
   purchaseUpdatedListener,
   purchaseErrorListener,
@@ -58,8 +60,8 @@ export function useIAPManager({
         await initConnection();
         const gemIds = GEM_PACKAGES.map(p => p.id);
         const [productResults, subscriptionResults] = await Promise.all([
-          fetchProducts({ skus: gemIds, type: 'in-app' }),
-          fetchProducts({ skus: [PRODUCT_IDS.PREMIUM_MONTHLY], type: 'subs' }),
+          getProducts({ skus: gemIds }),
+          getSubscriptions({ skus: [PRODUCT_IDS.PREMIUM_MONTHLY] }),
         ]);
         if (!cancelled) {
           setPrices(
@@ -147,7 +149,7 @@ export function useIAPManager({
     }
     setPurchasing(pkg.id);
     try {
-      await requestPurchase({ type: 'in-app', request: { apple: { sku: pkg.id }, google: { skus: [pkg.id] } } });
+      await requestPurchase({ sku: pkg.id });
     } catch {
       showAlertRef.current(
         '❌',
@@ -165,7 +167,7 @@ export function useIAPManager({
     }
     setPurchasing('premium');
     try {
-      await requestPurchase({ type: 'subs', request: { apple: { sku: PRODUCT_IDS.PREMIUM_MONTHLY }, google: { skus: [PRODUCT_IDS.PREMIUM_MONTHLY] } } });
+      await requestSubscription({ sku: PRODUCT_IDS.PREMIUM_MONTHLY });
     } catch {
       showAlertRef.current(
         '❌',
