@@ -14,7 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
           node-version: 22
           cache: 'npm'
       - run: npm ci --legacy-peer-deps
@@ -27,14 +26,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
           node-version: 22
           cache: 'npm'
       - run: npm ci --legacy-peer-deps
       - run: npm run test:ci
       - uses: actions/upload-artifact@v4
         if: always()
-        with:
           name: coverage
           path: coverage/
 
@@ -44,14 +41,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
           node-version: 22
           cache: 'npm'
       - uses: actions/setup-java@v4
-        with:
           distribution: 'temurin'
           java-version: '17'
-        with:
       - run: npm ci --legacy-peer-deps
       - run: npx expo prebuild --platform android --clean
       - name: Build Release AAB
@@ -59,6 +53,5 @@ jobs:
           cd android
           ./gradlew bundleRelease
       - uses: actions/upload-artifact@v4
-        with:
           name: app-release.aab
           path: android/app/build/outputs/bundle/release/app-release.aab
