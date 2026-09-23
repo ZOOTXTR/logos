@@ -53,8 +53,7 @@ jobs:
           java-version: '17'
       - uses: android-actions/setup-android@v3
         with:
-          cmdline-tools-version: '12.0'
-          accept-android-sdk-licenses: true
+                    accept-android-sdk-licenses: true
       - run: npm ci --legacy-peer-deps
       - run: npx expo prebuild --platform android --clean
       - name: Build Release AAB
