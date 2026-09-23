@@ -2,6 +2,7 @@ import { signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPa
 import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirebaseAuth, getFirebaseDb, FIRESTORE_COLLECTIONS } from '../config/firebase';
 import { storageGet, storageSet, storageRemove } from './storage.service';
+import { setUserContext, clearUserContext } from './error-reporting.service';
 
 const AUTH_UID_KEY = 'gq_auth_uid';
 
@@ -17,6 +18,8 @@ export function onAuthStateChanged(callback: (user: User | null) => void) {
 
 function notifyListeners(user: User | null) {
   currentUser = user;
+  // Hata raporlamada yalnızca anonim uid bağlanır (PII gönderilmez).
+  if (user) setUserContext(user.uid); else clearUserContext();
   authListeners.forEach(l => l(user));
 }
 
