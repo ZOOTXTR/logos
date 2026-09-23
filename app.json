@@ -71,7 +71,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "./plugins/withAndroidXCore.js"
     ],
     "experiments": {
       "typedRoutes": true
