@@ -47,8 +47,10 @@ jobs:
     #   ANDROID_KEYSTORE_PASSWORD     -> keystore sifresi
     #   ANDROID_KEY_ALIAS             -> anahtar alias (orn. logos-key-alias)
     #   ANDROID_KEY_PASSWORD          -> anahtar sifresi
+    #   PLAY_SERVICE_ACCOUNT_JSON     -> Play yayin servis hesabi JSON (release to testing)
     # R8/ProGuard + kaynak kucultme app.json > expo-build-properties ile aciktir;
     # prebuild sonrasi mapping.txt uretilir ve artifact olarak yuklenir.
+    # Surum notlari release-notes/<locale> dosyalarindan okunur (orn. release-notes/tr-TR).
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -113,14 +115,13 @@ jobs:
             android/app/build/outputs/mapping/release/configuration.txt
           if-no-files-found: warn
 
-      # OPSIYONEL: AAB + kod gosterme dosyasini Play'e otomatik yukle.
-      # Kullanmak icin bir Google Play servis hesabi JSON'unu PLAY_SERVICE_ACCOUNT_JSON
-      # secret'i olarak ekleyip asagidaki blogun yorumunu kaldirin.
-      # - name: Upload to Google Play (internal track)
-      #   uses: r0adkll/upload-google-play@v1
-      #   with:
-      #     serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-      #     packageName: com.zovtex.logos
-      #     releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
-      #     mappingFile: android/app/build/outputs/mapping/release/mapping.txt
-      #     track: internal
+      - name: Upload to Google Play (closed testing / alpha)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.zovtex.logos
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          mappingFile: android/app/build/outputs/mapping/release/mapping.txt
+          track: alpha
+          status: completed
+          whatsNewDirectory: release-notes
