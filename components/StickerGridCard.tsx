@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { Sticker } from '../constants/stickers';
 

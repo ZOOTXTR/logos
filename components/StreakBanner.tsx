@@ -1,15 +1,19 @@
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, BORDER_RADIUS, SPACING } from '../constants/theme';
+import { TRANSLATIONS, Language } from '../constants/translations';
 
 interface StreakBannerProps {
   streak: number;
   bonusGems?: number;
+  language?: Language;
 }
 
-export function StreakBanner({ streak, bonusGems }: StreakBannerProps) {
+export function StreakBanner({ streak, bonusGems, language = 'tr' }: StreakBannerProps) {
   if (streak < 2) return null;
+  const t = TRANSLATIONS[language];
 
   const getStreakColor = (): [string, string] => {
     if (streak >= 30) return ['#7C3AED', '#4F46E5'];
@@ -19,10 +23,10 @@ export function StreakBanner({ streak, bonusGems }: StreakBannerProps) {
   };
 
   const getStreakLabel = () => {
-    if (streak >= 30) return '👑 Efsane Seri!';
-    if (streak >= 7)  return '🌋 Yakıcı Seri!';
-    if (streak >= 3)  return '🔥 Harika Seri!';
-    return '🔥 Seri Devam Ediyor!';
+    if (streak >= 30) return t.streakLegend;
+    if (streak >= 7)  return t.streakBlazing;
+    if (streak >= 3)  return t.streakGreat;
+    return t.streakAlive;
   };
 
   return (
@@ -33,8 +37,8 @@ export function StreakBanner({ streak, bonusGems }: StreakBannerProps) {
       end={{ x: 1, y: 0 }}
     >
       <Text style={styles.label}>{getStreakLabel()}</Text>
-      <Text style={styles.count}>{streak} GÜN</Text>
-      {bonusGems && bonusGems > 0 && (
+      <Text style={styles.count}>{streak} {t.daysShort}</Text>
+      {(bonusGems ?? 0) > 0 && (
         <Text style={styles.bonus}>+{bonusGems} 💎 Bonus!</Text>
       )}
     </LinearGradient>

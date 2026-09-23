@@ -5,7 +5,7 @@
  */
 
 export const toTurkishUpper = (s: string): string =>
-  s.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR');
+  s.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase();
 
 export const toTurkishLower = (s: string): string =>
   s.replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr-TR');

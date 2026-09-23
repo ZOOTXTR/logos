@@ -1,30 +1,43 @@
-import * as Sentry from '@sentry/react-native';
+import crashlytics from '@react-native-firebase/crashlytics';
+const c = crashlytics as any;
 
-const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN ?? '';
+function safe(fn: () => void) {
+  try {
+    fn();
+  } catch {
+    // Crashlytics native modülü yoksa (web/Expo Go) sessizce yoksay
+  }
+}
+
+function toStringMap(context?: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (context) {
+    for (const [k, v] of Object.entries(context)) {
+      if (v === undefined || v === null) continue;
+      out[k] = typeof v === 'string' ? v : JSON.stringify(v);
+    }
+  }
+  return out;
+}
 
 export function initErrorReporting() {
-  if (!SENTRY_DSN) return;
-  Sentry.init({
-    dsn: SENTRY_DSN,
-    environment: process.env.EXPO_PUBLIC_ENV ?? 'development',
-    tracesSampleRate: 0.2,
-  });
+  safe(() => { c().log('[ErrorReporting] Crashlytics initialized'); });
 }
 
 export function captureError(error: Error, context?: Record<string, unknown>) {
-  if (!SENTRY_DSN) {
-    console.warn('[ErrorReporting]', error.message, context);
-    return;
-  }
-  Sentry.captureException(error, { extra: context });
+  console.warn('[ErrorReporting]', error.message, context);
+  safe(() => {
+    const attrs = toStringMap(context);
+    if (Object.keys(attrs).length > 0) c().setAttributes(attrs);
+    c().recordError(error);
+  });
 }
 
-export function setUserContext(uid: string, email?: string) {
-  if (!SENTRY_DSN) return;
-  Sentry.setUser({ id: uid, email });
+// PII (e-posta) GÖNDERİLMEZ; yalnızca anonim uid gönderilir (KVKK/GDPR).
+export function setUserContext(uid: string) {
+  safe(() => { c().setUserId(uid); });
 }
 
 export function clearUserContext() {
-  if (!SENTRY_DSN) return;
-  Sentry.setUser(null);
+  safe(() => { c().setUserId(''); });
 }

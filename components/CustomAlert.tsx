@@ -1,4 +1,5 @@
-import { Modal, View, Text, StyleSheet, Dimensions } from 'react-native';
+import { Modal, View, StyleSheet, Dimensions } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';

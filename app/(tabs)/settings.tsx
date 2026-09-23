@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView,
-  TouchableOpacity, StatusBar, Alert, Platform,
-} from 'react-native';
+import { useRouter } from 'expo-router';
+import { AuraBackground } from '../../components/design/AuraBackground';
+import { WidgetCard } from '../../components/design/WidgetCard';
+import { View, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert, Platform } from 'react-native';
+import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
-import { storageGet } from '../../services/storage.service';
+import { storageGet, storageSet } from '../../services/storage.service';
+import { restorePurchases } from '../../services/iap.service';
+import { deleteAccount } from '../../services/auth.service';
 import { THEMES } from '../../constants/themes';
 import { useTheme } from '../../hooks/useTheme';
 import { useProgress } from '../../hooks/useProgress';
@@ -18,8 +21,10 @@ import { PrivacyPolicyModal } from '../../components/PrivacyPolicyModal';
 import { AboutModal } from '../../components/AboutModal';
 import { CustomAlert } from '../../components/CustomAlert';
 import { InviteModal } from '../../components/InviteModal';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const {
     theme, setTheme, unlockedThemes, unlockTheme, unlockAndSetTheme,
     colorBlind, setColorBlind,
@@ -43,7 +48,25 @@ export default function SettingsScreen() {
 
   const handleToggleMusic = async (val: boolean) => {
     setMusicEnabledState(val);
+    await storageSet('gq_music_enabled', String(val));
     await audioService.toggleBgMusic(val);
+  };
+
+  const handleRestorePurchases = async () => {
+    try {
+      const restored = await restorePurchases();
+      Alert.alert(
+        language === 'en' ? 'Restore Purchases' : 'Satın Alımları Geri Yükle',
+        restored.length
+          ? (language === 'en' ? 'Your previous purchases have been restored.' : 'Geçmiş satın alımlarınız geri yüklendi.')
+          : (language === 'en' ? 'No purchases to restore.' : 'Geri yüklenecek satın alma bulunamadı.')
+      );
+    } catch {
+      Alert.alert(
+        language === 'en' ? 'Restore Failed' : 'Geri Yükleme Başarısız',
+        language === 'en' ? 'Could not restore purchases.' : 'Satın alımlar geri yüklenemedi.'
+      );
+    }
   };
 
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
@@ -74,7 +97,7 @@ export default function SettingsScreen() {
       title,
       message,
       buttons: buttons || [{
-        text: 'Tamam',
+        text: language === 'en' ? 'OK' : 'Tamam',
         onPress: () => setCustomAlert(prev => ({ ...prev, visible: false }))
       }]
     });
@@ -137,17 +160,18 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={c.background} />
-      <LinearGradient colors={[c.background, c.surface]} style={styles.container}>
+      <AuraBackground theme={theme} />
+      <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={[styles.title, { color: c.text }]}>⚙️ {t.settingsTitle}</Text>
 
-          <View style={[styles.gemBar, { backgroundColor: c.card, borderColor: c.gem }]}>
+          <WidgetCard theme={theme} variant="glass" style={{ marginBottom: SPACING.lg, padding: SPACING.md, alignItems: 'center' }}>
             <Text style={[styles.gemBarText, { color: c.gem }]}>💎 {progress.gems} {t.gemBalance}</Text>
-          </View>
+          </WidgetCard>
 
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: c.text }]}>🔧 {t.prefHeader}</Text>
-            <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+            <WidgetCard theme={theme} variant="glass" style={{ padding: 0, overflow: 'hidden' }}>
               <SettingToggle label={t.soundEffects} emoji="🔊" value={soundEnabled} onToggle={setSoundEnabled} colors={c} language={language} />
               <View style={[styles.divider, { backgroundColor: c.border }]} />
               <SettingToggle label={language === 'en' ? 'Background Music' : 'Arka Plan Müzikleri'} emoji="🎵" value={musicEnabled} onToggle={handleToggleMusic} colors={c} language={language} />
@@ -175,7 +199,7 @@ export default function SettingsScreen() {
                   {language === 'tr' ? 'TÜRKÇE 🇹🇷' : 'ENGLISH 🇺🇸'}
                 </Text>
               </TouchableOpacity>
-            </View>
+            </WidgetCard>
           </View>
 
           <View style={styles.section}>
@@ -197,7 +221,7 @@ export default function SettingsScreen() {
                       {!isUnlocked && <Text style={styles.lockIcon}>{isPremiumTheme ? '👑' : '🔒'}</Text>}
                     </LinearGradient>
                     <Text style={styles.themeEmoji}>{tData.emoji}</Text>
-                    <Text style={[styles.themeName, { color: c.text }]}>{tData.name}</Text>
+                    <Text style={[styles.themeName, { color: c.text }]}>{language === 'en' ? (tData.nameEn ?? tData.name) : tData.name}</Text>
                     {!isUnlocked && (
                       <Text style={styles.themePrice}>
                         {isPremiumTheme ? 'Premium' : `${tData.gemCost} 💎`}
@@ -215,41 +239,45 @@ export default function SettingsScreen() {
 
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: c.text }]}>🔑 {t.supportHeader}</Text>
-            <View style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}>
+            <WidgetCard theme={theme} variant="glass" style={{ padding: 0, overflow: 'hidden' }}>
               <TouchableOpacity
                 style={styles.accountRow}
-                onPress={() => Alert.alert(
-                  language === 'en' ? 'Restore Purchases' : 'Satın Alımları Geri Yükle',
-                  language === 'en' ? 'Your purchases have been successfully restored!' : 'Geçmiş satın alımlarınız kontrol edildi ve başarıyla geri yüklendi!'
-                )}
+                onPress={handleRestorePurchases}
               >
                 <Text style={styles.accountEmoji}>🔄</Text>
                 <Text style={[styles.accountLabel, { color: c.text }]}>{t.restorePurchases}</Text>
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
               </TouchableOpacity>
               <View style={[styles.divider, { backgroundColor: c.border }]} />
-              <TouchableOpacity style={styles.accountRow}
+              <TouchableOpacity accessibilityRole="button" style={styles.accountRow}
                 onPress={() => setPrivacyModalVisible(true)}>
                 <Text style={styles.accountEmoji}>🔒</Text>
                 <Text style={[styles.accountLabel, { color: c.text }]}>{t.privacyPolicy}</Text>
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
               </TouchableOpacity>
               <View style={[styles.divider, { backgroundColor: c.border }]} />
-              <TouchableOpacity style={styles.accountRow}
+              <TouchableOpacity accessibilityRole="button" style={styles.accountRow}
                 onPress={() => setFeedbackModalVisible(true)}>
                 <Text style={styles.accountEmoji}>📣</Text>
                 <Text style={[styles.accountLabel, { color: c.text }]}>{t.sendFeedback}</Text>
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
               </TouchableOpacity>
               <View style={[styles.divider, { backgroundColor: c.border }]} />
-              <TouchableOpacity style={styles.accountRow}
+              <TouchableOpacity accessibilityRole="button" style={styles.accountRow}
                 onPress={() => setAboutModalVisible(true)}>
                 <Text style={styles.accountEmoji}>ℹ️</Text>
                 <Text style={[styles.accountLabel, { color: c.text }]}>{t.aboutApp}</Text>
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
               </TouchableOpacity>
               <View style={[styles.divider, { backgroundColor: c.border }]} />
-              <TouchableOpacity style={styles.accountRow}
+              <TouchableOpacity accessibilityRole="button" style={styles.accountRow}
+                onPress={() => router.push('/tutorial' as any)}>
+                <Text style={styles.accountEmoji}>🎓</Text>
+                <Text style={[styles.accountLabel, { color: c.text }]}>{language === 'en' ? 'Play Tutorial' : 'Eğitimi Oyna'}</Text>
+                <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
+              </TouchableOpacity>
+              <View style={[styles.divider, { backgroundColor: c.border }]} />
+              <TouchableOpacity accessibilityRole="button" style={styles.accountRow}
                 onPress={() => {
                   Alert.alert(
                     language === 'en' ? 'Delete Account' : 'Hesabı Sil',
@@ -262,9 +290,8 @@ export default function SettingsScreen() {
                         text: language === 'en' ? 'Delete' : 'Sil', 
                         style: 'destructive',
                         onPress: async () => {
-                          const { signOut } = require('../../services/auth.service');
                           const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-                          await signOut();
+                          await deleteAccount();
                           await AsyncStorage.clear();
                           Alert.alert('✅', language === 'en' ? 'Account deleted.' : 'Hesabınız silindi.');
                         }
@@ -277,19 +304,19 @@ export default function SettingsScreen() {
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
               </TouchableOpacity>
               <View style={[styles.divider, { backgroundColor: c.border }]} />
-              <TouchableOpacity style={styles.accountRow} onPress={() => setShowInvite(true)}>
+              <TouchableOpacity accessibilityRole="button" style={styles.accountRow} onPress={() => setShowInvite(true)}>
                 <Text style={styles.accountEmoji}>🎉</Text>
                 <Text style={[styles.accountLabel, { color: c.text }]}>
                   {language === 'en' ? 'Invite Friends' : 'Arkadaş Davet Et'}
                 </Text>
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
               </TouchableOpacity>
-            </View>
+            </WidgetCard>
           </View>
 
           <View style={{ height: SPACING.xl }} />
         </ScrollView>
-      </LinearGradient>
+      </View>
 
       <PrivacyPolicyModal
         visible={privacyModalVisible}
@@ -325,7 +352,7 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { flex: 1, paddingHorizontal: SPACING.md },
+  container: { flex: 1, paddingHorizontal: SPACING.md, maxWidth: 600, alignSelf: 'center', width: '100%' },
   title: { fontSize: FONTS.size.xxl, fontWeight: '900', paddingVertical: SPACING.md },
   gemBar: { borderRadius: BORDER_RADIUS.md, padding: SPACING.sm, marginBottom: SPACING.lg, borderWidth: 1, alignItems: 'center' },
   gemBarText: { fontWeight: '700', fontSize: FONTS.size.md },
@@ -336,15 +363,15 @@ const styles = StyleSheet.create({
   settingEmoji: { fontSize: 20, width: 28 },
   settingLabel: { flex: 1, fontSize: FONTS.size.md, fontWeight: '500' },
   divider: { height: 1, marginHorizontal: SPACING.md },
-  themeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
-  themeCard: { width: '31%', borderRadius: BORDER_RADIUS.md, overflow: 'hidden', borderWidth: 2, alignItems: 'center', paddingBottom: SPACING.sm },
+  themeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, justifyContent: 'center' },
+  themeCard: { width: 100, flexGrow: 1, borderRadius: BORDER_RADIUS.md, overflow: 'hidden', borderWidth: 2, alignItems: 'center', paddingBottom: SPACING.sm },
   themeCardActive: { borderColor: COLORS.primaryLight },
   themePreview: { width: '100%', height: 60, alignItems: 'center', justifyContent: 'center' },
   activeCheck: { fontSize: 24, color: '#FFF', fontWeight: '900' },
   lockIcon: { fontSize: 24 },
   themeEmoji: { fontSize: 20, marginTop: 6 },
   themeName: { fontSize: FONTS.size.xs, fontWeight: '700', marginTop: 2 },
-  themePrice: { color: COLORS.gem, fontSize: 10, fontWeight: '700', marginTop: 2 },
+  themePrice: { color: COLORS.gem, fontSize: 12, fontWeight: '700', marginTop: 2 },
   themeFree: { fontSize: 10, marginTop: 2 },
   themeActive: { fontSize: 10, fontWeight: '800', marginTop: 2 },
   accountRow: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md, gap: SPACING.sm },

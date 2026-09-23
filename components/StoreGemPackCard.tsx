@@ -1,11 +1,6 @@
 ﻿import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
+import { View, TouchableOpacity, ActivityIndicator, StyleSheet,  } from 'react-native';
+import { Text } from './CustomText';
 import { GemPackage } from '../constants/products';
 import { Theme } from '../constants/themes';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -43,7 +38,7 @@ export function StoreGemPackCard({
       {pkg.popular && (
         <View style={styles.popularBadge}>
           <Text style={styles.popularText}>
-            {language === 'en' ? 'BEST VALUE' : 'EN POPÃœLER'}
+            {language === 'en' ? 'BEST VALUE' : 'EN POPÜLER'}
           </Text>
         </View>
       )}

@@ -5,11 +5,10 @@ import { useGame } from '../../hooks/useGame';
 import { storageGet } from '../../services/storage.service';
 import { useProgress } from '../../hooks/useProgress';
 import { useTheme } from '../../hooks/useTheme';
-import { hasDoneDaily, markDailyDone, addScore } from '../../services/storage.service';
+import { hasDoneDaily, markDailyDone } from '../../services/storage.service';
 import { XP_REWARDS } from '../../constants/levels';
 import { GameMode, Category, Difficulty } from '../../constants/words';
 import { audioService } from '../../services/audio.service';
-import { submitScore } from '../../services/leaderboard.service';
 import { GameMenuScreen } from '../../screens/GameMenuScreen';
 import { GamePlayScreen } from '../../screens/GamePlayScreen';
 import { LoadingView } from '../../components/LoadingView';
@@ -47,6 +46,12 @@ export default function GameScreen() {
   }, [language]);
 
   const handleGameEnd = useCallback(async (won: boolean) => {
+    const isDaily = gameConfig.mode === 'daily';
+    if (isDaily) {
+      await markDailyDone();
+      setDailyDone(true);
+    }
+
     if (!won) {
       audioService.play('loss'); audioService.triggerHaptic('warning');
       await progress.recordLoss(); return;
@@ -58,7 +63,6 @@ export default function GameScreen() {
     const isPerfect = gc === 1;
     const isSpeed = gameConfig.mode === 'speed';
     const isExpert = gameConfig.difficulty === 'expert';
-    const isDaily = gameConfig.mode === 'daily';
 
     let xp = XP_REWARDS.WIN_BASE;
     xp += XP_REWARDS.DIFFICULTY_BONUS[gameConfig.difficulty];
@@ -66,27 +70,12 @@ export default function GameScreen() {
     if (isSpeed) xp *= XP_REWARDS.SPEED_MODE_MULTIPLIER;
     if (isDaily) xp += XP_REWARDS.DAILY_CHALLENGE;
 
-    await progress.earnXP(xp);
-    await progress.addGems(isSpeed ? 30 : isDaily ? 100 : 10);
-
-    if (isDaily) { await markDailyDone(); setDailyDone(true); }
-
-    await addScore({
-      date: new Date().toISOString(), mode: gameConfig.mode,
-      category: gameConfig.category, guesses: gc,
-      timeSeconds: isSpeed ? (90 - game.timeLeft) : game.elapsedSeconds, xpEarned: xp,
-    });
-
-    await submitScore({
-      date: new Date().toISOString(), mode: gameConfig.mode,
-      category: gameConfig.category, guesses: gc,
-      timeSeconds: isSpeed ? (90 - game.timeLeft) : game.elapsedSeconds, xpEarned: xp,
-    });
-
+    // Tek yazıcı: XP, gem, istatistik ve skor progress.recordWin içinde işlenir
     await progress.recordWin({
       guesses: gc, mode: gameConfig.mode, difficulty: gameConfig.difficulty,
       category: gameConfig.category, isSpeed, isExpert, isPerfect, isDaily,
       elapsedSeconds: game.elapsedSeconds, xpEarned: xp,
+      gemsEarned: isSpeed ? 30 : isDaily ? 100 : 10,
     });
   }, [game, gameConfig, progress]);
 

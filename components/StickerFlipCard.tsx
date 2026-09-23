@@ -1,5 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

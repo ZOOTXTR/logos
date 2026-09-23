@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -8,7 +8,6 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const NUM_PARTICLES = 40;
 
 const COLORS_POOL = [
@@ -21,6 +20,7 @@ interface ParticleProps {
 }
 
 function ConfettiParticle({ index }: ParticleProps) {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
   // Random horizontal starting position
   const startX = Math.random() * SCREEN_WIDTH;
   

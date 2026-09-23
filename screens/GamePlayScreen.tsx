@@ -1,7 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import {
-  View, Text, TouchableOpacity, StyleSheet, Platform,
-} from 'react-native';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { View, TouchableOpacity, StyleSheet, Platform,  } from 'react-native';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { GameMode, Category, Difficulty, GAME_MODE_INFO, CATEGORY_INFO, DIFFICULTY_INFO } from '../constants/words';
@@ -9,6 +8,7 @@ import { HINT_GEM_COST } from '../constants/products';
 import { GameBoard } from '../components/GameBoard';
 import { Keyboard } from '../components/Keyboard';
 import { HintModal } from '../components/HintModal';
+import { AuraBackground } from '../components/design/AuraBackground';
 import { HelpModal } from '../components/HelpModal';
 import { StoreModal } from '../components/StoreModal';
 import { Timer } from '../components/Timer';
@@ -22,8 +22,10 @@ import { useCustomAlert } from '../hooks/useCustomAlert';
 import { shareScoreGrid } from '../services/share.service';
 import { audioService } from '../services/audio.service';
 
+import { Theme } from '../constants/themes';
+
 interface GamePlayScreenProps {
-  theme: any;
+  theme: Theme;
   language: string;
   colorBlind: boolean;
   game: {
@@ -41,7 +43,7 @@ interface GamePlayScreenProps {
     deleteLetter: () => void;
     submitGuess: () => 'short' | 'not_valid' | 'not_ready' | 'submitted';
     resetGame: (d?: Difficulty, m?: GameMode, c?: Category, l?: 'tr' | 'en') => void;
-    useHint: () => string | null;
+    useHint: (lang?: string) => string | null;
     useSweeper: () => string[];
     addTime: (s: number) => void;
   };
@@ -92,21 +94,30 @@ export function GamePlayScreen({
   const categoryInfo = CATEGORY_INFO[gameConfig.category];
   const diffInfo = DIFFICULTY_INFO[gameConfig.difficulty];
 
+  // game/gameConfig her render'da yeni kimlik alır; handler'ları ref üzerinden
+  // okuyup sabit tutmak, React.memo(Keyboard) optimizasyonunun çalışmasını sağlar.
+  const gameRef = useRef(game);
+  gameRef.current = game;
+  const gameConfigRef = useRef(gameConfig);
+  gameConfigRef.current = gameConfig;
+
   const handleKey = useCallback((key: string) => {
-    if (game.gameStatus !== 'playing') return;
+    const g = gameRef.current;
+    if (g.gameStatus !== 'playing') return;
     audioService.triggerHaptic('light');
-    game.addLetter(key);
-  }, [game]);
+    g.addLetter(key);
+  }, []);
 
   const handleDelete = useCallback(() => {
     audioService.triggerHaptic('light');
-    game.deleteLetter();
-  }, [game]);
+    gameRef.current.deleteLetter();
+  }, []);
 
   const handleSubmit = useCallback(() => {
+    const g = gameRef.current;
     audioService.triggerHaptic('medium');
-    const result = game.submitGuess();
-    const wordLen = game.targetWord.length;
+    const result = g.submitGuess();
+    const wordLen = g.targetWord.length;
 
     if (result === 'short') {
       audioService.triggerHaptic('warning');
@@ -126,10 +137,10 @@ export function GamePlayScreen({
         language === 'en' ? 'Loading' : 'Yükleniyor',
         language === 'en' ? 'Dictionary is loading, please wait...' : 'Sözlük yükleniyor, lütfen bekleyin...'
       );
-    } else if (gameConfig.mode === 'speed' && game.gameStatus === 'playing') {
-      game.addTime(15);
+    } else if (gameConfigRef.current.mode === 'speed' && g.gameStatus === 'playing') {
+      g.addTime(15);
     }
-  }, [game, gameConfig.mode, language, showCustomAlert]);
+  }, [language, showCustomAlert]);
 
   const handleShare = async () => {
     audioService.triggerHaptic('light');
@@ -146,22 +157,28 @@ export function GamePlayScreen({
     }
   };
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
+
   const handleWatchAd = async () => {
     await new Promise(r => setTimeout(r, 1500));
-    const hint = game.useHint();
-    showCustomAlert('💡 İpucu', hint ?? (language === 'en' ? 'All letters found!' : 'Tüm harfler zaten bulundu!'));
+    if (!isMounted.current) return;
+    const hint = game.useHint(language);
+    showCustomAlert((language === 'en' ? '💡 Hint' : '💡 İpucu'), hint ?? (language === 'en' ? 'All letters found!' : 'Tüm harfler zaten bulundu!'));
   };
 
   const handleSpendGems = async (): Promise<boolean> => {
     if (premium) {
-      const hint = game.useHint();
-      showCustomAlert('💡 İpucu', hint ?? (language === 'en' ? 'All letters found!' : 'Tüm harfler zaten bulundu!'));
+      const hint = game.useHint(language);
+      showCustomAlert((language === 'en' ? '💡 Hint' : '💡 İpucu'), hint ?? (language === 'en' ? 'All letters found!' : 'Tüm harfler zaten bulundu!'));
       return true;
     }
     const ok = await onSpendGems(HINT_GEM_COST);
     if (ok) {
-      const hint = game.useHint();
-      showCustomAlert('💡 İpucu', hint ?? (language === 'en' ? 'All letters found!' : 'Tüm harfler zaten bulundu!'));
+      const hint = game.useHint(language);
+      showCustomAlert((language === 'en' ? '💡 Hint' : '💡 İpucu'), hint ?? (language === 'en' ? 'All letters found!' : 'Tüm harfler zaten bulundu!'));
     }
     return ok;
   };
@@ -229,7 +246,7 @@ export function GamePlayScreen({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (game.gameStatus !== 'playing') return;
-      const key = e.key.toLocaleUpperCase('tr-TR');
+      const key = e.key.toUpperCase();
       if (key === 'ENTER') {
         handleSubmit();
       } else if (key === 'BACKSPACE') {
@@ -244,7 +261,9 @@ export function GamePlayScreen({
   }, [game.gameStatus, handleSubmit, handleDelete, handleKey]);
 
   return (
-    <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <AuraBackground theme={theme} />
+      <View style={styles.container}>
       <View style={styles.topBar}>
         <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={handleMenu}>
           <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← {language === 'en' ? 'Menu' : 'Menü'}</Text>
@@ -260,7 +279,7 @@ export function GamePlayScreen({
       </View>
 
       {gameConfig.mode === 'speed' && game.gameStatus === 'playing' && (
-        <Timer timeLeft={game.timeLeft} totalTime={90} />
+        <Timer timeLeft={game.timeLeft} totalTime={90} language={language as 'tr' | 'en'} />
       )}
 
       {game.gameStatus !== 'playing' && (
@@ -327,6 +346,7 @@ export function GamePlayScreen({
         onWatchAd={handleWatchAd}
         onSpendGems={handleSpendGems}
         onGoToStore={() => { setShowHint(false); setShowStore(true); }}
+        language={language as 'tr' | 'en'}
       />
       <StoreModal
         visible={showStore}
@@ -348,6 +368,7 @@ export function GamePlayScreen({
       <AchievementToast
         achievement={newAchievement}
         onDismiss={onClearNewAchievement}
+        language={language as 'tr' | 'en'}
       />
       <Confetti active={showConfetti} />
       <GemShower active={showGemShower} onComplete={() => onShowGemShower(false)} />
@@ -364,7 +385,8 @@ export function GamePlayScreen({
         buttons={alert.buttons}
         onClose={hideAlert}
       />
-    </LinearGradient>
+      </View>
+    </View>
   );
 }
 
@@ -373,11 +395,23 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row', alignItems: 'center',
     justifyContent: 'space-between', paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginTop: Platform.OS === 'ios' ? 44 : 12,
+    marginBottom: SPACING.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   backBtn: {
-    backgroundColor: COLORS.card, paddingHorizontal: SPACING.sm,
+    backgroundColor: 'transparent', paddingHorizontal: SPACING.sm,
     paddingVertical: 6, borderRadius: BORDER_RADIUS.full,
-    borderWidth: 1, borderColor: COLORS.border,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
   },
   backText: { color: COLORS.textSecondary, fontSize: FONTS.size.sm, fontWeight: '600' },
   modePills: { flexDirection: 'row', gap: 4 },

@@ -51,7 +51,7 @@ export function SpinWheelCanvas({ theme, prizes, spinAnim }: SpinWheelCanvasProp
   return (
     <>
       <View style={styles.pointerContainer}>
-        <View style={[styles.pointer, { borderBottomColor: theme.colors.accent }]} />
+        <View style={[styles.pointer, { borderTopColor: theme.colors.accent }]} />
       </View>
       <View style={[styles.outerRing, { borderColor: theme.colors.primary + '55' }]}>
         <Animated.View
@@ -113,9 +113,14 @@ export function SpinWheelCanvas({ theme, prizes, spinAnim }: SpinWheelCanvasProp
 const styles = StyleSheet.create({
   pointerContainer: {
     position: 'absolute',
-    top: 6,
+    top: -4, // Adjust top to sit right on the edge of the wheel
     zIndex: 20,
     alignItems: 'center',
+    shadowColor: '#000', // Add a little shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    elevation: 5,
   },
   pointer: {
     width: 0,
@@ -124,7 +129,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderLeftWidth: 14,
     borderRightWidth: 14,
-    borderBottomWidth: 28,
+    borderTopWidth: 28, // Change to Top to point downwards
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
   },

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
+import { Text } from './CustomText';
 import { COLORS, FONTS, BORDER_RADIUS, SPACING } from '../constants/theme';
 import { LevelInfo, getXPProgress } from '../constants/levels';
 
@@ -15,7 +16,7 @@ export function LevelBar({ xp, levelInfo }: LevelBarProps) {
   useEffect(() => {
     Animated.spring(animWidth, {
       toValue: percent,
-      useNativeDriver: false,
+      useNativeDriver: true,
       tension: 40,
       friction: 8,
     }).start();
@@ -38,10 +39,7 @@ export function LevelBar({ xp, levelInfo }: LevelBarProps) {
             styles.bar,
             {
               backgroundColor: levelInfo.color,
-              width: animWidth.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
+              width: '100%',               transform: [{ scaleX: animWidth.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }) }],
             },
           ]}
         />

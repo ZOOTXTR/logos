@@ -174,8 +174,8 @@ describe('Empirical Stress & Boundary Tests — Keyboard.tsx', () => {
         <Keyboard onKey={jest.fn()} onDelete={jest.fn()} onSubmit={jest.fn()} revealedLetters={{}} language="tr" />
       );
 
-      expect(getByLabelText('Delete')).toBeTruthy();
-      expect(getByLabelText('Submit')).toBeTruthy();
+      expect(getByLabelText('Sil')).toBeTruthy();
+      expect(getByLabelText('Gönder')).toBeTruthy();
       expect(getByLabelText('Ğ')).toBeTruthy();
     });
   });

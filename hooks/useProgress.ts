@@ -4,8 +4,9 @@ import {
   isPremium, setPremium, getXP, addXP as addXPStorage,
   getStreak, updateStreak, getStats, updateStats, getUnlockedAchievements,
   getUnlockedCategories, unlockCategory as unlockCategoryStorage,
-  unlockAchievement,
+  unlockAchievement, addScore, ScoreEntry,
 } from '../services/storage.service';
+import { submitScore } from '../services/leaderboard.service';
 import { getLevelFromXP, LevelInfo } from '../constants/levels';
 import { getNewAchievements, Achievement, AchievementStats } from '../constants/achievements';
 
@@ -97,6 +98,7 @@ export function useProgress() {
     isDaily: boolean;
     elapsedSeconds: number;
     xpEarned: number;
+    gemsEarned?: number;
   }) => {
     try {
       const streakResult = await updateStreak(true);
@@ -105,6 +107,17 @@ export function useProgress() {
       if (streakResult.bonusGems > 0) {
         const freshGems = await getGems();
         setGems(freshGems);
+      }
+
+      // Tek yazıcı: taban XP ve gem burada bir kez eklenir
+      if (opts.xpEarned > 0) {
+        const nx = await addXPStorage(opts.xpEarned);
+        setXP(nx);
+        setLevelInfo(getLevelFromXP(nx));
+      }
+      if (opts.gemsEarned && opts.gemsEarned > 0) {
+        const ng = await addGemsStorage(opts.gemsEarned);
+        setGems(ng);
       }
 
       const stats = await getStats();
@@ -148,12 +161,40 @@ export function useProgress() {
       };
       const newlyUnlocked = getNewAchievements(achievementStats, currentUnlocked);
       if (newlyUnlocked.length > 0) {
+        let rewardGems = 0;
+        let rewardXP = 0;
         for (const a of newlyUnlocked) {
           await unlockAchievement(a.id);
+          rewardGems += a.rewardGems ?? 0;
+          rewardXP += a.rewardXP ?? 0;
+        }
+        if (rewardGems > 0) {
+          const ng = await addGemsStorage(rewardGems);
+          setGems(ng);
+        }
+        if (rewardXP > 0) {
+          const nx = await addXPStorage(rewardXP);
+          setXP(nx);
+          setLevelInfo(getLevelFromXP(nx));
         }
         const ua = [...currentUnlocked, ...newlyUnlocked.map(a => a.id)];
         setUnlockedAchievements(ua);
         setNewAchievement(newlyUnlocked[0]);
+      }
+
+      try {
+        const entry: ScoreEntry = {
+          date: new Date().toISOString(),
+          mode: opts.mode || 'classic',
+          category: opts.category || 'random',
+          guesses: opts.guesses,
+          timeSeconds: opts.elapsedSeconds,
+          xpEarned: opts.xpEarned,
+        };
+        await addScore(entry);
+        await submitScore(entry);
+      } catch (e) {
+        // bulut skoru başarısız olsa da yerel kayıt tutuldu
       }
     } catch (e) {
       console.error('recordWin failed:', e);

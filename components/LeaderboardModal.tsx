@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { View, StyleSheet, Modal, TouchableOpacity, ScrollView, ActivityIndicator, Image } from 'react-native';
+import { Text } from './CustomText';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { cloudService, CloudScoreEntry } from '../services/cloud.service';
 
@@ -29,7 +30,7 @@ export function LeaderboardModal({ visible, onClose, language = 'tr' }: Leaderbo
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.title}>🏆 {language === 'en' ? 'Global Leaderboard' : 'Küresel Liderlik Tablosu'}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat">
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>

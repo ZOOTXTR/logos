@@ -1,9 +1,6 @@
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { TouchableOpacity, StyleSheet,  } from 'react-native';
+import { Text } from './CustomText';
 import { Theme } from '../constants/themes';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 

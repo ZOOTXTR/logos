@@ -1,7 +1,6 @@
 import React from 'react';
-import {
-  Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView,
-} from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity, ScrollView,  } from 'react-native';
+import { Text } from './CustomText';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { TRANSLATIONS } from '../constants/translations';
 import type { Theme } from '../constants/themes';
@@ -29,7 +28,7 @@ export function AboutModal({ visible, onClose, theme, language }: AboutModalProp
         <View style={[styles.modalContent, { backgroundColor: '#16162A', borderColor: c.border }]}>
           <View style={[styles.modalHeader, { borderBottomColor: c.border }]}>
             <Text style={[styles.modalTitle, { color: c.text }]}>ℹ️ {t.aboutApp}</Text>
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+            <TouchableOpacity style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat" hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} onPress={onClose}>
               <Text style={{ color: c.textMuted, fontSize: 18, fontWeight: 'bold' }}>✕</Text>
             </TouchableOpacity>
           </View>

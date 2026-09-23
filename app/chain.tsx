@@ -1,19 +1,20 @@
 import React, { useState, useRef } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView,
-  TouchableOpacity, StatusBar, TextInput, KeyboardAvoidingView, Platform, Alert,
-} from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, StatusBar, TextInput, KeyboardAvoidingView, Platform, Alert,  } from 'react-native';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useWordChain } from '../hooks/useWordChain';
 import { useProgress } from '../hooks/useProgress';
+import { useTheme } from '../hooks/useTheme';
 import { LoadingView } from '../components/LoadingView';
+import { GameResultOverlay } from '../components/GameResultOverlay';
 
 export default function ChainScreen() {
   const router = useRouter();
-  const game = useWordChain();
   const progress = useProgress();
+  const { theme, language } = useTheme();
+  const game = useWordChain(language);
   const inputRef = useRef<TextInput>(null);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -26,12 +27,6 @@ export default function ChainScreen() {
     if (result === 'ok') {
       const xp = game.chain.length * 5;
       await progress.earnXP(xp);
-    }
-    if (game.status === 'lost') {
-      Alert.alert('💔 Oyun Bitti', `Skor: ${game.score}\nZincir: ${game.chain.length} kelime`, [
-        { text: 'Tekrar', onPress: game.reset },
-        { text: 'Menü', onPress: () => router.back() },
-      ]);
     }
     inputRef.current?.clear();
   };
@@ -49,7 +44,7 @@ export default function ChainScreen() {
       <LinearGradient colors={[COLORS.background, '#0F0F23']} style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Geri">
             <Text style={styles.backText}>← Geri</Text>
           </TouchableOpacity>
           <Text style={styles.title}>⛓️ Kelime Zinciri</Text>
@@ -121,7 +116,19 @@ export default function ChainScreen() {
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
-      </LinearGradient>
+        </LinearGradient>
+        <GameResultOverlay
+          visible={game.status === 'lost' || game.status === 'won'}
+          title={language === 'en' ? 'Game Over!' : 'Oyun Bitti!'}
+          emoji="🔗"
+          message={language === 'en' ? `Score: ${game.score}\nChain: ${game.chain.length} words` : `Skor: ${game.score}\nZincir: ${game.chain.length} kelime`}
+          theme={theme}
+          language={language}
+          buttons={[
+            { label: language === 'en' ? 'Play Again' : 'Yeniden Oyna', onPress: game.reset, primary: true },
+            { label: language === 'en' ? 'Menu' : 'Ana Menü', onPress: () => router.back() }
+          ]}
+        />
     </SafeAreaView>
   );
 }

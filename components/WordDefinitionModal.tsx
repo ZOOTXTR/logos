@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator,
-} from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator,  } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
@@ -58,7 +57,7 @@ export function WordDefinitionModal({ visible, word, lang, onClose }: WordDefini
             <Text style={styles.headerTitle}>
               📖 {lang === 'tr' ? 'Kelime Anlamı' : 'Word Definition'}
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat">
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </LinearGradient>

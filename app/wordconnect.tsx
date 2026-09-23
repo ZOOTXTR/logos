@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView,
-  TouchableOpacity, StatusBar, Alert, Dimensions, PanResponder,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Alert, Dimensions, PanResponder } from 'react-native';
+import { Text } from '../components/CustomText';
 import { Svg, Line, Circle as SvgCircle } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -16,6 +14,7 @@ import { TRANSLATIONS } from '../constants/translations';
 import { StoreModal } from '../components/StoreModal';
 import { LoadingView } from '../components/LoadingView';
 import { GameResultOverlay } from '../components/GameResultOverlay';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 const CELL_SIZE = 40;
@@ -49,9 +48,6 @@ export default function WordConnectScreen() {
 
   const [touchCoords, setTouchCoords] = useState<{ x: number; y: number } | null>(null);
   const lastTouchUpdateRef = useRef<{ time: number; x: number; y: number }>({ time: 0, x: 0, y: 0 });
-
-  const handleSubmitRef = useRef<() => void>(() => {});
-  handleSubmitRef.current = () => handleSubmit();
 
   const handleClearRef = useRef<() => void>(() => {});
   handleClearRef.current = () => handleClear();
@@ -88,16 +84,16 @@ export default function WordConnectScreen() {
         const now = Date.now();
         const dx = Math.abs(locationX - lastTouchUpdateRef.current.x);
         const dy = Math.abs(locationY - lastTouchUpdateRef.current.y);
-        // Throttle coordinate re-renders to ~30 FPS (32ms) or significant spatial delta (> 6px)
-        if (now - lastTouchUpdateRef.current.time > 32 || dx > 6 || dy > 6) {
+        // Throttle coordinate re-renders to ~60 FPS (16ms) or significant spatial delta (> 2px)
+        if (now - lastTouchUpdateRef.current.time > 32 && (dx > 4 || dy > 4)) {
           lastTouchUpdateRef.current = { time: now, x: locationX, y: locationY };
           setTouchCoords({ x: locationX, y: locationY });
         }
         checkTouchCollisionRef.current(locationX, locationY);
       },
       onPanResponderRelease: () => {
+        // Otomatik gönderme yok; kullanıcı Onayla butonunu kullanır (eksik tahmin engellenir)
         setTouchCoords(null);
-        handleSubmitRef.current();
       },
       onPanResponderTerminate: () => {
         setTouchCoords(null);
@@ -143,7 +139,11 @@ export default function WordConnectScreen() {
               onPress: () => {
                 setShowConfetti(false);
                 setResultOverlay(prev => ({ ...prev, visible: false }));
-                setLevelIdx(prev => prev + 1);
+                if (levelIdx + 1 >= game.totalLevels) {
+                  Alert.alert('', language === 'en' ? 'All levels completed!' : 'Tüm bölümler tamamlandı!');
+                } else {
+                  setLevelIdx(prev => prev + 1);
+                }
               },
               primary: true,
             }
@@ -181,7 +181,7 @@ export default function WordConnectScreen() {
       <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()}>
+          <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Geri">
             <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← {t.back}</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: theme.colors.text }]}>
@@ -412,3 +412,5 @@ const styles = StyleSheet.create({
   submitGrad: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   submitBtnText: { color: '#FFF', fontWeight: '800', fontSize: FONTS.size.md },
 });
+
+

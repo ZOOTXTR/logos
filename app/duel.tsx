@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView,
-  TouchableOpacity, StatusBar, Alert, Dimensions, Platform,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Alert, Dimensions, Platform } from 'react-native';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -15,6 +13,7 @@ import { Confetti } from '../components/Confetti';
 import { GameResultOverlay } from '../components/GameResultOverlay';
 import { TRANSLATIONS } from '../constants/translations';
 import { LoadingView } from '../components/LoadingView';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 const PLAYER_CELL_SIZE = 40;
@@ -46,33 +45,22 @@ export default function DuelScreen() {
 
   // Initial welcome message
   useEffect(() => {
-    setAiBubbleText(language === 'en' 
-      ? "Let's see who is faster! Good luck." 
-      : "Kim daha hızlı bakalım! Başarılar."
-    );
+    setAiBubbleText(t.duelWelcome);
   }, []);
 
   // Update bubble text when AI completes a row or game ends
   useEffect(() => {
     if (game.winner) {
       if (game.winner === 'player') {
-        setAiBubbleText(language === 'en'
-          ? "Amazing! You beat me this time."
-          : "Tebrikler! Beni bu sefer yendin."
-        );
+        setAiBubbleText(t.duelPlayerWin);
       } else {
-        setAiBubbleText(language === 'en'
-          ? "Victory is mine! Better luck next time."
-          : "Zafer benim! Bir dahaki sefere artık."
-        );
+        setAiBubbleText(t.duelAiWin);
       }
       return;
     }
 
     if (game.opponentRow > 0) {
-      const messages = language === 'en'
-        ? ["Aha! I found a clue.", "Step by step, I am solving this.", "Is that your best guess?", "Interesting strategy..."]
-        : ["Aha! Bir ipucu buldum.", "Adım adım çözüyorum.", "En iyi tahminin bu mu?", "İlginç bir strateji..."];
+      const messages = [t.duelAiThink1, t.duelAiThink2, t.duelAiThink3, t.duelAiThink4];
       setAiBubbleText(messages[Math.floor(Math.random() * messages.length)]);
     }
   }, [game.opponentRow, game.winner]);
@@ -80,9 +68,7 @@ export default function DuelScreen() {
   // Update bubble text when player completes a row
   useEffect(() => {
     if (game.playerRow > 0 && !game.winner) {
-      const messages = language === 'en'
-        ? ["Not bad, but I am faster!", "Hmm, a solid attempt.", "Let me think about my next word...", "You are doing great!"]
-        : ["Fena değil, ama ben daha hızlıyım!", "Hmm, sağlam bir tahmin.", "Sonraki hamlemi düşüneyim...", "Harika gidiyorsun!"];
+      const messages = [t.duelPlayerThink1, t.duelPlayerThink2, t.duelPlayerThink3, t.duelPlayerThink4];
       setAiBubbleText(messages[Math.floor(Math.random() * messages.length)]);
     }
   }, [game.playerRow]);
@@ -102,12 +88,12 @@ export default function DuelScreen() {
           setResultOverlay({
             visible: true,
             emoji: '🏆',
-            title: language === 'en' ? 'Victory!' : 'Zafer Senin!',
-            message: language === 'en' ? 'You defeated the AI!' : 'Yapay zekayı yendiniz!',
+            title: t.duelVictoryTitle,
+            message: t.duelVictoryMsg,
             word: game.targetWord,
             gemsAwarded: 50,
             xpAwarded: 200,
-            buttons: [{ label: language === 'en' ? 'Continue' : 'Devam Et', onPress: () => { handleNext(); setResultOverlay(r => ({ ...r, visible: false })); }, primary: true }],
+            buttons: [{ label: t.continue, onPress: () => { handleNext(); setResultOverlay(r => ({ ...r, visible: false })); }, primary: true }],
             theme,
             language,
           });
@@ -117,10 +103,10 @@ export default function DuelScreen() {
           setResultOverlay({
             visible: true,
             emoji: '💀',
-            title: language === 'en' ? 'Defeat' : 'Mağlubiyet',
-            message: language === 'en' ? 'The AI solved the word first!' : 'Yapay zeka kelimeyi sizden önce çözdü!',
+            title: t.duelDefeatTitle,
+            message: t.duelDefeatMsg,
             word: game.targetWord,
-            buttons: [{ label: language === 'en' ? 'Try Again' : 'Tekrar Dene', onPress: () => { handleNext(); setResultOverlay(r => ({ ...r, visible: false })); }, primary: true }],
+            buttons: [{ label: t.tryAgain, onPress: () => { handleNext(); setResultOverlay(r => ({ ...r, visible: false })); }, primary: true }],
             theme,
             language,
           });
@@ -151,7 +137,7 @@ export default function DuelScreen() {
     audioService.triggerHaptic('medium');
     const result = game.submitGuess();
     if (result === 'short') {
-      Alert.alert(language === 'en' ? 'Short Word' : 'Eksik Harf', language === 'en' ? 'Fill all 5 letters!' : '5 harfi de doldurun!');
+      Alert.alert(t.shortWordTitle, t.shortWordMsg);
       audioService.triggerHaptic('warning');
     } else if (result === 'correct') {
       // handled by useEffect
@@ -165,10 +151,10 @@ export default function DuelScreen() {
         setResultOverlay({
           visible: true,
           emoji: '😢',
-          title: language === 'en' ? 'Game Over' : 'Oyun Bitti',
-          message: language === 'en' ? 'You ran out of rows!' : 'Tüm haklarınız bitti!',
+          title: t.gameover,
+          message: t.duelGameOverMsg,
           word: game.targetWord,
-          buttons: [{ label: language === 'en' ? 'Try Again' : 'Tekrar Dene', onPress: () => { handleNext(); setResultOverlay(r => ({ ...r, visible: false })); }, primary: true }],
+          buttons: [{ label: t.tryAgain, onPress: () => { handleNext(); setResultOverlay(r => ({ ...r, visible: false })); }, primary: true }],
           theme,
           language,
         });
@@ -183,7 +169,7 @@ export default function DuelScreen() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (game.winner) return;
 
-      const key = e.key.toLocaleUpperCase('tr-TR');
+      const key = e.key.toUpperCase();
 
       if (key === 'ENTER') {
         handleSubmit();
@@ -201,7 +187,7 @@ export default function DuelScreen() {
   }, [game.winner, handleSubmit, handleDelete, handleKey]);
 
   if (progress.loading) {
-    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
+    return <LoadingView message={t.loading} />;
   }
 
   // Keyboard letter colors merged from player board
@@ -240,7 +226,7 @@ export default function DuelScreen() {
             <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← {t.back}</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: theme.colors.text }]}>
-            ⚔️ {language === 'en' ? '1v1 AI Duel' : '1v1 Yapay Zeka Düello'}
+            ⚔️ {t.modeDuelTitle}
           </Text>
           <View style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]}>
             <Text style={[styles.gemText, { color: theme.colors.gem }]}>💎 {progress.gems}</Text>
@@ -256,10 +242,10 @@ export default function DuelScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Text style={{ fontSize: 28 }}>🤖</Text>
                 <View>
-                  <Text style={[styles.sideTitle, { color: theme.colors.textSecondary }]}>RAKİP (AI Opponent)</Text>
+                  <Text style={[styles.sideTitle, { color: theme.colors.textSecondary }]}>{t.duelAiOpponent}</Text>
                   {game.opponentStatus === 'playing' && (
-                    <Text style={[styles.typingText, { color: theme.colors.primaryLight, fontSize: 9 }]}>
-                      {language === 'en' ? 'Thinking...' : 'Düşünüyor...'} ⚡
+                    <Text style={[styles.typingText, { color: theme.colors.primaryLight, fontSize: 12 }]}>
+                      {t.duelThinking} ⚡
                     </Text>
                   )}
                 </View>
@@ -297,14 +283,14 @@ export default function DuelScreen() {
           {/* Versus Divider line */}
           <View style={[styles.vsBar, { borderBottomColor: theme.colors.border }]}>
             <Text style={[styles.vsText, { color: theme.colors.textSecondary }]}>
-              {language === 'en' ? 'VS ARENA' : 'DÜELLO ARENASI'}
+              {t.duelVsArena}
             </Text>
           </View>
 
           {/* Player Side */}
           <View style={[styles.sideCard, { flex: 1.4, paddingBottom: SPACING.sm }]}>
             <Text style={[styles.sideTitle, { color: theme.colors.text, marginBottom: SPACING.xs }]}>
-              🎯 SİZ (You) — {game.playerRow}/6
+              🎯 {t.duelYou} — {game.playerRow}/6
             </Text>
             <View style={styles.playerGrid}>
               {game.playerBoard.map((row, rIdx) => (
@@ -363,7 +349,7 @@ const styles = StyleSheet.create({
   sideCard: { borderRadius: BORDER_RADIUS.lg, borderWidth: 1, borderColor: 'transparent', padding: SPACING.sm },
   sideHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.xs },
   sideTitle: { fontSize: 10, fontWeight: '900', letterSpacing: 1 },
-  typingText: { fontSize: 9, fontWeight: '700' },
+  typingText: { fontSize: 12, fontWeight: '700' },
   botGrid: { gap: 3, alignItems: 'center' },
   botRow: { flexDirection: 'row', gap: 3 },
   botCell: { width: BOT_CELL_SIZE, height: BOT_CELL_SIZE, borderRadius: BORDER_RADIUS.sm, borderWidth: 1 },
@@ -382,9 +368,9 @@ const styles = StyleSheet.create({
     maxWidth: '55%',
   },
   speechBubbleText: {
-    fontSize: 9,
+    fontSize: 12,
     fontWeight: '800',
     fontStyle: 'italic',
-    lineHeight: 12,
+    lineHeight: 16,
   },
 });

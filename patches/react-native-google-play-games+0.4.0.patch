@@ -1,0 +1,23 @@
+diff --git a/node_modules/react-native-google-play-games/android/src/main/java/com/reactnativegoogleplaygames/GooglePlayGamesPackage.kt b/node_modules/react-native-google-play-games/android/src/main/java/com/reactnativegoogleplaygames/GooglePlayGamesPackage.kt
+index 523ed00..226b14b 100644
+--- a/node_modules/react-native-google-play-games/android/src/main/java/com/reactnativegoogleplaygames/GooglePlayGamesPackage.kt
++++ b/node_modules/react-native-google-play-games/android/src/main/java/com/reactnativegoogleplaygames/GooglePlayGamesPackage.kt
+@@ -19,12 +19,12 @@ class GooglePlayGamesPackage : BaseReactPackage() {
+     return ReactModuleInfoProvider {
+       mapOf(
+         GooglePlayGamesModule.NAME to ReactModuleInfo(
+-          name = GooglePlayGamesModule.NAME,
+-          className = GooglePlayGamesModule.NAME,
+-          canOverrideExistingModule = false,
+-          needsEagerInit = false,
+-          isCxxModule = false,
+-          isTurboModule = true,
++          GooglePlayGamesModule.NAME,
++          GooglePlayGamesModule.NAME,
++          false,
++          false,
++          false,
++          true
+         ),
+       )
+     }

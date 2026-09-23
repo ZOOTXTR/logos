@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { LetterStatus } from '../constants/words';
 import { useTheme } from '../hooks/useTheme';
@@ -69,13 +70,15 @@ function KeyboardComponent({ onKey, onDelete, onSubmit, revealedLetters, languag
               <TouchableOpacity
                 key={key}
                 onPress={() => handlePress(key)}
+                hitSlop={{ top: 5, bottom: 5, left: 4, right: 4 }}
                 style={[
                   styles.key,
                   isSpecial && styles.specialKey,
                   { backgroundColor: getKeyBg(status) },
                 ]}
                 activeOpacity={0.7}
-                accessibilityLabel={isDeleteKey(key) ? 'Delete' : isSubmitKey(key) ? 'Submit' : key}
+                accessibilityLabel={isDeleteKey(key) ? (activeLanguage === 'en' ? 'Delete' : 'Sil') : isSubmitKey(key) ? (activeLanguage === 'en' ? 'Submit' : 'Gönder') : key}
+                accessibilityRole="button"
               >
                 <Text style={[
                   styles.keyText,
@@ -115,18 +118,21 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   key: {
-    minWidth: 30,
-    height: 48,
-    paddingHorizontal: 6,
-    borderRadius: BORDER_RADIUS.sm,
+    height: 52, // Slightly taller for the 3D effect
+    paddingHorizontal: 2,
+    borderRadius: BORDER_RADIUS.md, // More rounded for modern look
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
-    maxWidth: 36,
     position: 'relative',
+    borderBottomWidth: 4, // 3D depth
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: 'rgba(0,0,0,0.2)', // Darker bottom edge simulated by the main component logic, here we just set the structural border
   },
   specialKey: {
-    maxWidth: 64,
+    flex: 1.5,
     backgroundColor: COLORS.primary,
   },
   keyText: {
@@ -134,7 +140,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   specialKeyText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '800',
   },
   keyIndicator: {
@@ -143,7 +149,7 @@ const styles = StyleSheet.create({
     right: 2,
   },
   keyIndicatorText: {
-    fontSize: 8,
+    fontSize: 11,
     fontWeight: '900',
     color: 'rgba(255, 255, 255, 0.8)',
   },

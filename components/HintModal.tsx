@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
-} from 'react-native';
+import { View, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { HINT_GEM_COST } from '../constants/products';
@@ -19,6 +14,7 @@ interface HintModalProps {
   onWatchAd: () => Promise<void>;
   onSpendGems: () => Promise<boolean>;
   onGoToStore: () => void;
+  language?: 'tr' | 'en';
 }
 
 export function HintModal({
@@ -29,21 +25,29 @@ export function HintModal({
   onWatchAd,
   onSpendGems,
   onGoToStore,
+  language = 'tr',
 }: HintModalProps) {
   const [loading, setLoading] = useState<'ad' | 'gem' | null>(null);
+  const en = language === 'en';
 
   const handleWatchAd = async () => {
     setLoading('ad');
-    await onWatchAd();
-    setLoading(null);
-    onClose();
+    try {
+      await onWatchAd();
+      onClose();
+    } finally {
+      setLoading(null);
+    }
   };
 
   const handleSpendGems = async () => {
     setLoading('gem');
-    const success = await onSpendGems();
-    setLoading(null);
-    if (success) onClose();
+    try {
+      const success = await onSpendGems();
+      if (success) onClose();
+    } finally {
+      setLoading(null);
+    }
   };
 
   const canAffordGems = gems >= HINT_GEM_COST;
@@ -62,9 +66,9 @@ export function HintModal({
             style={styles.header}
           >
             <Text style={styles.emoji}>💡</Text>
-            <Text style={styles.title}>İpucu Al</Text>
+            <Text style={styles.title}>{en ? 'Get a Hint' : 'İpucu Al'}</Text>
             <Text style={styles.subtitle}>
-              Bir harfin yerini öğren!
+              {en ? 'Learn the position of a letter!' : 'Bir harfin yerini öğren!'}
             </Text>
           </LinearGradient>
 
@@ -72,8 +76,8 @@ export function HintModal({
             {isPremium ? (
               <HintOptionCard
                 emoji="👑"
-                title="Premium — Ücretsiz"
-                description="Sınırsız ipucu hakkın var!"
+                title={en ? 'Premium — Free' : 'Premium — Ücretsiz'}
+                description={en ? 'You have unlimited hints!' : 'Sınırsız ipucu hakkın var!'}
                 onPress={handleSpendGems}
                 disabled={loading !== null}
                 loading={loading === 'gem'}
@@ -82,18 +86,18 @@ export function HintModal({
               <>
                 <HintOptionCard
                   emoji="📺"
-                  title="Reklam İzle"
-                  description="~30 saniye • Tamamen ücretsiz"
+                  title={en ? 'Watch Ad' : 'Reklam İzle'}
+                  description={en ? '~30 seconds • Completely free' : '~30 saniye • Tamamen ücretsiz'}
                   onPress={handleWatchAd}
                   disabled={loading !== null}
                   loading={loading === 'ad'}
                 />
                 <HintOptionCard
                   emoji="💎"
-                  title={canAffordGems ? 'Gem Harca' : 'Gem Satın Al'}
+                  title={canAffordGems ? (en ? 'Spend Gems' : 'Gem Harca') : (en ? 'Buy Gems' : 'Gem Satın Al')}
                   description={canAffordGems
-                    ? `${HINT_GEM_COST} Gem • Bakiye: ${gems} 💎`
-                    : `${gems} Gem var, ${HINT_GEM_COST} gerekli`}
+                    ? (en ? `${HINT_GEM_COST} Gems • Balance: ${gems} 💎` : `${HINT_GEM_COST} Gem • Bakiye: ${gems} 💎`)
+                    : (en ? `You have ${gems} gems, ${HINT_GEM_COST} needed` : `${gems} Gem var, ${HINT_GEM_COST} gerekli`)}
                   onPress={canAffordGems ? handleSpendGems : onGoToStore}
                   disabled={loading !== null}
                   loading={loading === 'gem'}
@@ -101,8 +105,8 @@ export function HintModal({
               </>
             )}
 
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <Text style={styles.closeText}>Vazgeç</Text>
+            <TouchableOpacity style={styles.closeBtn} accessibilityRole="button" accessibilityLabel={en ? 'Close' : 'Kapat'} hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} onPress={onClose}>
+              <Text style={styles.closeText}>{en ? 'Cancel' : 'Vazgeç'}</Text>
             </TouchableOpacity>
           </View>
         </View>

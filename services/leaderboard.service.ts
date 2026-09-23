@@ -1,5 +1,6 @@
-import { collection, query, orderBy, limit, getDocs, addDoc, where, serverTimestamp } from 'firebase/firestore';
-import { getFirebaseDb, FIRESTORE_COLLECTIONS } from '../config/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
+import { getFirebaseDb, getFirebaseFunctions, FIRESTORE_COLLECTIONS } from '../config/firebase';
 import { ScoreEntry } from './storage.service';
 import { getCurrentUser } from './auth.service';
 
@@ -18,19 +19,26 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
     const user = getCurrentUser();
     if (!user) return false;
 
-    const db = getFirebaseDb();
-    const points = calculateScore(entry);
+    // Skor sunucuda hesaplanır ve doğrulanır (Firestore kuralları istemci yazımına kapalıdır).
+    const submitFn = httpsCallable<
+      {
+        guesses: number;
+        timeSeconds: number;
+        xpEarned: number;
+        mode: string;
+        category: string;
+        playerName: string;
+      },
+      { success: boolean; score: number }
+    >(getFirebaseFunctions(), 'submitScore');
 
-    await addDoc(collection(db, FIRESTORE_COLLECTIONS.SCORES), {
-      uid: user.uid,
-      displayName: `Player_${user.uid.slice(0, 6)}`,
-      score: points,
-      mode: entry.mode,
+    await submitFn({
       guesses: entry.guesses,
       timeSeconds: entry.timeSeconds ?? 0,
       xpEarned: entry.xpEarned,
-      date: entry.date,
-      createdAt: serverTimestamp(),
+      mode: entry.mode,
+      category: entry.category,
+      playerName: `Player_${user.uid.slice(0, 6)}`,
     });
 
     return true;
@@ -38,13 +46,6 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
     console.warn('Failed to submit score:', e);
     return false;
   }
-}
-
-function calculateScore(entry: ScoreEntry): number {
-  let points = entry.xpEarned;
-  if (entry.guesses > 0) points += Math.max(0, 6 - entry.guesses) * 10;
-  if (entry.timeSeconds && entry.timeSeconds < 30) points += 50;
-  return points;
 }
 
 export async function getGlobalLeaderboard(limitCount: number = 50): Promise<LeaderboardEntry[]> {

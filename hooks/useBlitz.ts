@@ -1,13 +1,14 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { getRandomWord, Category, WORD_LENGTH, DIFFICULTY_MAX_GUESSES } from '../constants/words';
+import { getRandomWord, Category, WORD_LENGTH, ALL_WORDS, ALL_WORDS_EN } from '../constants/words';
+import { getDictionary } from '../services/dictionary.service';
 
 export interface BlitzState {
   currentWord: string;
   guess: string;
   score: number;
   streak: number;
-  timeLeft: number;
+  endTime: number;
   status: 'playing' | 'ended';
   wordsAnswered: number;
   wordsSolved: number;
@@ -16,70 +17,45 @@ export interface BlitzState {
 
 const BLITZ_TIME = 60;
 
-export function useBlitz(category: Category = 'random') {
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+export function useBlitz(category: Category = 'random', language: 'tr' | 'en' = 'tr') {
   const backgroundTimeRef = useRef<number>(0);
 
-  const cleanupTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
-  const startTimer = () => {
-    cleanupTimer();
-    timerRef.current = setInterval(() => {
-      setState(prev => {
-        if (prev.timeLeft <= 1) {
-          cleanupTimer();
-          return { ...prev, timeLeft: 0, status: 'ended' };
-        }
-        return { ...prev, timeLeft: prev.timeLeft - 1 };
-      });
-    }, 1000);
-  };
-
-  const [state, setState] = useState<BlitzState>({
-    currentWord: getRandomWord(category),
+  const [state, setState] = useState<BlitzState>(() => ({
+    currentWord: getRandomWord(category, language),
     guess: '',
     score: 0,
     streak: 0,
-    timeLeft: BLITZ_TIME,
+    endTime: Date.now() + BLITZ_TIME * 1000,
     status: 'playing',
     wordsAnswered: 0,
     wordsSolved: 0,
     history: [],
-  });
+  }));
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  useEffect(() => {
-    startTimer();
+  const onTimeUp = useCallback(() => {
+    setState(prev => (prev.status === 'playing' ? { ...prev, status: 'ended' } : prev));
+  }, []);
 
+  useEffect(() => {
     const sub = AppState.addEventListener('change', (nextState: AppStateStatus) => {
       if (nextState === 'active') {
-        const elapsed = Math.floor((Date.now() - backgroundTimeRef.current) / 1000);
-        if (elapsed > 0 && backgroundTimeRef.current > 0) {
+        if (backgroundTimeRef.current > 0) {
           setState(prev => {
             if (prev.status !== 'playing') return prev;
-            const remaining = prev.timeLeft - elapsed;
-            if (remaining <= 0) {
-              cleanupTimer();
-              return { ...prev, timeLeft: 0, status: 'ended' };
+            if (prev.endTime <= Date.now()) {
+              return { ...prev, status: 'ended' };
             }
-            return { ...prev, timeLeft: remaining };
+            return prev;
           });
         }
-        startTimer();
       } else if (nextState.match(/inactive|background/)) {
         backgroundTimeRef.current = Date.now();
-        cleanupTimer();
       }
     });
 
     return () => {
-      cleanupTimer();
       sub.remove();
     };
   }, []);
@@ -93,13 +69,29 @@ export function useBlitz(category: Category = 'random') {
   }, []);
 
   const deleteLetter = useCallback(() => {
-    setState(prev => ({ ...prev, guess: prev.guess.slice(0, -1) }));
+    setState(prev => {
+      if (prev.status !== 'playing') return prev;
+      return { ...prev, guess: prev.guess.slice(0, -1) };
+    });
   }, []);
 
   const submitGuess = useCallback((): 'short' | 'correct' | 'wrong' => {
     const s = stateRef.current;
+    if (s.status !== 'playing') return 'wrong';
     if (s.guess.length < WORD_LENGTH) return 'short';
-    const correct = s.guess === s.currentWord;
+
+    const rawGuess = s.guess;
+    const guess = language === 'tr'
+      ? rawGuess.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase()
+      : rawGuess.toUpperCase();
+
+    const dictionary = getDictionary(language);
+    const targetPool = language === 'en' ? ALL_WORDS_EN : ALL_WORDS;
+    const isValidWord = (dictionary && dictionary.has(guess)) || targetPool.includes(guess);
+    const alreadyUsed = s.history.some(h => h.word === guess && h.solved);
+    // Doğruluk hedef kelimeyle karşılaştırılır; sadece sözlükte var olmak yetmez.
+    const correct = isValidWord && !alreadyUsed && guess === s.currentWord;
+
     setState(prev => {
       const newStreak = correct ? prev.streak + 1 : 0;
       const bonus = correct ? (newStreak >= 5 ? 100 : newStreak >= 3 ? 50 : 0) : 0;
@@ -110,43 +102,44 @@ export function useBlitz(category: Category = 'random') {
         streak: newStreak,
         wordsAnswered: prev.wordsAnswered + 1,
         wordsSolved: prev.wordsSolved + (correct ? 1 : 0),
-        currentWord: getRandomWord(category),
+        currentWord: getRandomWord(category, language),
         guess: '',
-        timeLeft: correct ? Math.min(prev.timeLeft + 5, BLITZ_TIME) : prev.timeLeft,
-        history: [...prev.history, { word: prev.currentWord, solved: correct, guesses: 1 }],
+        endTime: correct ? Math.min(prev.endTime + 5000, Date.now() + BLITZ_TIME * 1000) : prev.endTime,
+        history: [...prev.history, { word: guess, solved: correct, guesses: 1 }],
       };
     });
     return correct ? 'correct' : 'wrong';
-  }, [category]);
+  }, [category, language]);
 
   const skip = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      currentWord: getRandomWord(category),
-      guess: '',
-      streak: 0,
-      wordsAnswered: prev.wordsAnswered + 1,
-      history: [...prev.history, { word: prev.currentWord, solved: false, guesses: 0 }],
-      timeLeft: Math.max(prev.timeLeft - 5, 1),
-    }));
-  }, [category]);
+    setState(prev => {
+      if (prev.status !== 'playing') return prev;
+      return {
+        ...prev,
+        currentWord: getRandomWord(category, language),
+        guess: '',
+        streak: 0,
+        wordsAnswered: prev.wordsAnswered + 1,
+        history: [...prev.history, { word: prev.currentWord, solved: false, guesses: 0 }],
+        endTime: Math.max(prev.endTime - 5000, Date.now() + 1000),
+      };
+    });
+  }, [category, language]);
 
   const reset = useCallback(() => {
-    cleanupTimer();
     backgroundTimeRef.current = 0;
     setState({
-      currentWord: getRandomWord(category),
+      currentWord: getRandomWord(category, language),
       guess: '',
       score: 0,
       streak: 0,
-      timeLeft: BLITZ_TIME,
+      endTime: Date.now() + BLITZ_TIME * 1000,
       status: 'playing',
       wordsAnswered: 0,
       wordsSolved: 0,
       history: [],
     });
-    startTimer();
-  }, [category]);
+  }, [category, language]);
 
-  return { ...state, addLetter, deleteLetter, submitGuess, skip, reset };
+  return { ...state, addLetter, deleteLetter, submitGuess, skip, reset, onTimeUp };
 }

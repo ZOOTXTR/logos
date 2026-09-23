@@ -28,8 +28,10 @@ export interface ThemeColors {
 export interface Theme {
   id: string;
   name: string;
+  nameEn?: string;
   emoji: string;
   description: string;
+  descEn?: string;
   gemCost: number;    // 0 = ücretsiz, -1 = premium
   preview: [string, string]; // gradient önizleme renkleri
   colors: ThemeColors;
@@ -39,8 +41,10 @@ export const THEMES: Theme[] = [
   {
     id: 'dark',
     name: 'Karanlık',
+    nameEn: 'Dark',
     emoji: '🌙',
     description: 'Varsayılan koyu tema',
+    descEn: 'Default dark theme',
     gemCost: 0,
     preview: ['#0D0D1A', '#1A1A2E'],
     colors: {
@@ -56,8 +60,10 @@ export const THEMES: Theme[] = [
   {
     id: 'light',
     name: 'Aydınlık',
+    nameEn: 'Light',
     emoji: '☀️',
     description: 'Temiz beyaz tema',
+    descEn: 'Clean white theme',
     gemCost: 100,
     preview: ['#F8FAFC', '#E2E8F0'],
     colors: {
@@ -73,8 +79,10 @@ export const THEMES: Theme[] = [
   {
     id: 'neon',
     name: 'Neon',
+    nameEn: 'Neon',
     emoji: '🌈',
     description: 'Parlak neon renkler',
+    descEn: 'Bright neon colors',
     gemCost: 250,
     preview: ['#0A0A0F', '#0D0D1A'],
     colors: {
@@ -90,8 +98,10 @@ export const THEMES: Theme[] = [
   {
     id: 'nature',
     name: 'Doğa',
+    nameEn: 'Nature',
     emoji: '🌿',
     description: 'Sakin yeşil tonlar',
+    descEn: 'Calm green tones',
     gemCost: 200,
     preview: ['#0A1A0A', '#0F2A0F'],
     colors: {
@@ -107,8 +117,10 @@ export const THEMES: Theme[] = [
   {
     id: 'fire',
     name: 'Ateş',
+    nameEn: 'Fire',
     emoji: '🔥',
     description: 'Yakıcı kırmızı tonlar',
+    descEn: 'Blazing red tones',
     gemCost: 300,
     preview: ['#1A0A00', '#2A0F00'],
     colors: {
@@ -124,8 +136,10 @@ export const THEMES: Theme[] = [
   {
     id: 'ocean',
     name: 'Okyanus',
+    nameEn: 'Ocean',
     emoji: '🌊',
     description: 'Derin mavi tonlar',
+    descEn: 'Deep blue tones',
     gemCost: 200,
     preview: ['#020C1B', '#0A192F'],
     colors: {
@@ -141,8 +155,10 @@ export const THEMES: Theme[] = [
   {
     id: 'crystal',
     name: 'Obsidian',
+    nameEn: 'Obsidian',
     emoji: '🖤',
     description: '👑 Özel Premium Karanlık Tema',
+    descEn: '👑 Premium dark theme',
     gemCost: -1, // Premium only
     preview: ['#050508', '#0C0C14'],
     colors: {

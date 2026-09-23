@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
@@ -48,13 +49,13 @@ export function InviteModal({ visible, onClose }: InviteModalProps) {
         <View style={[styles.content, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
           <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.header}>
             <Text style={styles.headerTitle}>🎉 {language === 'en' ? 'Invite Friends' : 'Arkadaş Davet Et'}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat">
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </LinearGradient>
 
           <View style={styles.body}>
-            {myCode && (
+            {myCode ? (
               <View style={[styles.codeBox, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]}>
                 <Text style={[styles.codeLabel, { color: theme.colors.textSecondary }]}>
                   {language === 'en' ? 'Your Invite Code' : 'Davet Kodunuz'}
@@ -66,7 +67,7 @@ export function InviteModal({ visible, onClose }: InviteModalProps) {
                   </Text>
                 </TouchableOpacity>
               </View>
-            )}
+            ) : null}
 
             <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               {language === 'en' ? 'Have a code? Enter it!' : 'Kodun var mı? Gir!'}

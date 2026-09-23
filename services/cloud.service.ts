@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirebaseDb, FIRESTORE_COLLECTIONS } from '../config/firebase';
-import { getGems, getXP, getStats, getStreak, getUnlockedAchievements, getScores, getUnlockedCategories, isPremium } from './storage.service';
+import { getFirebaseDb, getFirebaseFunctions, FIRESTORE_COLLECTIONS } from '../config/firebase';
+import { httpsCallable } from 'firebase/functions';
+import { getGems, setGems, getXP, setXP, getStats, getStreak, setStreak, getUnlockedAchievements, getScores, getUnlockedCategories, setUnlockedCategories, isPremium, setPremium } from './storage.service';
 import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { getCurrentUser } from './auth.service';
 
 export interface UserProgressData {
   gems: number;
@@ -69,7 +71,9 @@ class CloudService {
     }
   }
 
-  async syncStorageToCloud(email: string): Promise<boolean> {
+  async syncStorageToCloud(_email?: string): Promise<boolean> {
+    const userId = getCurrentUser()?.uid;
+    if (!userId) return false;
     const isChild = await AsyncStorage.getItem('gq_age_gate_passed');
     if (isChild === 'child') return false; // COPPA block
 
@@ -101,14 +105,14 @@ class CloudService {
 
       try {
         const db = this.getDb();
-        await setDoc(doc(db, FIRESTORE_COLLECTIONS.CLOUD_SAVES, email), {
+        await setDoc(doc(db, FIRESTORE_COLLECTIONS.CLOUD_SAVES, userId), {
           ...payload,
           updatedAt: serverTimestamp(),
         });
         return true;
       } catch (firestoreError) {
         console.error('Firestore syncStorageToCloud failed, falling back to AsyncStorage:', firestoreError);
-        await AsyncStorage.setItem(`gq_cloud_db_${email}`, JSON.stringify(payload));
+        await AsyncStorage.setItem(`gq_cloud_db_${userId}`, JSON.stringify(payload));
         await new Promise(resolve => setTimeout(resolve, 800));
         return true;
       }
@@ -118,17 +122,19 @@ class CloudService {
     }
   }
 
-  async restoreStorageFromCloud(email: string): Promise<boolean> {
+  async restoreStorageFromCloud(_email?: string): Promise<boolean> {
+    const userId = getCurrentUser()?.uid;
+    if (!userId) return false;
     let data: Record<string, unknown>;
     try {
       const db = this.getDb();
-      const snap = await getDoc(doc(db, FIRESTORE_COLLECTIONS.CLOUD_SAVES, email));
+      const snap = await getDoc(doc(db, FIRESTORE_COLLECTIONS.CLOUD_SAVES, userId));
       if (!snap.exists()) return false;
       data = snap.data() as Record<string, unknown>;
     } catch (error) {
       console.error('Firestore restoreStorageFromCloud failed, falling back to AsyncStorage:', error);
       try {
-        const val = await AsyncStorage.getItem(`gq_cloud_db_${email}`);
+        const val = await AsyncStorage.getItem(`gq_cloud_db_${userId}`);
         if (!val) return false;
         data = JSON.parse(val);
       } catch (fallbackError) {
@@ -138,16 +144,37 @@ class CloudService {
     }
 
     try {
-      await Promise.all([
-        AsyncStorage.setItem('gq_gems', String(data.gems ?? 150)),
-        AsyncStorage.setItem('gq_premium', String(!!data.isPremium)),
-        AsyncStorage.setItem('gq_xp', String(data.xp ?? 0)),
-        AsyncStorage.setItem('gq_achievements', JSON.stringify(data.unlockedAchievements ?? [])),
-        AsyncStorage.setItem('gq_unlocked_categories', JSON.stringify(data.unlockedThemes ?? [])),
-      ]);
-      if (data.stats) await AsyncStorage.setItem('gq_stats', JSON.stringify(data.stats));
-      if (typeof data.streak === 'number') await AsyncStorage.setItem('gq_streak', String(data.streak));
-      if (typeof data.maxStreak === 'number') await AsyncStorage.setItem('gq_max_streak', String(data.maxStreak));
+      await setGems((data.gems as number) ?? 150);
+      await setPremium(!!data.isPremium);
+      if (typeof data.xp === 'number') await setXP(data.xp);
+      await setUnlockedCategories((data.unlockedThemes as string[]) ?? []);
+      if (Array.isArray(data.unlockedAchievements)) {
+        await AsyncStorage.setItem('gq_achievements', JSON.stringify(data.unlockedAchievements));
+      }
+      if (data.stats) {
+        const cloudStats = data.stats as Record<string, any>;
+        const local = await getStats();
+        const cats = [...new Set([...local.categoriesWon, ...((cloudStats.categoriesWon as string[]) ?? [])])];
+        const cloudDist = (cloudStats.guessDistribution as Record<string, number>) ?? {};
+        const distKeys = new Set<string>([...Object.keys(local.guessDistribution), ...Object.keys(cloudDist)]);
+        const dist: Record<number, number> = {};
+        distKeys.forEach(k => {
+          dist[Number(k)] = (local.guessDistribution[Number(k)] || 0) + (cloudDist[k] || 0);
+        });
+        const merged = {
+          ...local,
+          ...cloudStats,
+          categoriesWon: cats,
+          guessDistribution: dist,
+          gamesPlayed: Math.max(local.gamesPlayed, (cloudStats.gamesPlayed as number) ?? 0),
+          gamesWon: Math.max(local.gamesWon, (cloudStats.gamesWon as number) ?? 0),
+          totalXP: Math.max(local.totalXP, (cloudStats.totalXP as number) ?? 0),
+        };
+        await AsyncStorage.setItem('gq_stats', JSON.stringify(merged));
+      }
+      if (typeof data.streak === 'number') {
+        await setStreak(data.streak, (typeof data.maxStreak === 'number' ? data.maxStreak : data.streak));
+      }
       if (data.scores) await AsyncStorage.setItem('gq_scores', JSON.stringify(data.scores));
       return true;
     } catch (e) {
@@ -185,14 +212,11 @@ class CloudService {
 
   async submitScore(score: number, mode: string = 'classic', category: string = 'random'): Promise<boolean> {
     try {
-      const db = this.getDb();
-      await addDoc(collection(db, FIRESTORE_COLLECTIONS.SCORES), {
-        score,
-        mode,
-        category,
-        playerName: 'Anonim',
-        createdAt: serverTimestamp(),
-      });
+      const submitFn = httpsCallable<
+        { guesses: number; timeSeconds: number; xpEarned: number; mode: string; category: string; playerName: string },
+        { success: boolean; score: number }
+      >(getFirebaseFunctions(), 'submitScore');
+      await submitFn({ guesses: 0, timeSeconds: 0, xpEarned: score, mode, category, playerName: 'Anonim' });
       return true;
     } catch (e) {
       console.warn('submitScore failed:', e);

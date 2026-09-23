@@ -17903,7 +17903,6 @@ export const VALIDATION_DICT_EN = new Set<string>([
   'BISULC',
   'BISYNC',
   'BITAKE',
-  'BITCHY',
   'BITE',
   'BITED',
   'BITER',

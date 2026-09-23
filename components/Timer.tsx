@@ -5,9 +5,10 @@ import { COLORS, FONTS, BORDER_RADIUS, SPACING } from '../constants/theme';
 interface TimerProps {
   timeLeft: number;
   totalTime?: number;
+  language?: 'tr' | 'en';
 }
 
-export function Timer({ timeLeft, totalTime = 90 }: TimerProps) {
+export function Timer({ timeLeft, totalTime = 90, language = 'tr' }: TimerProps) {
   const animWidth = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -21,7 +22,7 @@ export function Timer({ timeLeft, totalTime = 90 }: TimerProps) {
     Animated.timing(animWidth, {
       toValue: percent,
       duration: 900,
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
   }, [timeLeft]);
 
@@ -55,7 +56,7 @@ export function Timer({ timeLeft, totalTime = 90 }: TimerProps) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Text style={styles.label}>⚡ Süre</Text>
+        <Text style={styles.label}>⚡ {language === 'en' ? 'Time' : 'Süre'}</Text>
         <Animated.Text style={[
           styles.time,
           { color: barColor, transform: [{ scale: pulseAnim }] }
@@ -69,10 +70,8 @@ export function Timer({ timeLeft, totalTime = 90 }: TimerProps) {
             styles.bar,
             {
               backgroundColor: barColor,
-              width: animWidth.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
+              transform: [{ scaleX: animWidth }],
+              transformOrigin: 'left',
             },
           ]}
         />

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
+import { Text } from '../CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { LevelInfo, getXPProgress } from '../../constants/levels';
@@ -39,7 +40,7 @@ export function PlayerCard({ theme, language, xp, levelInfo, streak, streakBonus
   useEffect(() => {
     Animated.spring(animWidth, {
       toValue: percent,
-      useNativeDriver: false,
+      useNativeDriver: true,
       tension: 40,
       friction: 8,
     }).start();
@@ -74,10 +75,8 @@ export function PlayerCard({ theme, language, xp, levelInfo, streak, streakBonus
             styles.bar,
             {
               backgroundColor: levelInfo?.color ?? theme.colors.primaryLight,
-              width: animWidth.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
+              transform: [{ scaleX: animWidth }],
+              transformOrigin: 'left',
             },
           ]}
         />

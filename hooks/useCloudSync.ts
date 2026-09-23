@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Alert, Platform } from 'react-native';
 import { storageGet, storageSet, storageRemove } from '../services/storage.service';
 import { useTheme } from '../hooks/useTheme';
 import { cloudService } from '../services/cloud.service';
+import { linkEmail } from '../services/auth.service';
 import { audioService } from '../services/audio.service';
 
 export function useCloudSync(visible: boolean, onClose: () => void) {
@@ -10,6 +11,8 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
   const [linkedEmail, setLinkedEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const mountedRef = useRef(true);
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   useEffect(() => {
     if (visible) {
@@ -20,7 +23,7 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
     }
   }, [visible]);
 
-  const handleLinkAccount = async (email: string) => {
+  const handleLinkAccount = async (email: string, password: string) => {
     if (!email.includes('@') || email.length < 5) {
       Alert.alert(
         language === 'en' ? 'Invalid Email' : 'Geçersiz E-posta',
@@ -34,7 +37,18 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
     audioService.triggerHaptic('medium');
 
     try {
-      await new Promise(r => setTimeout(r, 1200));
+      const ok = await linkEmail(email, password);
+      if (!mountedRef.current) return;
+      if (!ok) {
+        setSyncStatus('error');
+        Alert.alert(
+          language === 'en' ? 'Link Failed' : 'Bağlama Başarısız',
+          language === 'en'
+            ? 'Could not link this e-mail. Check the address and password.'
+            : 'Bu e-posta bağlanamadı. Adres ve parolayı kontrol edin.'
+        );
+        return;
+      }
       await storageSet('gq_user_email', email);
       setLinkedEmail(email);
       setSyncStatus('success');
@@ -58,7 +72,8 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
     audioService.triggerHaptic('light');
 
     try {
-      const success = await cloudService.syncStorageToCloud(linkedEmail);
+      const success = await cloudService.syncStorageToCloud(linkedEmail || 'anonymous');
+      if (!mountedRef.current) return;
       if (success) {
         setSyncStatus('success');
         Alert.alert(
@@ -83,7 +98,8 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
       setSyncStatus('idle');
       audioService.triggerHaptic('warning');
 
-      cloudService.restoreStorageFromCloud(linkedEmail).then(success => {
+      cloudService.restoreStorageFromCloud(linkedEmail || 'anonymous').then(success => {
+        if (!mountedRef.current) return;
         if (success) {
           setSyncStatus('success');
           Alert.alert(
@@ -135,8 +151,51 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
   const handleUnlink = async () => {
     audioService.triggerHaptic('warning');
     await storageRemove('gq_user_email');
+    await storageRemove('gq_user_name');
+    await storageRemove('gq_user_photo');
     setLinkedEmail(null);
     setSyncStatus('idle');
+  };
+
+  const handlePlayGamesSignIn = async () => {
+    setLoading(true);
+    setSyncStatus('idle');
+    audioService.triggerHaptic('medium');
+
+    try {
+      const { signInWithGooglePlayGames } = require('../services/googleAuth.service');
+      const player = await signInWithGooglePlayGames();
+      
+      if (player && player.id) {
+        const fakeEmail = `playgames_${player.id}`;
+        await storageSet('gq_user_email', fakeEmail);
+        
+        if (player.displayName) await storageSet('gq_user_name', player.displayName);
+        if (player.hiResImageUri || player.iconImageUri) {
+          await storageSet('gq_user_photo', player.hiResImageUri || player.iconImageUri || '');
+        }
+        
+        setLinkedEmail(fakeEmail);
+        setSyncStatus('success');
+        
+        Alert.alert(
+          language === 'en' ? 'Play Games Linked ✓' : 'Play Oyunlar Bağlandı ✓',
+          language === 'en'
+            ? `Welcome ${player.displayName || ''}! Your progress is linked to Play Games.`
+            : `Hoş geldin ${player.displayName || ''}! İlerlemeniz Play Oyunlar'a bağlandı.`
+        );
+      } else {
+        setSyncStatus('idle');
+      }
+    } catch (e) {
+      setSyncStatus('error');
+      Alert.alert(
+        language === 'en' ? 'Login Error' : 'Giriş Hatası',
+        language === 'en' ? 'Could not sign in with Google Play Games.' : 'Google Play Oyunlar ile giriş yapılamadı.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return {
@@ -144,6 +203,7 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
     loading,
     syncStatus,
     handleLinkAccount,
+    handlePlayGamesSignIn,
     handleBackup,
     handleRestore,
     handleUnlink,

@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   addGems as addGemsStorage, spendGems as spendGemsStorage,
   getGems, isPremium, setPremium,
@@ -8,8 +7,10 @@ import {
   getStats, updateStats,
   getUnlockedAchievements, unlockAchievement,
   getUnlockedCategories, unlockCategory as unlockCategoryStorage,
-  hasDoneDaily, markDailyDone as markDailyDoneStorage,
+  hasDoneDaily,
+  addScore, ScoreEntry,
 } from '../services/storage.service';
+import { submitScore } from '../services/leaderboard.service';
 import { getLevelFromXP, LevelInfo, XP_REWARDS } from '../constants/levels';
 import { getNewAchievements, Achievement, AchievementStats } from '../constants/achievements';
 
@@ -24,6 +25,7 @@ export interface RecordWinOptions {
   isDaily: boolean;
   elapsedSeconds: number;
   xpEarned: number;
+  gemsEarned?: number;
 }
 
 interface ProgressState {
@@ -178,6 +180,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         set({ xp: freshXP, levelInfo: getLevelFromXP(freshXP) });
       }
 
+      // Tek yazıcı: taban XP ve gem burada bir kez eklenir
+      if (opts.xpEarned > 0) {
+        const freshXP = await addXPStorage(opts.xpEarned);
+        set({ xp: freshXP, levelInfo: getLevelFromXP(freshXP) });
+      }
+      if (opts.gemsEarned && opts.gemsEarned > 0) {
+        const freshGems = await addGemsStorage(opts.gemsEarned);
+        set({ gems: freshGems });
+      }
+
       const stats = await getStats();
       const categoriesWon = [...new Set([...stats.categoriesWon, opts.category])];
       const hour = new Date().getHours();
@@ -235,11 +247,18 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       }
       
       try {
-        const { cloudService } = require('../services/cloud.service');
-        const scoreVal = opts.xpEarned + streakXpBonus;
-        await cloudService.submitScore(scoreVal, opts.mode || 'classic', opts.category || 'random');
-      } catch(e) {
-        // silently ignore cloud score failure
+        const entry: ScoreEntry = {
+          date: new Date().toISOString(),
+          mode: opts.mode || 'classic',
+          category: opts.category || 'random',
+          guesses: opts.guesses,
+          timeSeconds: opts.elapsedSeconds,
+          xpEarned: opts.xpEarned + streakXpBonus,
+        };
+        await addScore(entry);
+        await submitScore(entry);
+      } catch {
+        // yerel kayıt tutuldu; bulut skoru başarısız olsa da oyunu etkilemez
       }
     } catch (e) {
       console.error('recordWin failed:', e);

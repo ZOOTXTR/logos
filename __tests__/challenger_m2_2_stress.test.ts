@@ -403,7 +403,7 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
       ];
 
       testCases.forEach(({ raw, expected }) => {
-        const normalized = raw.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR');
+        const normalized = raw.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase();
         expect(normalized).toBe(expected);
         const inPool = ALL_WORDS.includes(expected);
         const inDict = trDict.has(expected);
@@ -416,7 +416,7 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
       const standardUpper = 'sinek'.toUpperCase();
       expect(standardUpper).toBe('SINEK');
 
-      const trNormalized = 'sinek'.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR');
+      const trNormalized = 'sinek'.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase();
       expect(trNormalized).toBe('SİNEK');
 
       // The Turkish dictionary/pool contains 'SİNEK', NOT 'SINEK'
@@ -455,7 +455,7 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
           expect(typeof w).toBe('string');
           expect(w.length).toBeGreaterThanOrEqual(3);
           // Check uppercase format
-          expect(w).toBe(w.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR'));
+          expect(w).toBe(w.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase());
         });
       });
 
@@ -492,7 +492,7 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
         expect(res).toBe('wrong_start');
       });
       expect(result.current.lives).toBe(2);
-      expect(result.current.errorMessage).toContain(lastChar);
+      expect(result.current.errorMessage).toContain('Kelime son');
     });
 
     it('prevents reusing words already in the chain', () => {

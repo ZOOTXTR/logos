@@ -1,7 +1,6 @@
 import React from 'react';
-import {
-  Modal, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator,
-} from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity, ActivityIndicator,  } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
@@ -16,7 +15,7 @@ interface CloudSyncModalProps {
 
 export function CloudSyncModal({ visible, onClose }: CloudSyncModalProps) {
   const { theme, language } = useTheme();
-  const { linkedEmail, loading, syncStatus, handleLinkAccount, handleBackup, handleRestore, handleUnlink } = useCloudSync(visible, onClose);
+  const { linkedEmail, loading, syncStatus, handleLinkAccount, handlePlayGamesSignIn, handleBackup, handleRestore, handleUnlink } = useCloudSync(visible, onClose);
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
@@ -27,7 +26,7 @@ export function CloudSyncModal({ visible, onClose }: CloudSyncModalProps) {
             <Text style={styles.headerTitle}>
               ☁️ {language === 'en' ? 'Cloud Save Sync' : 'Bulut Kayıt Portalı'}
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat">
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </LinearGradient>
@@ -49,6 +48,7 @@ export function CloudSyncModal({ visible, onClose }: CloudSyncModalProps) {
             ) : !linkedEmail ? (
               <CloudLoginForm
                 onLogin={handleLinkAccount}
+                onGoogleLogin={handlePlayGamesSignIn}
                 theme={theme}
                 language={language}
               />

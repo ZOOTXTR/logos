@@ -1,8 +1,6 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView,
-  TouchableOpacity, StatusBar, Dimensions, Share, Platform,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Share, Platform, useWindowDimensions } from 'react-native';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -16,9 +14,7 @@ import { Confetti } from '../components/Confetti';
 import { GameResultOverlay, GameResultOverlayProps } from '../components/GameResultOverlay';
 import { TRANSLATIONS } from '../constants/translations';
 import { LoadingView } from '../components/LoadingView';
-
-const { width } = Dimensions.get('window');
-const CELL_SIZE = Math.floor((width - 48) / 11); // Side by side cell sizing
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface MiniBoardProps {
   board: Board;
@@ -28,15 +24,16 @@ interface MiniBoardProps {
   colorBlind: boolean;
   dyslexiaFont: boolean;
   theme: any;
+  cellSize: number;
 }
 
-const getCellBg = (status: LetterStatus, isSolved: boolean, colorBlind: boolean, theme: any) => {
-  if (isSolved) return colorBlind ? '#0072B2' : theme.colors.correct;
+const getCellBg = (status: LetterStatus, colorBlind: boolean, theme: any) => {
+  if (status === 'empty' || status === 'tbd') return 'transparent';
   switch (status) {
     case 'correct': return colorBlind ? '#0072B2' : theme.colors.correct;
     case 'present': return colorBlind ? '#E69F00' : theme.colors.present;
     case 'absent': return theme.colors.absent;
-    case 'tbd': return theme.colors.surfaceLight;
+     return theme.colors.surfaceLight;
     default: return theme.colors.empty;
   }
 };
@@ -49,19 +46,22 @@ const MiniBoard = React.memo(function MiniBoard({
   colorBlind,
   dyslexiaFont,
   theme,
+  cellSize
 }: MiniBoardProps) {
   return (
-    <View style={styles.board}>
+    <View style={[styles.board, isSolved && { opacity: 0.5 }]}>
       {board.map((row, rIdx) => (
         <View key={rIdx} style={styles.row}>
           {row.map((cell, cIdx) => {
-            const bg = getCellBg(cell.status, isSolved && rIdx >= currentRow, colorBlind, theme);
+            const bg = getCellBg(cell.status, colorBlind, theme);
             return (
               <View
                 key={cIdx}
                 style={[
                   styles.cell,
                   {
+                    width: cellSize,
+                    height: cellSize + 6,
                     backgroundColor: bg,
                     borderColor: cell.status === 'empty' ? theme.colors.border : 'transparent',
                     borderWidth: cell.status === 'empty' ? 1.5 : 0
@@ -89,6 +89,9 @@ export default function DordleScreen() {
   const [resultOverlay, setResultOverlay] = useState<GameResultOverlayProps>({ visible: false, title: '', emoji: '', message: '', buttons: [], theme: theme, language: language });
   const dismissOverlay = () => setResultOverlay({ visible: false, title: '', emoji: '', message: '', buttons: [], theme: theme, language: language });
 
+  const { width } = useWindowDimensions();
+  const cellSize = Math.floor((width - 48) / 11);
+
 
 
   const t = TRANSLATIONS[language];
@@ -108,7 +111,7 @@ export default function DordleScreen() {
     audioService.triggerHaptic('light');
     let board1Grid = '';
     let board2Grid = '';
-    const limit = game.gameStatus === 'won' ? game.currentRow : game.maxAttempts;
+    const limit = game.gameStatus === 'won' ? game.currentRow + 1 : game.maxAttempts;
 
     game.board1.slice(0, limit).forEach(row => {
       let r = '';
@@ -131,8 +134,8 @@ export default function DordleScreen() {
     });
 
     const shareText = language === 'en'
-      ? `💎 Logos Dordle - ${game.gameStatus === 'won' ? `${game.currentRow}/${game.maxAttempts}` : 'X'}/7 🎭\n\nLeft Word:\n${board1Grid}\nRight Word:\n${board2Grid}\nPlay now! 🚀`
-      : `💎 Logos Dordle - ${game.gameStatus === 'won' ? `${game.currentRow}/${game.maxAttempts}` : 'X'}/7 🎭\n\nSol Kelime:\n${board1Grid}\nSağ Kelime:\n${board2Grid}\nSen de oyna! 🚀`;
+      ? `💎 Logos Dordle - ${game.gameStatus === 'won' ? `${game.currentRow + 1}/${game.maxAttempts}` : 'X'}/7 🎭\n\nLeft Word:\n${board1Grid}\nRight Word:\n${board2Grid}\nPlay now! 🚀`
+      : `💎 Logos Dordle - ${game.gameStatus === 'won' ? `${game.currentRow + 1}/${game.maxAttempts}` : 'X'}/7 🎭\n\nSol Kelime:\n${board1Grid}\nSağ Kelime:\n${board2Grid}\nSen de oyna! 🚀`;
 
     if (Platform.OS === 'web') {
       try {
@@ -167,6 +170,7 @@ export default function DordleScreen() {
   };
 
   const handleSubmit = useCallback(async () => {
+    if (game.gameStatus !== 'playing') return;
     audioService.triggerHaptic('medium');
     const result = game.submitGuess();
     if (result === 'short') {
@@ -234,7 +238,7 @@ export default function DordleScreen() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (game.gameStatus !== 'playing') return;
 
-      const key = e.key.toLocaleUpperCase('tr-TR');
+      const key = e.key.toUpperCase();
 
       if (key === 'ENTER') {
         handleSubmit();
@@ -250,10 +254,6 @@ export default function DordleScreen() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [game.gameStatus, handleSubmit, handleDelete, handleKey]);
-
-  if (progress.loading) {
-    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
-  }
 
   const mergedRevealedLetters = useMemo(() => {
     const merged: Record<string, LetterStatus> = {};
@@ -274,13 +274,17 @@ export default function DordleScreen() {
     return merged;
   }, [game.revealedLetters1, game.revealedLetters2]);
 
+  if (progress.loading) {
+    return <LoadingView message={language === 'en' ? 'Loading...' : 'Yükleniyor...'} />;
+  }
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
       <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()}>
+          <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Geri">
             <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← Geri</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: theme.colors.text }]}>🎭 Çift Kelime</Text>
@@ -301,6 +305,7 @@ export default function DordleScreen() {
             colorBlind={colorBlind}
             dyslexiaFont={dyslexiaFont}
             theme={theme}
+            cellSize={cellSize}
           />
           <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
           <MiniBoard
@@ -311,6 +316,7 @@ export default function DordleScreen() {
             colorBlind={colorBlind}
             dyslexiaFont={dyslexiaFont}
             theme={theme}
+            cellSize={cellSize}
           />
         </View>
 
@@ -355,7 +361,7 @@ const styles = StyleSheet.create({
   boardsContainer: { flex: 1, flexDirection: 'row', justifyContent: 'center', gap: SPACING.md, alignItems: 'center' },
   board: { gap: 4 },
   row: { flexDirection: 'row', gap: 4 },
-  cell: { width: CELL_SIZE, height: CELL_SIZE + 6, borderRadius: BORDER_RADIUS.sm, alignItems: 'center', justifyContent: 'center' },
+  cell: { borderRadius: BORDER_RADIUS.sm, alignItems: 'center', justifyContent: 'center' },
   cellText: { fontSize: FONTS.size.md, fontWeight: '800' },
   divider: { width: 1, height: '80%' },
   keyboardContainer: { paddingBottom: SPACING.md, marginTop: SPACING.md },

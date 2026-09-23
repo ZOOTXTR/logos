@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,6 +10,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Letter, LetterStatus } from '../constants/words';
 import { BORDER_RADIUS } from '../constants/theme';
+
+import { Theme } from '../constants/themes';
 
 const COLORBLIND_COLORS = {
   correct: { bg: '#0072B2', border: '#0072B2' },
@@ -24,10 +27,10 @@ interface AnimatedCellProps {
   cellFontSize: number;
   colorBlind: boolean;
   dyslexiaFont: boolean;
-  theme: any;
+  theme: Theme;
 }
 
-function getLetterBg(status: LetterStatus | undefined, colorBlind: boolean, theme: any): string {
+function getLetterBg(status: LetterStatus | undefined, colorBlind: boolean, theme: Theme): string {
   switch (status) {
     case 'correct': return colorBlind ? COLORBLIND_COLORS.correct.bg : theme.colors.correct;
     case 'present': return colorBlind ? COLORBLIND_COLORS.present.bg : theme.colors.present;
@@ -38,7 +41,7 @@ function getLetterBg(status: LetterStatus | undefined, colorBlind: boolean, them
   }
 }
 
-function getLetterBorder(status: LetterStatus | undefined, theme: any): string {
+function getLetterBorder(status: LetterStatus | undefined, theme: Theme): string {
   switch (status) {
     case 'correct': return theme.colors.correct;
     case 'present': return theme.colors.present;
@@ -87,6 +90,13 @@ function AnimatedCellComponent({ letter, colIndex, rowIndex, currentRow, cellSiz
 
   return (
     <Animated.View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={
+        letter.char
+          ? `${letter.char}${isEvaluated ? (letter.status === 'correct' ? ', doğru' : letter.status === 'present' ? ', mevcut' : ', yok') : ''}`
+          : 'boş'
+      }
       style={[
         styles.cell,
         { width: cellSize, height: cellSize * 1.15 },

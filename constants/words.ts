@@ -1,4 +1,4 @@
-import { WORD_BANK_EN, ALL_WORDS_EN } from './words_en';
+﻿import { WORD_BANK_EN, ALL_WORDS_EN } from './words_en';
 export { ALL_WORDS_EN } from './words_en';
 
 // Kategorize edilmiş Türkçe kelime listesi (TÜMÜ KESİNLİKLE 5 HARFLİ)
@@ -23,7 +23,7 @@ export const WORD_BANK: Record<Exclude<Category, 'random'>, string[]> = {
     'SİNEK', 'MİDYE', 'SIĞIR', 'AYGIR', 'KATIR', 'AKREP', 'ŞAHİN', 'HAMSİ',
     'HÜTHÜT', 'KELER', 'TAVUS', 'KEKLİ', 'DOĞAN',
     'AYI', 'KEDİ', 'KURT', 'FARE', 'DEVE', 'TEKE', 'KUZU', 'BOĞA', 'DANA', 'MORS',
-    'KAPLAN', 'MAYMUN', 'SİNCAP', 'KUNDUZ', 'LEOPAR', 'BALİNA', 'SIRTLAN', 'PENGUEN', 'TIMSAH', 'BAYKUŞ'
+    'KAPLAN', 'MAYMUN', 'SİNCAP', 'KUNDUZ', 'LEOPAR', 'BALİNA', 'SIRTLAN', 'PENGUEN', 'TİMSAH', 'BAYKUŞ'
   ],
   sehirler: [
     'İZMİR', 'BURSA', 'ADANA', 'KONYA', 'SİVAS', 'DÜZCE', 'HATAY', 'SİNOP',
@@ -130,12 +130,28 @@ const FILTERED_BANK_EN: Record<string, string[]> = {
   spor: filterWordList(WORD_BANK_EN.spor),
 };
 
+const sessionHistory: Record<string, Set<string>> = {};
+
 export const getRandomWord = (category: Category = 'random', lang: 'tr' | 'en' = 'tr'): string => {
   const bank = lang === 'en' ? FILTERED_BANK_EN : FILTERED_BANK_TR;
-  const pool = bank[category] || bank.random;
+  let pool = bank[category] || bank.random;
+  const historyKey = `${lang}:${category}`;
+
+  // Filter out already seen words in this session (dil + kategori bazlı)
+  const unseenPool = pool.filter(w => !sessionHistory[historyKey]?.has(w));
+  if (unseenPool.length > 0) {
+    pool = unseenPool;
+  } else {
+    // If all words seen, reset history for this language+category only
+    if (sessionHistory[historyKey]) sessionHistory[historyKey].clear();
+  }
+
   const selected = pool[Math.floor(Math.random() * pool.length)];
+  if (!sessionHistory[historyKey]) sessionHistory[historyKey] = new Set();
+  sessionHistory[historyKey].add(selected);
+
   return lang === 'tr'
-    ? selected.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')
+    ? selected.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase()
     : selected.toUpperCase();
 };
 
@@ -146,6 +162,6 @@ export const getDailyWord = (lang: 'tr' | 'en' = 'tr'): string => {
   const words = lang === 'en' ? FILTERED_ALL_WORDS_EN : FILTERED_ALL_WORDS_TR;
   const selected = words[seed % words.length];
   return lang === 'tr'
-    ? selected.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')
+    ? selected.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase()
     : selected.toUpperCase();
 };

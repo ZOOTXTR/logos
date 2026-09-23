@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 
@@ -43,7 +44,7 @@ export function GameResultOverlay({
   return (
     <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <Animated.View style={[styles.content, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, transform: [{ scale: scaleAnim }] }]}>
+        <Animated.View style={[styles.content, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, transform: [{ scale: scaleAnim }] }]} accessibilityRole="alert">
           <View style={styles.emojiRow}>
             <Text style={styles.emoji}>{emoji}</Text>
           </View>
@@ -65,11 +66,11 @@ export function GameResultOverlay({
             </View>
           )}
 
-          {word && (
+          {word ? (
             <Text style={[styles.wordReveal, { color: theme.colors.primaryLight }]}>
               {language === 'en' ? 'Answer:' : 'Cevap:'} {word.toUpperCase()}
             </Text>
-          )}
+          ) : null}
 
           <View style={styles.buttonRow}>
             {buttons.map((btn, i) => (
@@ -81,6 +82,8 @@ export function GameResultOverlay({
                 ]}
                 onPress={btn.onPress}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={btn.label}
               >
                 {btn.primary ? (
                   <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.buttonGrad}>

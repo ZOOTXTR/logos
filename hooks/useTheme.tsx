@@ -55,9 +55,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const load = async () => {
-      const [saved, unlocked, cb, sound, haptic, notif, lang, df] = await Promise.all([
-        storageGet('gq_theme'),
-        storageGet('gq_unlocked_themes'),
+      try {
+        const [saved, unlocked, cb, sound, haptic, notif, lang, df] = await Promise.all([
+          storageGet('gq_theme'),
+          storageGet('gq_unlocked_themes'),
         storageGet('gq_color_blind'),
         storageGet('gq_sound_enabled'),
         storageGet('gq_haptic_enabled'),
@@ -82,6 +83,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (notif !== null) setNotifEnabledState(notif === 'true');
       if (lang !== null) setLanguageState(lang as 'tr' | 'en');
       if (df !== null) setDyslexiaFontState(df === 'true');
+      } catch (err) {
+        console.error('Failed to load theme settings:', err);
+      }
     };
     load();
   }, []);

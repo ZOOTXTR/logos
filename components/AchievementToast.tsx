@@ -1,14 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { Text } from './CustomText';
 import { COLORS, FONTS, BORDER_RADIUS, SPACING } from '../constants/theme';
 import { Achievement } from '../constants/achievements';
 
 interface AchievementToastProps {
   achievement: Achievement | null;
   onDismiss: () => void;
+  language?: 'tr' | 'en';
 }
 
-export function AchievementToast({ achievement, onDismiss }: AchievementToastProps) {
+export function AchievementToast({ achievement, onDismiss, language = 'tr' }: AchievementToastProps) {
   const slideAnim = useRef(new Animated.Value(-120)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -32,19 +34,25 @@ export function AchievementToast({ achievement, onDismiss }: AchievementToastPro
 
   if (!achievement) return null;
 
+  const title = language === 'en' && achievement.titleEn ? achievement.titleEn : achievement.title;
+  const desc = language === 'en' && achievement.descriptionEn ? achievement.descriptionEn : achievement.description;
+
   return (
     <Animated.View
       style={[
         styles.container,
         { transform: [{ translateY: slideAnim }], opacity: opacityAnim },
       ]}
+      accessible
+      accessibilityLiveRegion="polite"
+      accessibilityLabel={`${language === 'en' ? 'Achievement unlocked' : 'Başarım açıldı'}: ${title}`}
     >
       <TouchableOpacity style={styles.inner} onPress={onDismiss} activeOpacity={0.9}>
         <Text style={styles.emoji}>{achievement.emoji}</Text>
         <View style={styles.text}>
-          <Text style={styles.unlocked}>🏅 Başarım Açıldı!</Text>
-          <Text style={styles.title}>{achievement.title}</Text>
-          <Text style={styles.desc}>{achievement.description}</Text>
+          <Text style={styles.unlocked}>{language === 'en' ? '🏅 Achievement Unlocked!' : '🏅 Başarım Açıldı!'}</Text>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.desc}>{desc}</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>

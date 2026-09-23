@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Modal, View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView,
-} from 'react-native';
+import { Modal, View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView,  } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
@@ -10,6 +8,7 @@ import { cloudService } from '../services/cloud.service';
 import { audioService } from '../services/audio.service';
 import { FeedbackTypeSelector } from './FeedbackTypeSelector';
 import { FeedbackForm } from './FeedbackForm';
+import { TRANSLATIONS } from '../constants/translations';
 
 interface FeedbackModalProps {
   visible: boolean;
@@ -20,6 +19,7 @@ type FeedbackType = 'bug' | 'suggestion' | 'complaint' | 'other';
 
 export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
   const { theme, language } = useTheme();
+  const t = TRANSLATIONS[language];
 
   const [type, setType] = useState<FeedbackType>('suggestion');
   const [message, setMessage] = useState('');
@@ -29,10 +29,8 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
   const handleSubmit = async () => {
     if (message.trim().length < 10) {
       Alert.alert(
-        language === 'en' ? 'Short Message' : 'Çok Kısa',
-        language === 'en'
-          ? 'Please write at least 10 characters to explain your feedback.'
-          : 'Geri bildiriminizi açıklamak için lütfen en az 10 karakter yazın.'
+        t.feedbackShortTitle,
+        t.feedbackShortMsg
       );
       return;
     }
@@ -48,13 +46,11 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
     if (ok) {
       audioService.triggerHaptic('success');
       Alert.alert(
-        language === 'en' ? 'Thank You! 🎉' : 'Teşekkürler! 🎉',
-        language === 'en'
-          ? 'Your feedback has been successfully sent to the developer.'
-          : 'Geri bildiriminiz başarıyla geliştirici ekibine iletildi.',
+        t.feedbackSuccessTitle,
+        t.feedbackSuccessMsg,
         [
           {
-            text: 'Tamam',
+            text: t.ok,
             onPress: () => {
               setMessage('');
               setEmail('');
@@ -67,10 +63,8 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
     } else {
       audioService.triggerHaptic('warning');
       Alert.alert(
-        language === 'en' ? 'Error' : 'Hata',
-        language === 'en'
-          ? 'Could not send feedback. Please check your internet connection.'
-          : 'Geri bildirim gönderilemedi. Lütfen internet bağlantınızı kontrol edin.'
+        t.feedbackErrorTitle,
+        t.feedbackErrorMsg
       );
     }
   };
@@ -81,27 +75,25 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
       >
-        <View style={[styles.container, { backgroundColor: '#13132B', borderColor: theme.colors.border }]}>
+        <View style={[styles.container, { backgroundColor: '#13132B', borderColor: theme.colors.border }]} accessibilityViewIsModal={true}>
           {/* Header */}
           <LinearGradient
             colors={[theme.colors.primary, theme.colors.primaryDark]}
             style={styles.header}
           >
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+            <TouchableOpacity style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat" hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} onPress={onClose}>
               <Text style={styles.closeX}>✕</Text>
             </TouchableOpacity>
             <Text style={styles.titleEmoji}>📣</Text>
             <Text style={styles.titleText}>
-              {language === 'en' ? 'Developer Feedback' : 'Geri Bildirim'}
+              {t.feedbackTitle}
             </Text>
           </LinearGradient>
 
           <ScrollView style={styles.scroll} contentContainerStyle={{ paddingBottom: SPACING.xl }} showsVerticalScrollIndicator={false}>
             {/* Intro text */}
             <Text style={[styles.introText, { color: theme.colors.textSecondary }]}>
-              {language === 'en'
-                ? 'We want to make Logos better! Share your bugs, ideas, or things you want to change directly with us.'
-                : 'Logos\'i daha iyi yapmak istiyoruz! Karşılaştığınız hataları, fikirlerinizi veya değişmesini istediğiniz şeyleri bizimle paylaşın.'}
+              {t.feedbackIntro}
             </Text>
 
             <FeedbackTypeSelector selectedType={type} onSelect={setType} theme={theme} language={language} />
@@ -130,7 +122,7 @@ export function FeedbackModal({ visible, onClose }: FeedbackModalProps) {
                   <ActivityIndicator color="white" />
                 ) : (
                   <Text style={styles.submitText}>
-                    {language === 'en' ? 'SUBMIT FEEDBACK' : 'BİLDİRİMİ GÖNDER'}
+                    {t.feedbackSubmit}
                   </Text>
                 )}
               </LinearGradient>

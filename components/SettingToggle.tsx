@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Switch, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Switch, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import { FONTS, SPACING } from '../constants/theme';
 import { audioService } from '../services/audio.service';
 
@@ -30,7 +31,9 @@ export function SettingToggle({ label, emoji, value, onToggle, description, colo
         onToggle(!value);
       }}
       activeOpacity={0.7}
-      accessibilityLabel={`Toggle ${label}`}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
+      accessibilityLabel={label}
     >
       <Text style={styles.emoji}>{emoji}</Text>
       <View style={styles.labelContainer}>
@@ -53,6 +56,8 @@ export function SettingToggle({ label, emoji, value, onToggle, description, colo
         trackColor={{ false: colors.border, true: colors.primary }}
         thumbColor={colors.text}
         style={{ pointerEvents: 'none' }}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
       />
     </TouchableOpacity>
   );

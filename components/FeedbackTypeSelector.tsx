@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 
 type FeedbackType = 'bug' | 'suggestion' | 'complaint' | 'other';

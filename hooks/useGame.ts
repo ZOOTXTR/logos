@@ -25,7 +25,15 @@ export interface GameState {
   elapsedSeconds: number;
 }
 
-const MAX_SPEED_TIME = 90;
+const getSpeedTime = (diff: Difficulty) => {
+  switch (diff) {
+    case 'easy': return 60;
+    case 'normal': return 90;
+    case 'hard': return 120;
+    case 'expert': return 150;
+    default: return 90;
+  }
+};
 
 export function useGame(
   difficulty: Difficulty = 'normal',
@@ -33,13 +41,18 @@ export function useGame(
   category: Category = 'random',
   lang: 'tr' | 'en' = 'tr'
 ) {
-  const maxGuesses = DIFFICULTY_MAX_GUESSES[difficulty];
+  const initialMaxGuesses = DIFFICULTY_MAX_GUESSES[difficulty];
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const endTimeRef = useRef<number>(0);
   const stateRef = useRef<GameState>(null!);
   const paramsRef = useRef({ difficulty, mode, category, lang });
-  paramsRef.current = { difficulty, mode, category, lang };
 
   const [dictionaryReady, setDictionaryReady] = useState(false);
+  const [resetToken, setResetToken] = useState(0);
+
+  useEffect(() => {
+    paramsRef.current = { difficulty, mode, category, lang };
+  }, [difficulty, mode, category, lang]);
 
   useEffect(() => {
     if (isDictionaryReady()) { setDictionaryReady(true); return; }
@@ -54,12 +67,12 @@ export function useGame(
   const [state, setState] = useState<GameState>(() => {
     const target = getWord(lang);
     return {
-      board: createEmptyBoard(maxGuesses, target.length),
+      board: createEmptyBoard(initialMaxGuesses, target.length),
       currentRow: 0, currentCol: 0,
       targetWord: target, gameStatus: 'playing',
       revealedLetters: {}, hintsUsed: 0,
       difficulty, mode, category,
-      timeLeft: MAX_SPEED_TIME,
+      timeLeft: getSpeedTime(difficulty),
       isTimerRunning: mode === 'speed',
       startTime: Date.now(), elapsedSeconds: 0,
     };
@@ -75,18 +88,24 @@ export function useGame(
     }
     timerRef.current = setInterval(() => {
       setState(prev => {
-        if (prev.timeLeft <= 1) {
+        if (!endTimeRef.current) endTimeRef.current = Date.now() + prev.timeLeft * 1000;
+        const left = Math.max(0, Math.round((endTimeRef.current - Date.now()) / 1000));
+        if (left <= 0) {
           clearInterval(timerRef.current!);
-          return { ...prev, timeLeft: 0, gameStatus: 'lost' };
+          return { ...prev, timeLeft: 0, gameStatus: 'lost', isTimerRunning: false };
         }
-        return { ...prev, timeLeft: prev.timeLeft - 1 };
+        return { ...prev, timeLeft: left };
       });
     }, 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [mode, state.gameStatus]);
+  }, [mode, state.gameStatus, resetToken]);
 
   const addTime = useCallback((seconds: number) => {
-    setState(prev => ({ ...prev, timeLeft: Math.min(prev.timeLeft + seconds, MAX_SPEED_TIME + 30) }));
+    setState(prev => {
+      const newTime = Math.min(prev.timeLeft + seconds, getSpeedTime(prev.difficulty) + 30);
+      endTimeRef.current = Date.now() + newTime * 1000;
+      return { ...prev, timeLeft: newTime };
+    });
   }, []);
 
   const resetGame = useCallback((newDifficulty?: Difficulty, newMode?: GameMode, newCategory?: Category, newLang?: 'tr' | 'en') => {
@@ -99,16 +118,19 @@ export function useGame(
     const mg = DIFFICULTY_MAX_GUESSES[d];
     const word = m === 'daily' ? getDailyWord(l) : getRandomWord(c, l);
 
+    endTimeRef.current = 0;
     setState({
       board: createEmptyBoard(mg, word.length),
       currentRow: 0, currentCol: 0,
       targetWord: word, gameStatus: 'playing',
       revealedLetters: {}, hintsUsed: 0,
       difficulty: d, mode: m, category: c,
-      timeLeft: MAX_SPEED_TIME,
+      timeLeft: getSpeedTime(d),
       isTimerRunning: m === 'speed',
       startTime: Date.now(), elapsedSeconds: 0,
     });
+    // Timer effect'ini yeniden tetikle (reset sırasında oyun zaten 'playing' olsa bile)
+    setResetToken(t => t + 1);
   }, []);
 
   const addLetter = useCallback((letter: string) => {
@@ -124,6 +146,7 @@ export function useGame(
 
   const deleteLetter = useCallback(() => {
     setState(prev => {
+      if (prev.gameStatus !== 'playing') return prev;
       if (prev.currentCol === 0) return prev;
       const newBoard = [...prev.board];
       const newRow = [...newBoard[prev.currentRow]];
@@ -135,6 +158,7 @@ export function useGame(
 
   const submitGuess = useCallback((): 'short' | 'not_valid' | 'not_ready' | 'submitted' => {
     const s = stateRef.current;
+    if (s.gameStatus !== 'playing') return 'not_valid';
     const wordLen = s.targetWord.length;
     if (s.currentCol < wordLen) return 'short';
     if (!dictionaryReady) return 'not_ready';
@@ -142,7 +166,7 @@ export function useGame(
     const p = paramsRef.current;
     const rawGuess = s.board[s.currentRow].map(l => l.char).join('');
     const guess = p.lang === 'tr'
-      ? rawGuess.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')
+      ? rawGuess.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase()
       : rawGuess.toUpperCase();
     const dictionary = getDictionary(p.lang);
     const targetPool = p.lang === 'en' ? ALL_WORDS_EN : ALL_WORDS;
@@ -182,6 +206,7 @@ export function useGame(
         currentRow: won || lost ? prev.currentRow : nextRow,
         currentCol: 0,
         gameStatus: won ? 'won' : lost ? 'lost' : 'playing',
+        isTimerRunning: won || lost ? false : prev.isTimerRunning,
         revealedLetters: newRevealed,
         elapsedSeconds: Math.floor((Date.now() - prev.startTime) / 1000),
       };
@@ -190,7 +215,7 @@ export function useGame(
     return 'submitted';
   }, [dictionaryReady]);
 
-  const useHint = useCallback((): string | null => {
+  const useHint = useCallback((lang: string = 'tr'): string | null => {
     const s = stateRef.current;
     const target = s.targetWord;
     const unknownPositions: number[] = [];
@@ -201,14 +226,14 @@ export function useGame(
     if (unknownPositions.length === 0) return null;
     const pos = unknownPositions[Math.floor(Math.random() * unknownPositions.length)];
     setState(prev => ({ ...prev, hintsUsed: prev.hintsUsed + 1 }));
-    return `${pos + 1}. harf: ${target[pos]}`;
+    return lang === 'en' ? `Letter ${pos + 1}: ${target[pos]}` : `${pos + 1}. harf: ${target[pos]}`;
   }, []);
 
   const useSweeper = useCallback((): string[] => {
     const s = stateRef.current;
     const p = paramsRef.current;
     const target = p.lang === 'tr'
-      ? s.targetWord.replace(/i/g, 'İ').replace(/ı/g, 'I').toLocaleUpperCase('tr-TR')
+      ? s.targetWord.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase()
       : s.targetWord.toUpperCase();
     const alphabet = (p.lang === 'en' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ').split('');
     const wrongLetters = alphabet.filter(l => !target.includes(l) && s.revealedLetters[l] !== 'absent');
@@ -232,7 +257,7 @@ export function useGame(
 
   return useMemo(() => ({
     ...state,
-    maxGuesses,
+    maxGuesses: DIFFICULTY_MAX_GUESSES[state.difficulty],
     addLetter,
     deleteLetter,
     submitGuess,
@@ -240,5 +265,5 @@ export function useGame(
     useHint,
     useSweeper,
     addTime,
-  }), [state, maxGuesses, addLetter, deleteLetter, submitGuess, resetGame, useHint, useSweeper, addTime]);
+  }), [state, addLetter, deleteLetter, submitGuess, resetGame, useHint, useSweeper, addTime]);
 }

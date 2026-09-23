@@ -63,12 +63,41 @@ const DEFAULT_STATS: FullStats = {
   guessDistribution: {},
 };
 
+import * as SecureStore from 'expo-secure-store';
+
+const SECURE_KEYS = {
+  GEMS: 'gq_secure_gems',
+  PREMIUM: 'gq_secure_premium',
+  XP: 'gq_secure_xp',
+  STREAK_COUNT: 'gq_secure_streak',
+  MAX_STREAK: 'gq_secure_max_streak',
+  CATEGORIES: 'gq_secure_categories',
+};
+
 // ── Gem ──────────────────────────────────────────────────
 export const getGems = async (): Promise<number> => {
+  try {
+    const s = await SecureStore.getItemAsync(SECURE_KEYS.GEMS);
+    if (s) return parseInt(s, 10);
+  } catch {}
   const v = await AsyncStorage.getItem(KEYS.GEMS);
-  return v ? parseInt(v) : 150;
+  const gems = v ? parseInt(v, 10) : 150;
+  if (v) {
+    try {
+      await SecureStore.setItemAsync(SECURE_KEYS.GEMS, String(gems));
+      await AsyncStorage.removeItem(KEYS.GEMS);
+    } catch {}
+  }
+  return gems;
 };
-const setGems = async (n: number) => AsyncStorage.setItem(KEYS.GEMS, String(n));
+export const setGems = async (n: number) => {
+  try {
+    await SecureStore.setItemAsync(SECURE_KEYS.GEMS, String(n));
+    await AsyncStorage.removeItem(KEYS.GEMS);
+  } catch {
+    await AsyncStorage.setItem(KEYS.GEMS, String(n));
+  }
+};
 export const addGems = async (n: number): Promise<number> => mutex(async () => {
   const cur = await getGems(); const next = cur + n;
   await setGems(next); return next;
@@ -82,17 +111,56 @@ export const spendGems = async (n: number): Promise<{ success: boolean; remainin
 
 // ── Premium ──────────────────────────────────────────────
 export const isPremium = async (): Promise<boolean> => {
-  const v = await AsyncStorage.getItem(KEYS.PREMIUM); return v === 'true';
+  try {
+    const s = await SecureStore.getItemAsync(SECURE_KEYS.PREMIUM);
+    if (s) return s === 'true';
+  } catch {}
+  const v = await AsyncStorage.getItem(KEYS.PREMIUM);
+  const premium = v === 'true';
+  if (v) {
+    try {
+      await SecureStore.setItemAsync(SECURE_KEYS.PREMIUM, String(premium));
+      await AsyncStorage.removeItem(KEYS.PREMIUM);
+    } catch {}
+  }
+  return premium;
 };
-export const setPremium = async (v: boolean) => AsyncStorage.setItem(KEYS.PREMIUM, String(v));
+export const setPremium = async (v: boolean) => {
+  try {
+    await SecureStore.setItemAsync(SECURE_KEYS.PREMIUM, String(v));
+    await AsyncStorage.removeItem(KEYS.PREMIUM);
+  } catch {
+    await AsyncStorage.setItem(KEYS.PREMIUM, String(v));
+  }
+};
 
 // ── XP ───────────────────────────────────────────────────
 export const getXP = async (): Promise<number> => {
-  const v = await AsyncStorage.getItem(KEYS.XP); return v ? parseInt(v) : 0;
+  try {
+    const s = await SecureStore.getItemAsync(SECURE_KEYS.XP);
+    if (s) return parseInt(s, 10);
+  } catch {}
+  const v = await AsyncStorage.getItem(KEYS.XP);
+  const xp = v ? parseInt(v, 10) : 0;
+  if (v) {
+    try {
+      await SecureStore.setItemAsync(SECURE_KEYS.XP, String(xp));
+      await AsyncStorage.removeItem(KEYS.XP);
+    } catch {}
+  }
+  return xp;
+};
+export const setXP = async (n: number) => {
+  try {
+    await SecureStore.setItemAsync(SECURE_KEYS.XP, String(n));
+    await AsyncStorage.removeItem(KEYS.XP);
+  } catch {
+    await AsyncStorage.setItem(KEYS.XP, String(n));
+  }
 };
 export const addXP = async (n: number): Promise<number> => mutex(async () => {
   const cur = await getXP(); const next = cur + n;
-  await AsyncStorage.setItem(KEYS.XP, String(next)); return next;
+  await setXP(next); return next;
 });
 
 // ── Stats ────────────────────────────────────────────────
@@ -116,11 +184,57 @@ export const updateStats = async (patch: Partial<FullStats>): Promise<FullStats>
 
 // ── Streak ───────────────────────────────────────────────
 export const getStreak = async (): Promise<{ current: number; max: number }> => {
-  const [cur, max] = await Promise.all([
+  let current = 0;
+  let max = 0;
+  let curMigrated = false;
+  let maxMigrated = false;
+
+  try {
+    const sCur = await SecureStore.getItemAsync(SECURE_KEYS.STREAK_COUNT);
+    const sMax = await SecureStore.getItemAsync(SECURE_KEYS.MAX_STREAK);
+    if (sCur) { current = parseInt(sCur, 10); curMigrated = true; }
+    if (sMax) { max = parseInt(sMax, 10); maxMigrated = true; }
+  } catch {}
+
+  const [aCur, aMax] = await Promise.all([
     AsyncStorage.getItem(KEYS.STREAK_COUNT),
     AsyncStorage.getItem(KEYS.MAX_STREAK),
   ]);
-  return { current: cur ? parseInt(cur) : 0, max: max ? parseInt(max) : 0 };
+
+  if (!curMigrated && aCur) {
+    current = parseInt(aCur, 10);
+    try {
+      await SecureStore.setItemAsync(SECURE_KEYS.STREAK_COUNT, String(current));
+      await AsyncStorage.removeItem(KEYS.STREAK_COUNT);
+    } catch {}
+  }
+  if (!maxMigrated && aMax) {
+    max = parseInt(aMax, 10);
+    try {
+      await SecureStore.setItemAsync(SECURE_KEYS.MAX_STREAK, String(max));
+      await AsyncStorage.removeItem(KEYS.MAX_STREAK);
+    } catch {}
+  }
+
+  return { current, max };
+};
+
+export const setStreak = async (current: number, max: number) => {
+  try {
+    await Promise.all([
+      SecureStore.setItemAsync(SECURE_KEYS.STREAK_COUNT, String(current)),
+      SecureStore.setItemAsync(SECURE_KEYS.MAX_STREAK, String(max)),
+    ]);
+    await Promise.all([
+      AsyncStorage.removeItem(KEYS.STREAK_COUNT),
+      AsyncStorage.removeItem(KEYS.MAX_STREAK),
+    ]);
+  } catch {
+    await Promise.all([
+      AsyncStorage.setItem(KEYS.STREAK_COUNT, String(current)),
+      AsyncStorage.setItem(KEYS.MAX_STREAK, String(max)),
+    ]);
+  }
 };
 
 export const updateStreak = async (won: boolean): Promise<{ current: number; max: number; bonusGems: number }> => mutex(async () => {
@@ -135,7 +249,7 @@ export const updateStreak = async (won: boolean): Promise<{ current: number; max
     if (lastDate === today) {
       // Bugün zaten oynadı, streak değişmez
     } else {
-      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      const y = new Date(); y.setDate(y.getDate() - 1); const yesterday = y.toDateString();
       newCurrent = lastDate === yesterday ? current + 1 : 1;
       await AsyncStorage.setItem(KEYS.STREAK_DATE, today);
 
@@ -143,7 +257,7 @@ export const updateStreak = async (won: boolean): Promise<{ current: number; max
       if (newCurrent === 3)  bonusGems = 50;
       if (newCurrent === 7)  bonusGems = 150;
       if (newCurrent === 30) bonusGems = 500;
-      if (bonusGems > 0) await addGems(bonusGems);
+      if (bonusGems > 0) { const g = await getGems(); await setGems(g + bonusGems); }
     }
   } else {
     newCurrent = 0;
@@ -151,10 +265,7 @@ export const updateStreak = async (won: boolean): Promise<{ current: number; max
   }
 
   const newMax = Math.max(max, newCurrent);
-  await Promise.all([
-    AsyncStorage.setItem(KEYS.STREAK_COUNT, String(newCurrent)),
-    AsyncStorage.setItem(KEYS.MAX_STREAK, String(newMax)),
-  ]);
+  await setStreak(newCurrent, newMax);
 
   return { current: newCurrent, max: newMax, bonusGems };
 });
@@ -226,16 +337,44 @@ export const storageSetJSON = async (key: string, value: unknown): Promise<void>
 
 // ── Categories ───────────────────────────────────────────
 export const getUnlockedCategories = async (): Promise<string[]> => {
+  const defaultCats = ['random', 'hayvanlar', 'yiyecek', 'spor'];
+  try {
+    const s = await SecureStore.getItemAsync(SECURE_KEYS.CATEGORIES);
+    if (s) {
+      try { return JSON.parse(s); } catch {}
+    }
+  } catch {}
+
   const v = await AsyncStorage.getItem('gq_unlocked_categories');
-  if (!v) return ['random', 'hayvanlar', 'yiyecek', 'spor'];
-  try { return JSON.parse(v); } catch { return ['random', 'hayvanlar', 'yiyecek', 'spor']; }
+  let cats = defaultCats;
+  if (v) {
+    try {
+      const parsed = JSON.parse(v);
+      if (Array.isArray(parsed)) cats = parsed;
+      try {
+        await SecureStore.setItemAsync(SECURE_KEYS.CATEGORIES, JSON.stringify(cats));
+        await AsyncStorage.removeItem('gq_unlocked_categories');
+      } catch {}
+    } catch {}
+  }
+  return cats;
+};
+
+export const setUnlockedCategories = async (cats: string[]) => {
+  const val = JSON.stringify(cats);
+  try {
+    await SecureStore.setItemAsync(SECURE_KEYS.CATEGORIES, val);
+    await AsyncStorage.removeItem('gq_unlocked_categories');
+  } catch {
+    await AsyncStorage.setItem('gq_unlocked_categories', val);
+  }
 };
 
 export const unlockCategory = async (cat: string): Promise<string[]> => mutex(async () => {
   const cur = await getUnlockedCategories();
   if (!cur.includes(cat)) {
     const next = [...cur, cat];
-    await AsyncStorage.setItem('gq_unlocked_categories', JSON.stringify(next));
+    await setUnlockedCategories(next);
     return next;
   }
   return cur;

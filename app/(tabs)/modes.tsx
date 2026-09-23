@@ -1,8 +1,6 @@
 import React from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView,
-  TouchableOpacity, StatusBar, Alert,
-} from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, StatusBar, Alert,  } from 'react-native';
+import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
@@ -126,19 +124,19 @@ export default function ModesScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { flex: 1, paddingHorizontal: SPACING.md },
+  container: { flex: 1, paddingHorizontal: SPACING.md, maxWidth: 600, alignSelf: 'center', width: '100%' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingVertical: SPACING.md },
-  title: { fontSize: FONTS.size.xxl, fontWeight: '900' },
+  title: { fontSize: FONTS.size.xxl, fontWeight: '900', flexShrink: 1 },
   subtitle: { fontSize: FONTS.size.sm, marginTop: 2 },
-  gemPill: { paddingHorizontal: SPACING.sm, paddingVertical: 6, borderRadius: BORDER_RADIUS.full, borderWidth: 1 },
+  gemPill: { paddingHorizontal: SPACING.sm, paddingVertical: 6, borderRadius: BORDER_RADIUS.full, borderWidth: 1, marginLeft: SPACING.md },
   gemText: { fontWeight: '700', fontSize: FONTS.size.sm },
   modeCard: { marginBottom: SPACING.md, borderRadius: BORDER_RADIUS.xl, overflow: 'hidden' },
   modeGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SPACING.lg },
-  modeLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, flex: 1 },
+  modeLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, flex: 1, paddingRight: SPACING.md },
   modeEmoji: { fontSize: 40 },
   modeTitle: { color: '#FFF', fontSize: FONTS.size.lg, fontWeight: '800' },
-  modeDesc: { color: 'rgba(255,255,255,0.85)', fontSize: FONTS.size.sm, marginTop: 2, maxWidth: 200 },
-  modeRight: { alignItems: 'flex-end', gap: 4 },
+  modeDesc: { color: 'rgba(255,255,255,0.85)', fontSize: FONTS.size.sm, marginTop: 2 },
+  modeRight: { alignItems: 'flex-end', gap: 4, flexShrink: 0 },
   badge: { backgroundColor: 'rgba(0,0,0,0.25)', paddingHorizontal: SPACING.sm, paddingVertical: 3, borderRadius: BORDER_RADIUS.full },
   badgeText: { color: '#FFF', fontSize: 10, fontWeight: '800' },
   premiumIcon: { fontSize: 20 },

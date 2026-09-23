@@ -41,25 +41,25 @@ export function useWordChain(lang: 'tr' | 'en' = 'tr') {
     };
   });
 
+  const normalize = useCallback((text: string) => (
+    lang === 'en' ? text.toUpperCase() : toTurkishUpper(text)
+  ), [lang]);
+
   const setInput = useCallback((text: string) => {
-    setState(prev => ({ ...prev, currentInput: toTurkishUpper(text) }));
-  }, []);
+    setState(prev => ({ ...prev, currentInput: normalize(text) }));
+  }, [normalize]);
 
   const submitWord = useCallback((): 'ok' | 'invalid' | 'used' | 'wrong_start' => {
-    const word = toTurkishUpper(state.currentInput.trim());
+    if (state.status !== 'playing') return 'invalid';
+    const word = normalize(state.currentInput.trim());
     const lastWord = state.lastWord;
     const lastChar = lastWord[lastWord.length - 1];
 
     if (!word.startsWith(lastChar)) {
-      setState(prev => ({
-        ...prev,
-        lives: prev.lives - 1,
-        errorMessage: `'${lastChar}' harfiyle başlamalı!`,
-        currentInput: '',
-        status: prev.lives - 1 <= 0 ? 'lost' : 'playing',
-      }));
+      setState(prev => ({ ...prev, lives: prev.lives - 1, errorMessage: 'Kelime son harfle başlamalı!', currentInput: '', status: prev.lives - 1 <= 0 ? 'lost' : 'playing' }));
       return 'wrong_start';
     }
+
     if (state.chain.includes(word)) {
       setState(prev => ({
         ...prev,
@@ -90,9 +90,9 @@ export function useWordChain(lang: 'tr' | 'en' = 'tr') {
       errorMessage: '',
     }));
     return 'ok';
-  }, [state, validWords]);
+  }, [state, validWords, normalize]);
 
-  const reset = useCallback((newLang?: string) => {
+  const reset = useCallback((newLang?: 'tr' | 'en') => {
     const activeLang = (newLang === 'en' || newLang === 'tr') ? newLang : lang;
     const start = getRandomStartWord(activeLang);
     setState({

@@ -1,14 +1,32 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { GAME_MODE_INFO, CATEGORY_INFO } from '../constants/words';
 import { ScoreEntry } from '../services/storage.service';
+import { TRANSLATIONS, Language } from '../constants/translations';
 
 interface Props {
   score: ScoreEntry;
   theme: any;
   language: string;
 }
+
+const MODE_LABEL_KEY: Record<string, 'modeLabelClassic' | 'modeLabelSpeed' | 'modeLabelDaily'> = {
+  classic: 'modeLabelClassic',
+  speed: 'modeLabelSpeed',
+  daily: 'modeLabelDaily',
+};
+
+const CAT_LABEL_KEY: Record<string, 'catRandom' | 'catAnimals' | 'catCities' | 'catFood' | 'catJobs' | 'catNature' | 'catSports'> = {
+  random: 'catRandom',
+  hayvanlar: 'catAnimals',
+  sehirler: 'catCities',
+  yiyecek: 'catFood',
+  meslekler: 'catJobs',
+  doga: 'catNature',
+  spor: 'catSports',
+};
 
 function getModeInfo(mode: string) {
   return GAME_MODE_INFO[mode as keyof typeof GAME_MODE_INFO] || { label: mode, emoji: '🎮' };
@@ -18,9 +36,14 @@ function getCatInfo(category: string) {
   return CATEGORY_INFO[category as keyof typeof CATEGORY_INFO] || { label: category, emoji: '🎲' };
 }
 
-export function ScoreRow({ score, theme }: Props) {
+function ScoreRowComponent({ score, theme, language }: Props) {
+  const t = TRANSLATIONS[language === 'en' ? 'en' : 'tr'];
   const modeInfo = getModeInfo(score.mode);
   const catInfo = getCatInfo(score.category);
+  const modeKey = MODE_LABEL_KEY[score.mode];
+  const catKey = CAT_LABEL_KEY[score.category];
+  const modeLabel = modeKey ? t[modeKey] : modeInfo.label;
+  const catLabel = catKey ? t[catKey] : catInfo.label;
   const date = new Date(score.date);
   const dateStr = `${date.getDate()}/${date.getMonth() + 1} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 
@@ -32,7 +55,7 @@ export function ScoreRow({ score, theme }: Props) {
         </Text>
         <View>
           <Text style={[styles.scoreMode, { color: theme.colors.text }]}>
-            {modeInfo.label} · {catInfo.label}
+            {modeLabel} · {catLabel}
           </Text>
           <Text style={[styles.scoreDate, { color: theme.colors.textMuted }]}>{dateStr}</Text>
         </View>
@@ -44,6 +67,8 @@ export function ScoreRow({ score, theme }: Props) {
     </View>
   );
 }
+
+export const ScoreRow = React.memo(ScoreRowComponent);
 
 const styles = StyleSheet.create({
   scoreRow: {

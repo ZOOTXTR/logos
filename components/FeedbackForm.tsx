@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, StyleSheet, TextInput } from 'react-native';
+import { StyleSheet, TextInput } from 'react-native';
+import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 
 interface FeedbackFormProps {

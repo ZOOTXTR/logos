@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { getFirebaseApp } from '../config/firebase';
 
 // Set default notification handler behaviors
@@ -14,7 +15,12 @@ Notifications.setNotificationHandler({
 
 export async function registerForPushNotifications(): Promise<string | null> {
   try {
-    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? '' });
+    const projectId = (Constants.expoConfig?.extra as any)?.eas?.projectId as string | undefined;
+    if (!projectId) {
+      console.warn('[Notifications] EAS projectId bulunamadı, push token alınamadı.');
+      return null;
+    }
+    const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
     if (token) {
       await AsyncStorage.setItem('gq_push_token', token);
     }
@@ -85,6 +91,15 @@ class NotificationService {
 
     } catch (e) {
       console.warn('Failed to schedule notifications:', e);
+    }
+  }
+
+  async cancelDailyNotifications() {
+    if (Platform.OS === 'web') return;
+    try {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+    } catch (e) {
+      console.warn('Failed to cancel notifications:', e);
     }
   }
 }

@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { getRandomWord, WORD_LENGTH, Category } from '../constants/words';
+import { toTurkishUpper } from '../utils/turkish';
 
 export type LetterStatus = 'empty' | 'correct' | 'present' | 'absent';
 
@@ -25,7 +26,10 @@ export interface DuelState {
 const MAX_GUESSES = 6;
 
 export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr') {
-  const [targetWord, setTargetWord] = useState(() => getRandomWord(category, lang).toUpperCase());
+  const [targetWord, setTargetWord] = useState(() => {
+    const raw = getRandomWord(category, lang);
+    return lang === 'tr' ? toTurkishUpper(raw) : raw.toUpperCase();
+  });
 
   const createEmptyBoard = (): DuelCell[][] =>
     Array(MAX_GUESSES)
@@ -49,6 +53,8 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
   }));
 
   const botTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   // Bot logic simulating real-time player guesses
   useEffect(() => {
@@ -72,30 +78,19 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
       const currentRow = prev.opponentRow;
       const target = prev.targetWord;
 
-      // Simulate a guess:
-      // Row 0: 20% chance of finding letters
-      // Row 1: 40% chance
-      // Row 2: 60% chance
-      // Row 3: 80% chance
-      // Row 4/5: 100% correct if not already guessed
+      // Bot olasılığı 1.0'a ulaşmaz; son satırda da zorla çözmez (yenilebilir).
+      // Yanlış tahminler hedef harfleri sızdırmasın diye rastgele üretilir.
       let guessedWord = '';
-      const isLastRow = currentRow === MAX_GUESSES - 1;
-      const willSolve = Math.random() < 0.2 + currentRow * 0.2 || isLastRow;
+      const probabilities = [0.0, 0.05, 0.2, 0.4, 0.6, 0.85];
+      const willSolve = Math.random() < (probabilities[currentRow] ?? 0.85);
 
       if (willSolve) {
         guessedWord = target;
       } else {
-        // Generate an intelligent incorrect guess containing some target letters
-        const targetLetters = target.split('');
         const alphabet = (lang === 'en' ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ').split('');
         const chars: string[] = [];
-
         for (let i = 0; i < WORD_LENGTH; i++) {
-          if (Math.random() < 0.4 + currentRow * 0.1) {
-            chars.push(targetLetters[i]);
-          } else {
-            chars.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-          }
+          chars.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
         }
         guessedWord = chars.join('');
       }
@@ -156,7 +151,7 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
       const nextBoard = prev.playerBoard.map((row, rIndex) => {
         if (rIndex !== prev.playerRow) return row;
         return row.map((cell, cIndex) => {
-          if (cIndex === prev.playerCol) return { char: char.toUpperCase(), status: 'empty' as LetterStatus };
+          if (cIndex === prev.playerCol) return { char: (lang === 'tr' ? toTurkishUpper(char) : char.toUpperCase()), status: 'empty' as LetterStatus };
           return cell;
         });
       });
@@ -192,70 +187,60 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
   }, []);
 
   const submitGuess = useCallback((): 'short' | 'correct' | 'wrong' | 'gameover' => {
-    let result: 'short' | 'correct' | 'wrong' | 'gameover' = 'wrong';
+    const s = stateRef.current;
+    if (s.playerStatus !== 'playing' || s.winner) return 'wrong';
+    if (s.playerCol < WORD_LENGTH) return 'short';
 
-    setState(prev => {
-      if (prev.playerStatus !== 'playing' || prev.winner) return prev;
-      if (prev.playerCol < WORD_LENGTH) {
-        result = 'short';
-        return prev;
-      }
+    const currentRow = s.playerRow;
+    const guess = s.playerBoard[currentRow].map(c => c.char).join('');
+    const correct = guess === s.targetWord;
 
-      const currentRow = prev.playerRow;
-      const guess = prev.playerBoard[currentRow].map(c => c.char).join('');
-      const correct = guess === prev.targetWord;
+    const nextBoard = s.playerBoard.map((row, rIdx) => {
+      if (rIdx !== currentRow) return row;
 
-      const nextBoard = prev.playerBoard.map((row, rIdx) => {
-        if (rIdx !== currentRow) return row;
-        
-        const newRow = row.map(cell => ({ ...cell, status: 'absent' as LetterStatus }));
-        const targetChars = prev.targetWord.split('');
-        
-        // Pass 1: Mark corrects
-        newRow.forEach((cell, cIdx) => {
-          if (cell.char === targetChars[cIdx]) {
-            cell.status = 'correct';
-            targetChars[cIdx] = null as any;
-          }
-        });
-        
-        // Pass 2: Mark presents
-        newRow.forEach((cell) => {
-          if (cell.status !== 'correct') {
-            const matchIndex = targetChars.indexOf(cell.char);
-            if (matchIndex !== -1) {
-              cell.status = 'present';
-              targetChars[matchIndex] = null as any;
-            }
-          }
-        });
-        
-        return newRow;
+      const newRow = row.map(cell => ({ ...cell, status: 'absent' as LetterStatus }));
+      const targetChars: (string | null)[] = s.targetWord.split('');
+
+      // Pass 1: doğru konumlar
+      newRow.forEach((cell, cIdx) => {
+        if (cell.char === targetChars[cIdx]) {
+          cell.status = 'correct';
+          targetChars[cIdx] = null;
+        }
       });
 
-      const nextStatus = correct ? 'won' : (currentRow + 1 >= MAX_GUESSES ? 'lost' : 'playing');
-      let nextWinner: 'player' | 'opponent' | null = prev.winner;
-      if (correct && !prev.winner) {
-        nextWinner = 'player';
-      }
+      // Pass 2: mevcut harfler
+      newRow.forEach((cell) => {
+        if (cell.status !== 'correct') {
+          const matchIndex = targetChars.indexOf(cell.char);
+          if (matchIndex !== -1) {
+            cell.status = 'present';
+            targetChars[matchIndex] = null;
+          }
+        }
+      });
 
-      result = correct ? 'correct' : nextStatus === 'lost' ? 'gameover' : 'wrong';
-
-      return {
-        ...prev,
-        playerBoard: nextBoard,
-        playerRow: currentRow + 1,
-        playerCol: 0,
-        playerStatus: nextStatus,
-        winner: nextWinner,
-      };
+      return newRow;
     });
 
-    return result;
+    const nextStatus = correct ? 'won' : (currentRow + 1 >= MAX_GUESSES ? 'lost' : 'playing');
+    let nextWinner: 'player' | 'opponent' | null = s.winner;
+    if (correct && !s.winner) nextWinner = 'player';
+
+    setState({
+      ...s,
+      playerBoard: nextBoard,
+      playerRow: currentRow + 1,
+      playerCol: 0,
+      playerStatus: nextStatus,
+      winner: nextWinner,
+    });
+
+    return correct ? 'correct' : nextStatus === 'lost' ? 'gameover' : 'wrong';
   }, []);
 
   const reset = useCallback((nextCategory?: Category) => {
-    const word = getRandomWord(nextCategory ?? category, lang).toUpperCase();
+    const word = (lang === 'tr' ? toTurkishUpper(getRandomWord(nextCategory ?? category, lang)) : getRandomWord(nextCategory ?? category, lang).toUpperCase());
     setTargetWord(word);
     setState({
       targetWord: word,

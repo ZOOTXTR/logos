@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView,
-  TouchableOpacity, StatusBar, Alert, Platform,
-} from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, StatusBar, Alert, Platform,  } from 'react-native';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -10,17 +8,18 @@ import { WORD_LENGTH } from '../constants/words';
 import { useBlitz } from '../hooks/useBlitz';
 import { useProgress } from '../hooks/useProgress';
 import { useTheme } from '../hooks/useTheme';
-import { Timer } from '../components/Timer';
+import { TimerDisplay } from '../components/TimerDisplay';
 import { Keyboard } from '../components/Keyboard';
 import { LoadingView } from '../components/LoadingView';
+import { GameResultOverlay } from '../components/GameResultOverlay';
 
 import { audioService } from '../services/audio.service';
 
 export default function BlitzScreen() {
   const router = useRouter();
-  const game = useBlitz('random');
-  const progress = useProgress();
   const { theme, language } = useTheme();
+  const game = useBlitz('random', language as 'tr' | 'en');
+  const progress = useProgress();
 
 
 
@@ -43,83 +42,8 @@ export default function BlitzScreen() {
 
   useEffect(() => {
     let mounted = true;
-    if (game.status === 'ended') {
-      audioService.play('loss');
-      const award = async () => {
-        const xp = Math.floor(game.score / 10);
-        const gems = Math.floor(game.wordsSolved * 5);
-        if (xp > 0) await progress.earnXP(xp);
-        if (gems > 0) await progress.addGems(gems);
-      };
-      award();
-    }
     return () => { mounted = false; };
-  }, [game.status]);
-
-  // Physical keyboard support on Web
-  useEffect(() => {
-    if (Platform.OS !== 'web') return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (game.status !== 'playing') return;
-
-      const key = e.key.toLocaleUpperCase('tr-TR');
-
-      if (key === 'ENTER') {
-        handleSubmit();
-      } else if (key === 'BACKSPACE') {
-        game.deleteLetter();
-      } else if (/^[A-ZĞÜŞİÖÇI]$/.test(key)) {
-        handleKey(key);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [game.status, handleKey, handleSubmit]);
-
-  if (progress.loading) {
-    return <LoadingView />;
-  }
-
-  if (game.status === 'ended') {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <LinearGradient colors={['#0D0D1A', '#0F0F23']} style={styles.container}>
-          <View style={styles.resultScreen}>
-            <Text style={styles.resultTitle}>⚡ Blitz Bitti!</Text>
-            <View style={styles.resultCards}>
-              {[
-                { label: 'Skor', value: game.score, emoji: '🏆' },
-                { label: 'Çözülen', value: game.wordsSolved, emoji: '✅' },
-                { label: 'Toplam', value: game.wordsAnswered, emoji: '📝' },
-                { label: 'En Uzun Seri', value: game.streak, emoji: '🔥' },
-              ].map((item, i) => (
-                <View key={i} style={styles.resultCard}>
-                  <Text style={styles.resultEmoji}>{item.emoji}</Text>
-                  <Text style={styles.resultValue}>{item.value}</Text>
-                  <Text style={styles.resultLabel}>{item.label}</Text>
-                </View>
-              ))}
-            </View>
-            <Text style={styles.resultXP}>+{Math.floor(game.wordsSolved * 5)} 💎  +{Math.floor(game.score / 10)} XP</Text>
-            <View style={styles.resultActions}>
-              <TouchableOpacity style={styles.resultBtn} onPress={game.reset}>
-                <LinearGradient colors={['#7C3AED', '#4F46E5']} style={styles.resultBtnGrad}>
-                  <Text style={styles.resultBtnText}>🔄 Tekrar</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.resultBtn, { backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.border }]} onPress={() => router.back()}>
-                <Text style={[styles.resultBtnText, { color: COLORS.text }]}>🏠 Menü</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </LinearGradient>
-      </SafeAreaView>
-    );
-  }
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -127,7 +51,7 @@ export default function BlitzScreen() {
       <LinearGradient colors={[COLORS.background, '#0F0F23']} style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Geri">
             <Text style={styles.backText}>← Geri</Text>
           </TouchableOpacity>
           <Text style={styles.title}>⚡ Blitz</Text>
@@ -137,7 +61,7 @@ export default function BlitzScreen() {
         </View>
 
         {/* Timer */}
-        <Timer timeLeft={game.timeLeft} totalTime={60} />
+        <TimerDisplay endTime={game.endTime} totalTime={60} onTimeUp={game.onTimeUp} />
 
         {/* Skor */}
         <View style={styles.scoreRow}>
@@ -167,6 +91,18 @@ export default function BlitzScreen() {
           </TouchableOpacity>
         </View>
       </LinearGradient>
+      <GameResultOverlay
+        visible={game.status === 'ended'}
+        title={language === 'en' ? 'Time is Up!' : 'Süre Bitti!'}
+        emoji="⚡"
+        message={language === 'en' ? `Score: ${game.score}\nSolved: ${game.wordsSolved}\nStreak: ${game.streak}` : `Skor: ${game.score}\nÇözülen: ${game.wordsSolved}\nSeri: ${game.streak}`}
+        theme={theme}
+        language={language}
+        buttons={[
+          { label: language === 'en' ? 'Play Again' : 'Yeniden Oyna', onPress: game.reset, primary: true },
+          { label: language === 'en' ? 'Menu' : 'Ana Menü', onPress: () => router.back() }
+        ]}
+      />
     </SafeAreaView>
   );
 }
@@ -203,3 +139,5 @@ const styles = StyleSheet.create({
   resultBtnGrad: { paddingVertical: SPACING.md, alignItems: 'center' },
   resultBtnText: { color: COLORS.text, fontWeight: '800', fontSize: FONTS.size.md },
 });
+
+

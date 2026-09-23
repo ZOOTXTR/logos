@@ -1,6 +1,7 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
+import { getFunctions, Functions } from 'firebase/functions';
 
 const FIREBASE_CONFIG = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? 'YOUR_API_KEY',
@@ -36,10 +37,19 @@ export function getFirebaseDb(): Firestore {
   return db;
 }
 
+let functionsInstance: Functions | undefined;
+export function getFirebaseFunctions(): Functions {
+  if (!functionsInstance) {
+    functionsInstance = getFunctions(getFirebaseApp());
+  }
+  return functionsInstance;
+}
+
 export const FIRESTORE_COLLECTIONS = {
   USERS: 'users',
   SCORES: 'scores',
   FEEDBACK: 'feedback',
   REFERRALS: 'referrals',
   CLOUD_SAVES: 'cloud_saves',
+  DUELS: 'duels',
 } as const;

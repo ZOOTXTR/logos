@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import {
-  View, Text, TouchableOpacity, StyleSheet, ScrollView,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { GameMode, Category, Difficulty } from '../constants/words';
@@ -14,9 +14,12 @@ import { GemShower } from '../components/GemShower';
 import { LevelBar } from '../components/LevelBar';
 import { StreakBanner } from '../components/StreakBanner';
 import { audioService } from '../services/audio.service';
+import { AuraBackground } from '../components/design/AuraBackground';
+
+import { Theme } from '../constants/themes';
 
 interface GameMenuScreenProps {
-  theme: any;
+  theme: Theme;
   language: string;
   colorBlind: boolean;
   gems: number;
@@ -43,13 +46,16 @@ export function GameMenuScreen({
   onStartGame, onAddGems, onUnlockCategory,
   onUnlockPremium, onShowGemShower,
 }: GameMenuScreenProps) {
+  const router = useRouter();
   const [showStore, setShowStore] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showSpin, setShowSpin] = useState(false);
 
   return (
-    <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.container}>
-      <View style={styles.header}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <AuraBackground theme={theme} />
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
         <Text style={[styles.logo, { color: theme.colors.text }]}>💎 Logos</Text>
         <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
           <TouchableOpacity
@@ -70,7 +76,7 @@ export function GameMenuScreen({
         </View>
       )}
 
-      <StreakBanner streak={streak} bonusGems={streakBonus} />
+      <StreakBanner streak={streak} bonusGems={streakBonus} language={language as 'tr' | 'en'} />
 
       <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
         <ModeSelector
@@ -100,6 +106,22 @@ export function GameMenuScreen({
           </View>
           <Text style={[styles.spinBannerArrow, { color: theme.colors.primaryLight }]}>›</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.spinBanner, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
+          onPress={() => { audioService.triggerHaptic('light'); router.push('/multiplayer' as any); }}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.spinBannerEmoji}>⚔️</Text>
+          <View style={styles.spinBannerTextContainer}>
+            <Text style={[styles.spinBannerTitle, { color: theme.colors.text }]}>
+              {language === 'en' ? 'Online Duel' : 'Çevrimiçi Düello'}
+            </Text>
+            <Text style={[styles.spinBannerDesc, { color: theme.colors.textSecondary }]}>
+              {language === 'en' ? 'Play 1v1 against other players!' : 'Gerçek rakiplere karşı 1v1 oyna!'}
+            </Text>
+          </View>
+          <Text style={[styles.spinBannerArrow, { color: theme.colors.textMuted }]}>›</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       <StoreModal
@@ -127,7 +149,8 @@ export function GameMenuScreen({
         onClose={() => setShowHelp(false)}
       />
       <GemShower active={showGemShower} onComplete={() => onShowGemShower(false)} />
-    </LinearGradient>
+      </SafeAreaView>
+    </View>
   );
 }
 

@@ -1,17 +1,16 @@
 // Google Play Store Product IDs (SKUs)
-// Bu ID'leri Play Console'da da aynı şekilde tanımlamalısınız
+// Bu ID'ler Play Console'daki ürün kimlikleriyle birebir eşleşmelidir
 
 export const PRODUCT_IDS = {
   // Consumable - Tüketilebilir Gem Paketleri
-  GEM_SMALL: 'com.zovtex.logos.gems.small',      // 100 Gem - ₺29.99
-  GEM_MEDIUM: 'com.zovtex.logos.gems.medium',    // 500 Gem - ₺99.99
-  GEM_LARGE: 'com.zovtex.logos.gems.large',      // 1500 Gem - ₺249.99
-
-  // Non-consumable - Kalıcı Premium
-  PREMIUM_LIFETIME: 'com.zovtex.logos.premium.lifetime', // ₺149.99
+  GEM_PACK_1: 'gem_pack_1',    // 100 Gem - ₺12.99
+  GEM_PACK_2: 'gem_pack_2',    // 250 Gem - ₺24.99
+  GEM_PACK_3: 'gem_pack_3',    // 500 Gem - ₺39.99
+  GEM_PACK_4: 'gem_pack_4',    // 1200 Gem - ₺79.99
+  GEM_PACK_5: 'gem_pack_5',    // 3000 Gem - ₺149.99
 
   // Subscription - Aylık Premium
-  PREMIUM_MONTHLY: 'com.zovtex.logos.premium.monthly',   // ₺29.99/ay
+  PREMIUM_MONTHLY: 'premium_monthly',   // ₺49.99/ay
 } as const;
 
 export type ProductId = typeof PRODUCT_IDS[keyof typeof PRODUCT_IDS];
@@ -27,25 +26,39 @@ export interface GemPackage {
 
 export const GEM_PACKAGES: GemPackage[] = [
   {
-    id: PRODUCT_IDS.GEM_SMALL,
+    id: PRODUCT_IDS.GEM_PACK_1,
     gems: 100,
-    price: '₺29.99',
+    price: '₺12.99',
     icon: '💎',
   },
   {
-    id: PRODUCT_IDS.GEM_MEDIUM,
-    gems: 500,
-    price: '₺99.99',
-    bonus: '+50 Bonus!',
-    popular: true,
+    id: PRODUCT_IDS.GEM_PACK_2,
+    gems: 250,
+    price: '₺24.99',
+    bonus: '+25 Bonus!',
     icon: '💎💎',
   },
   {
-    id: PRODUCT_IDS.GEM_LARGE,
-    gems: 1500,
-    price: '₺249.99',
-    bonus: '+300 Bonus!',
+    id: PRODUCT_IDS.GEM_PACK_3,
+    gems: 500,
+    price: '₺39.99',
+    bonus: '+50 Bonus!',
+    popular: true,
     icon: '💎💎💎',
+  },
+  {
+    id: PRODUCT_IDS.GEM_PACK_4,
+    gems: 1200,
+    price: '₺79.99',
+    bonus: '+200 Bonus!',
+    icon: '👑',
+  },
+  {
+    id: PRODUCT_IDS.GEM_PACK_5,
+    gems: 3000,
+    price: '₺149.99',
+    bonus: '+500 Bonus!',
+    icon: '🏆',
   },
 ];
 

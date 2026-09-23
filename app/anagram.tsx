@@ -1,8 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView,
-  TouchableOpacity, StatusBar, Alert, TextInput, Platform,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert, TextInput, Platform } from 'react-native';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
@@ -16,6 +14,7 @@ import { Confetti } from '../components/Confetti';
 import { GameResultOverlay } from '../components/GameResultOverlay';
 import { TRANSLATIONS } from '../constants/translations';
 import { LoadingView } from '../components/LoadingView';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AnagramScreen() {
   const router = useRouter();
@@ -34,6 +33,7 @@ export default function AnagramScreen() {
   const categories: Category[] = ['random', 'hayvanlar', 'sehirler', 'yiyecek', 'meslekler', 'doga', 'spor'];
 
   const handleSubmit = async () => {
+    if (game.status !== 'playing') return;
     if (game.currentGuess.length < game.targetWord.length) {
       audioService.triggerHaptic('warning');
       Alert.alert('', language === 'en' ? 'Select all letters!' : 'Tüm harfleri seçin!');
@@ -131,7 +131,7 @@ export default function AnagramScreen() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (game.status !== 'playing') return;
 
-      const key = e.key.toLocaleUpperCase('tr-TR');
+      const key = e.key.toUpperCase();
 
       if (key === 'ENTER') {
         handleSubmit();
@@ -140,7 +140,7 @@ export default function AnagramScreen() {
       } else if (/^[A-ZĞÜŞİÖÇI]$/.test(key)) {
         // Find first index of key in shuffledLetters that is not selected
         const idx = game.shuffledLetters.findIndex((char, index) => {
-          return char.toLocaleUpperCase('tr-TR') === key && !game.selectedIndices.includes(index);
+          return char.toUpperCase() === key && !game.selectedIndices.includes(index);
         });
         if (idx !== -1) {
           audioService.triggerHaptic('light');
@@ -166,7 +166,7 @@ export default function AnagramScreen() {
       <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()}>
+          <TouchableOpacity style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Geri">
             <Text style={[styles.backText, { color: theme.colors.textSecondary }]}>← Geri</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: theme.colors.text }]}>🔀 Anagram</Text>
@@ -286,7 +286,7 @@ export default function AnagramScreen() {
           >
             <Text style={[styles.hintBtnText, { color: theme.colors.primaryLight }]}>💡 İpucu</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
+          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={game.status !== 'playing'}>
             <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.submitGrad}>
               <Text style={[styles.submitText, { color: theme.colors.text }]}>✓ Onayla</Text>
             </LinearGradient>

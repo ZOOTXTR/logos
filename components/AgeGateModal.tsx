@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { Text } from './CustomText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../hooks/useTheme';
 
@@ -33,7 +34,7 @@ export function AgeGateModal({ onComplete }: { onComplete: (isChild: boolean) =>
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={[styles.container, { backgroundColor: c.card, borderColor: c.border }]}>
+        <View style={[styles.container, { backgroundColor: c.card, borderColor: c.border }]} accessibilityViewIsModal={true}>
           <Text style={[styles.title, { color: c.text }]}>
             {language === 'en' ? 'Welcome to Logos!' : 'Logos\'a Hoş Geldiniz!'}
           </Text>

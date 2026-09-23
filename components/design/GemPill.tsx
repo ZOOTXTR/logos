@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { Text } from '../CustomText';
 import { FONTS, BORDER_RADIUS } from '../../constants/theme';
 import { Theme } from '../../constants/themes';
 

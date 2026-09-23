@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet,  } from 'react-native';
+import { Text } from './CustomText';
 import { GEM_PACKAGES, GemPackage, PRODUCT_IDS } from '../constants/products';
 import { Theme } from '../constants/themes';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';

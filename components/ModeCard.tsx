@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { audioService } from '../services/audio.service';
@@ -34,7 +35,9 @@ export function ModeCard({
       onPress={handlePress}
       activeOpacity={0.8}
       disabled={locked}
-      accessibilityLabel={`Play ${mode} mode`}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: locked }}
+      accessibilityLabel={language === 'en' ? `Play ${title} mode` : `${title} modunu oyna`}
     >
       <LinearGradient
         colors={[theme.colors.card, locked ? theme.colors.absent : theme.colors.surfaceLight]}
@@ -80,8 +83,8 @@ const styles = StyleSheet.create({
   },
   icon: { fontSize: 28, marginBottom: 4 },
   title: { fontSize: FONTS.size.sm, fontWeight: '800', textAlign: 'center', marginBottom: 2 },
-  desc: { fontSize: 9, textAlign: 'center', lineHeight: 12, marginBottom: 6 },
+  desc: { fontSize: 11, textAlign: 'center', lineHeight: 14, marginBottom: 6 },
   badgeRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap', justifyContent: 'center' },
   badge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: BORDER_RADIUS.sm },
-  badgeText: { fontSize: 8, fontWeight: '800' },
+  badgeText: { fontSize: 10, fontWeight: '800' },
 });

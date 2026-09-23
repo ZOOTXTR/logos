@@ -1,8 +1,6 @@
 import React from 'react';
-import {
-  Modal, View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Dimensions,
-} from 'react-native';
+import { Modal, View, StyleSheet, ScrollView, TouchableOpacity, Dimensions,  } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
@@ -51,7 +49,7 @@ export function HelpModal({ visible, onClose }: HelpModalProps) {
         <View style={[styles.content, { backgroundColor: '#121225', borderColor: theme.colors.border }]}>
           <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
             <Text style={[styles.title, { color: theme.colors.text }]}>📖 Nasıl Oynanır?</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat">
               <Text style={{ color: theme.colors.textMuted, fontSize: 18, fontWeight: 'bold' }}>✕</Text>
             </TouchableOpacity>
           </View>

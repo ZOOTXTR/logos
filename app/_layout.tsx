@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/theme';
 import { ThemeProvider, useTheme } from '../hooks/useTheme';
 import { notificationService } from '../services/notification.service';
@@ -10,6 +11,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { setupDeepLinkHandler } from '../services/deeplink.service';
 import { initErrorReporting } from '../services/error-reporting.service';
 import { AgeGateModal } from '../components/AgeGateModal';
+import { initAuth } from '../services/auth.service';
 
 function RootLayoutContent() {
   const { language, notifEnabled } = useTheme();
@@ -19,6 +21,7 @@ function RootLayoutContent() {
     setAgeChecked(true);
     if (!isChild) {
       initErrorReporting();
+      initAuth();
     }
   };
 
@@ -30,6 +33,8 @@ function RootLayoutContent() {
           if (allowed) {
             await notificationService.scheduleDailyNotifications(language);
           }
+        } else {
+          await notificationService.cancelDailyNotifications();
         }
       } catch (e) {
         console.warn('Notification init failed:', e);
@@ -38,20 +43,27 @@ function RootLayoutContent() {
     initNotifications();
   }, [language, notifEnabled]);
 
-  useEffect(() => { setupDeepLinkHandler(); }, []);
+  useEffect(() => setupDeepLinkHandler(), []);
 
   useEffect(() => {
-    // Start background music loop and preload SFX on app startup
+    // Start background music immediately (lightweight)
     audioService.startBgMusic();
-    audioService.preloadSounds();
-    preloadDictionaries();
+
+    // Defer heavy preloading to after first render
+    const { InteractionManager } = require('react-native');
+    const handle = InteractionManager.runAfterInteractions(() => {
+      audioService.preloadSounds();
+      preloadDictionaries();
+    });
+
     return () => {
+      handle.cancel();
       audioService.stopBgMusic();
     };
   }, []);
 
   return (
-    <ErrorBoundary>
+    <>
       <StatusBar style="light" backgroundColor={COLORS.background} />
       <AgeGateModal onComplete={handleAgeComplete} />
       {ageChecked && (
@@ -66,14 +78,18 @@ function RootLayoutContent() {
           <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
         </Stack>
       )}
-    </ErrorBoundary>
+    </>
   );
 }
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <RootLayoutContent />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <RootLayoutContent />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

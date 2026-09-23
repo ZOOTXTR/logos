@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Dimensions, Platform } from 'react-native';
+import { StyleSheet, View, useWindowDimensions, Platform } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,8 +9,6 @@ import Animated, {
   Easing,
   runOnJS,
 } from 'react-native-reanimated';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface GemShowerProps {
   active: boolean;
@@ -27,6 +25,7 @@ interface ParticleData {
 }
 
 export function GemShower({ active, onComplete, particleCount = 16 }: GemShowerProps) {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
   const [particles, setParticles] = useState<ParticleData[]>([]);
   const [visible, setVisible] = useState(false);
 
@@ -70,6 +69,7 @@ export function GemShower({ active, onComplete, particleCount = 16 }: GemShowerP
 }
 
 function GemParticle({ particle }: { particle: ParticleData }) {
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const translateX = useSharedValue(particle.startX);
   const translateY = useSharedValue(particle.startY);
   const scale = useSharedValue(0);

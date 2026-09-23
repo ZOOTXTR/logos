@@ -1,45 +1,46 @@
 import React, { useState } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView,
-  TouchableOpacity, StatusBar, Dimensions, Image,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Dimensions, Image } from 'react-native';
+import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useProgress } from '../hooks/useProgress';
 import { storageSet } from '../services/storage.service';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '../hooks/useTheme';
+import { TRANSLATIONS } from '../constants/translations';
 
 const { width } = Dimensions.get('window');
 
 interface Slide {
-  title: string;
-  desc: string;
   emoji: string;
   gradient: [string, string];
+  titleKey: keyof typeof TRANSLATIONS['en'];
+  descKey: keyof typeof TRANSLATIONS['en'];
 }
 
 const SLIDES: Slide[] = [
   {
-    title: '💎 Logos\'e Hoş Geldiniz!',
-    desc: 'Harfleri eşleştirin, kelimeleri bulun ve seviye atlayarak yeni temaların kilidini açın!',
+    titleKey: 'onboardingSlide1Title',
+    descKey: 'onboardingSlide1Desc',
     emoji: '👑',
     gradient: ['#7C3AED', '#4F46E5'],
   },
   {
-    title: '🎮 5 Farklı Oyun Modu',
-    desc: 'Klasik Wordle, Anagram, Süreli Hızlı Mod (Blitz), Kelime Zinciri ve Dordle modlarıyla beyninizi zorlayın!',
+    titleKey: 'onboardingSlide2Title',
+    descKey: 'onboardingSlide2Desc',
     emoji: '⚡',
     gradient: ['#F59E0B', '#D97706'],
   },
   {
-    title: '🎮 7 Farklı Oyun Modu',
-    desc: 'Klasik, Hızlı, Günlük, Anagram, Dordle, Düello ve Kelime Zinciri — her zevke göre bir mod!',
+    titleKey: 'onboardingSlide3Title',
+    descKey: 'onboardingSlide3Desc',
     emoji: '🎮',
     gradient: ['#3B82F6', '#1D4ED8'],
   },
   {
-    title: '🎁 150 Gem Hoş Geldin Hediyesi!',
-    desc: 'Başlangıç için hediye gemlerinizi alın, ipuçları kullanın ve mağazadan premium tasarımları edinin.',
+    titleKey: 'onboardingSlide4Title',
+    descKey: 'onboardingSlide4Desc',
     emoji: '💎',
     gradient: ['#10B981', '#059669'],
   },
@@ -48,6 +49,8 @@ const SLIDES: Slide[] = [
 export default function OnboardingScreen() {
   const router = useRouter();
   const progress = useProgress();
+  const { language } = useTheme();
+  const t = TRANSLATIONS[language];
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const handleNext = async () => {
@@ -56,7 +59,7 @@ export default function OnboardingScreen() {
     } else {
       // Set onboarded as true and award startup gems
       await storageSet('gq_onboarded', 'true');
-      await progress.addGems(150);
+      // başlangıç gem ödülü kaldırıldı (varsayılan bakiye zaten 150)
       router.replace('/(tabs)');
     }
   };
@@ -88,8 +91,8 @@ export default function OnboardingScreen() {
           </LinearGradient>
 
           {/* Text Info */}
-          <Text style={styles.slideTitle}>{slide.title}</Text>
-          <Text style={styles.slideDesc}>{slide.desc}</Text>
+          <Text style={styles.slideTitle}>{t[slide.titleKey]}</Text>
+          <Text style={styles.slideDesc}>{t[slide.descKey]}</Text>
 
           {/* Action Button */}
           <TouchableOpacity style={styles.btn} onPress={handleNext} activeOpacity={0.85}>
@@ -100,7 +103,7 @@ export default function OnboardingScreen() {
               end={{ x: 1, y: 0 }}
             >
               <Text style={styles.btnText}>
-                {currentSlide === SLIDES.length - 1 ? '🎁 Gemleri Al ve Başla' : 'İleri'}
+                {currentSlide === SLIDES.length - 1 ? t.onboardingStart : t.onboardingNext}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -110,12 +113,12 @@ export default function OnboardingScreen() {
             <TouchableOpacity
               onPress={async () => {
                 await storageSet('gq_onboarded', 'true');
-                await progress.addGems(150);
+                // başlangıç gem ödülü kaldırıldı (varsayılan bakiye zaten 150)
                 router.replace('/(tabs)');
               }}
               style={styles.skipBtn}
             >
-              <Text style={styles.skipText}>Geç</Text>
+              <Text style={styles.skipText}>{t.onboardingSkip}</Text>
             </TouchableOpacity>
           )}
 
@@ -139,6 +142,6 @@ const styles = StyleSheet.create({
   btn: { width: '100%', borderRadius: BORDER_RADIUS.full, overflow: 'hidden' },
   btnGrad: { paddingVertical: SPACING.md, alignItems: 'center' },
   btnText: { color: COLORS.text, fontSize: FONTS.size.md, fontWeight: '800' },
-  skipBtn: { padding: SPACING.sm },
+  skipBtn: { paddingVertical: 12, paddingHorizontal: 16 },
   skipText: { color: COLORS.textMuted, fontSize: FONTS.size.sm, fontWeight: '600' },
 });

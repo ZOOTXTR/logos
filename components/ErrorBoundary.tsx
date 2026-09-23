@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { captureError } from '../services/error-reporting.service';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -23,6 +26,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught:', error, errorInfo);
+    captureError(error, { componentStack: errorInfo.componentStack ?? '' });
   }
 
   render() {

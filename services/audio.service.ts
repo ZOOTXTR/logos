@@ -86,6 +86,7 @@ class AudioService {
 
   // ── BACKGROUND MUSIC ──────────────────────────────────────
   async startBgMusic() {
+    await this.loadSettings();
     if (!this.musicEnabled) {
       this.stopBgMusic();
       return;
@@ -132,6 +133,7 @@ class AudioService {
 
   // ── SOUNDS (POOLED & REUSED) ──────────────────────────────
   async play(type: SoundType) {
+    await this.loadSettings();
     if (!this.soundEnabled) return;
 
     try {

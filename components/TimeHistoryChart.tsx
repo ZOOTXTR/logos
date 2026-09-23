@@ -1,9 +1,11 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './CustomText';
 import { Svg, Path, Circle, Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
 
 export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; theme: any; language: string }) {
+  const en = language === 'en';
   // Filter for speed/classic games with valid times, take last 6
   const validScores = scores
     .filter(s => typeof s.timeSeconds === 'number' && s.timeSeconds > 0)
@@ -15,7 +17,7 @@ export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; t
       <View style={{ padding: SPACING.md, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.card, borderRadius: BORDER_RADIUS.md, borderWidth: 1, borderColor: theme.colors.border, minHeight: 120 }}>
         <Text style={{ fontSize: 24, marginBottom: 8 }}>📈</Text>
         <Text style={{ color: theme.colors.textSecondary, fontSize: FONTS.size.sm, textAlign: 'center', fontWeight: '600' }}>
-          {language === 'en'
+          {en
             ? 'Play more games with time trackers to unlock speed statistics!'
             : 'Süre grafiğini açmak için süreli modda daha fazla oyun tamamlayın!'}
         </Text>
@@ -24,8 +26,9 @@ export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; t
   }
 
   const times = validScores.map(s => s.timeSeconds as number);
-  const maxTime = Math.max(...times, 10);
-  const minTime = Math.min(...times, 0);
+  const maxTime = Math.max(...times);
+  const minTime = Math.min(...times);
+  const range = maxTime - minTime || 1;
   const chartHeight = 110;
   const chartWidth = 310;
   const paddingX = 25;
@@ -35,7 +38,7 @@ export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; t
 
   const points = times.map((t, idx) => {
     const x = paddingX + (idx * (graphWidth / (times.length - 1)));
-    const y = paddingY + graphHeight - ((t - minTime) / (maxTime - minTime || 1)) * graphHeight;
+    const y = paddingY + graphHeight - ((t - minTime) / range) * graphHeight;
     return { x, y, value: t };
   });
 
@@ -45,9 +48,15 @@ export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; t
   }
 
   const areaD = `${pathD} L ${points[points.length - 1].x} ${paddingY + graphHeight} L ${points[0].x} ${paddingY + graphHeight} Z`;
+  const unit = en ? 's' : 'sn';
 
   return (
-    <View style={{ alignItems: 'center', marginVertical: SPACING.md }}>
+    <View
+      style={{ alignItems: 'center', marginVertical: SPACING.md }}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={`${en ? 'Time history' : 'Süre geçmişi'}: ${times.map(t => `${t}${unit}`).join(', ')}`}
+    >
       <Svg width={chartWidth} height={chartHeight}>
         <Defs>
           <SvgLinearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
@@ -77,7 +86,7 @@ export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; t
               fontWeight="bold"
               textAnchor="middle"
             >
-              {pt.value}s
+              {pt.value}{unit}
             </SvgText>
           </React.Fragment>
         ))}

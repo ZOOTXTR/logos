@@ -1,11 +1,11 @@
 import { doc, getDoc, setDoc, collection, query, where, getDocs, increment, serverTimestamp } from 'firebase/firestore';
 import { Share, Platform } from 'react-native';
-import { getFirebaseDb, FIRESTORE_COLLECTIONS } from '../config/firebase';
+import { getFirebaseDb, FIRESTORE_COLLECTIONS, getFirebaseFunctions } from '../config/firebase';
 import { getCurrentUser, getUserProfile } from './auth.service';
 import { addGems } from './storage.service';
+import { httpsCallable } from 'firebase/functions';
 
 const REFERRAL_BONUS_GEMS = 50;
-const REFERRER_BONUS_GEMS = 75;
 
 export async function getMyReferralCode(): Promise<string | null> {
   const user = getCurrentUser();
@@ -39,36 +39,12 @@ export async function claimReferral(code: string): Promise<{ success: boolean; m
   if (!user) return { success: false, message: 'Sign in first!' };
 
   try {
-    const db = getFirebaseDb();
-
-    const usersRef = collection(db, FIRESTORE_COLLECTIONS.USERS);
-    const q = query(usersRef, where('referralCode', '==', code.toUpperCase()));
-    const snap = await getDocs(q);
-
-    if (snap.empty) return { success: false, message: 'Invalid referral code!' };
-
-    const referrer = snap.docs[0];
-    if (referrer.id === user.uid) return { success: false, message: "You can't use your own code!" };
-
-    const referralRef = doc(db, FIRESTORE_COLLECTIONS.REFERRALS, `${referrer.id}_${user.uid}`);
-    const existing = await getDoc(referralRef);
-    if (existing.exists()) return { success: false, message: 'Code already claimed!' };
-
-    await setDoc(referralRef, {
-      referrerId: referrer.id,
-      claimerId: user.uid,
-      claimedAt: serverTimestamp(),
-      bonusGiven: true,
-    });
-
-    await addGems(REFERRAL_BONUS_GEMS);
-    await setDoc(doc(db, FIRESTORE_COLLECTIONS.USERS, user.uid), {
-      referredBy: referrer.id,
-    }, { merge: true });
-
-    return { success: true, message: `🎉 You got ${REFERRAL_BONUS_GEMS} free gems!` };
-  } catch (e) {
+    const claimFn = httpsCallable<{code: string}, {success: boolean, message: string}>(getFirebaseFunctions(), 'claimReferral');
+    const result = await claimFn({ code: code.toUpperCase() });
+    return result.data;
+  } catch (e: any) {
     console.warn('Referral claim failed:', e);
-    return { success: false, message: 'Something went wrong. Try again!' };
+    const msg = e.message || 'Something went wrong. Try again!';
+    return { success: false, message: msg };
   }
 }

@@ -34,6 +34,7 @@ export function DailySpinModal({ visible, onClose, gems, onAddGems }: DailySpinM
   const { theme, language } = useTheme();
   const [canSpin, setCanSpin] = useState(true);
   const [cooldownText, setCooldownText] = useState('');
+  const timerRef = React.useRef<any>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
   const currentAngle = useRef(0);
@@ -58,7 +59,8 @@ export function DailySpinModal({ visible, onClose, gems, onAddGems }: DailySpinM
   };
 
   useEffect(() => {
-    if (visible) checkCooldown();
+    checkCooldown();
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [visible]);
 
   const checkCooldown = async () => {

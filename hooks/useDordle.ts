@@ -72,6 +72,7 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
 
   const deleteLetter = useCallback(() => {
     setState(prev => {
+      if (prev.gameStatus !== 'playing') return prev;
       if (prev.currentCol === 0) return prev;
 
       let newBoard1 = prev.board1;
@@ -99,7 +100,8 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
     });
   }, []);
 
-  const submitGuess = useCallback((): 'short' | 'submitted' => {
+  const submitGuess = useCallback((): 'short' | 'submitted' | 'ended' => {
+    if (state.gameStatus !== 'playing') return 'ended';
     if (state.currentCol < WORD_LENGTH) return 'short';
 
     const guess = (state.word1Solved ? state.board2 : state.board1)[state.currentRow]
@@ -107,9 +109,9 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
       .join('');
 
     // Evaluate Word 1
-    let w1Status: LetterStatus[] = Array(WORD_LENGTH).fill('absent');
+    const w1Status: LetterStatus[] = Array(WORD_LENGTH).fill('absent');
     let w1Solved = state.word1Solved;
-    let newRevealed1 = { ...state.revealedLetters1 };
+    const newRevealed1 = { ...state.revealedLetters1 };
 
     if (!state.word1Solved) {
       const target1Chars = state.targetWord1.split('');
@@ -144,9 +146,9 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
     }
 
     // Evaluate Word 2
-    let w2Status: LetterStatus[] = Array(WORD_LENGTH).fill('absent');
+    const w2Status: LetterStatus[] = Array(WORD_LENGTH).fill('absent');
     let w2Solved = state.word2Solved;
-    let newRevealed2 = { ...state.revealedLetters2 };
+    const newRevealed2 = { ...state.revealedLetters2 };
 
     if (!state.word2Solved) {
       const target2Chars = state.targetWord2.split('');
@@ -181,8 +183,8 @@ export function useDordle(lang: 'tr' | 'en' = 'tr') {
     }
 
     setState(prev => {
-      let newBoard1 = [...prev.board1];
-      let newBoard2 = [...prev.board2];
+      const newBoard1 = [...prev.board1];
+      const newBoard2 = [...prev.board2];
 
       if (!prev.word1Solved) {
         newBoard1[prev.currentRow] = guess.split('').map((c, i) => ({ char: c, status: w1Status[i] }));

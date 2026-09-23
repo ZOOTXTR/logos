@@ -15,7 +15,7 @@ export interface WordConnectState {
   wordsFound: string[];
   targetWords: string[];
   cells: ConnectCell[];
-  status: 'playing' | 'won';
+  status: 'playing' | 'won' | 'completed';
   level: number;
 }
 
@@ -31,22 +31,22 @@ interface LevelConfig {
 const LEVELS_TR: LevelConfig[] = [
   {
     letters: ['K', 'A', 'L', 'E', 'M'],
-    targetWords: ['KALEM', 'KALE', 'ELMA', 'KAME'],
+    targetWords: ['KALEM', 'KALE', 'ELMA', 'ALEM'],
     layout: [
-      ['KALEM', 2, 1, 'H'],
-      ['KALE', 2, 1, 'V'],
-      ['ELMA', 4, 3, 'H'],
-      ['KAME', 1, 3, 'V'],
+      ['KALEM', 0, 0, 'H'],
+      ['KALE', 0, 0, 'V'],
+      ['ELMA', 0, 3, 'V'],
+      ['ALEM', 3, 3, 'H'],
     ]
   },
   {
     letters: ['T', 'A', 'S', 'M', 'A'],
-    targetWords: ['TASMA', 'MASAT', 'SAAT', 'ASMA'],
+    targetWords: ['TASMA', 'ASMA', 'SAAT', 'ATA'],
     layout: [
-      ['TASMA', 0, 1, 'H'],
-      ['MASAT', 0, 4, 'V'],
-      ['SAAT', 2, 2, 'H'],
+      ['TASMA', 0, 0, 'H'],
       ['ASMA', 0, 1, 'V'],
+      ['SAAT', 0, 2, 'V'],
+      ['ATA', 0, 4, 'V'],
     ]
   }
 ];
@@ -54,29 +54,30 @@ const LEVELS_TR: LevelConfig[] = [
 const LEVELS_EN: LevelConfig[] = [
   {
     letters: ['S', 'T', 'A', 'R', 'E'],
-    targetWords: ['STARE', 'TEAR', 'RATE', 'EAST'],
+    targetWords: ['STARE', 'TEAR', 'RATE', 'STAR'],
     layout: [
-      ['STARE', 2, 0, 'H'],
+      ['STARE', 0, 0, 'H'],
       ['TEAR', 0, 1, 'V'],
-      ['RATE', 2, 3, 'V'],
-      ['EAST', 3, 0, 'H'],
+      ['RATE', 0, 3, 'V'],
+      ['STAR', 0, 0, 'V'],
     ]
   },
   {
     letters: ['P', 'E', 'A', 'C', 'H'],
-    targetWords: ['PEACH', 'EACH', 'CAPE', 'HEAP'],
+    targetWords: ['PEACH', 'EACH', 'CAPE', 'PEA'],
     layout: [
-      ['PEACH', 2, 0, 'H'],
-      ['EACH', 2, 1, 'V'],
+      ['PEACH', 0, 0, 'H'],
+      ['EACH', 0, 1, 'V'],
       ['CAPE', 0, 3, 'V'],
-      ['HEAP', 4, 0, 'H'],
+      ['PEA', 0, 0, 'V'],
     ]
   }
 ];
 
 export function useWordConnect(levelIndex = 0, lang: 'tr' | 'en' = 'tr') {
   const levels = lang === 'en' ? LEVELS_EN : LEVELS_TR;
-  const config = levels[levelIndex % levels.length];
+  const safeIndex = Math.max(0, Math.min(levelIndex, levels.length - 1));
+  const config = levels[safeIndex];
 
   const buildCells = (layout: LevelConfig['layout']): ConnectCell[] => {
     const list: ConnectCell[] = [];
@@ -142,7 +143,7 @@ export function useWordConnect(levelIndex = 0, lang: 'tr' | 'en' = 'tr') {
 
     if (state.targetWords.includes(word)) {
       // Find where this word lies in the layout
-      const level = levels[(state.level - 1) % levels.length];
+      const level = levels[Math.min(state.level - 1, levels.length - 1)];
       const match = level.layout.find(([w]) => w === word);
       
       let newCells = [...state.cells];
@@ -181,8 +182,13 @@ export function useWordConnect(levelIndex = 0, lang: 'tr' | 'en' = 'tr') {
   }, [state, levels]);
 
   const reset = useCallback((nextLevel?: number) => {
-    const nextIdx = nextLevel ?? (state.level - 1);
-    const conf = levels[nextIdx % levels.length];
+    const requested = nextLevel ?? (state.level - 1);
+    if (requested >= levels.length) {
+      setState(prev => ({ ...prev, status: 'completed' }));
+      return;
+    }
+    const nextIdx = Math.max(0, requested);
+    const conf = levels[nextIdx];
     setState({
       letters: conf.letters,
       selectedIndices: [],
@@ -195,5 +201,5 @@ export function useWordConnect(levelIndex = 0, lang: 'tr' | 'en' = 'tr') {
     });
   }, [state.level, levels]);
 
-  return { ...state, selectLetter, clearSelection, submitWord, reset };
+  return { ...state, totalLevels: levels.length, selectLetter, clearSelection, submitWord, reset };
 }

@@ -1,7 +1,6 @@
 import React from 'react';
-import {
-  View, Text, StyleSheet, TouchableOpacity, Animated,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated,  } from 'react-native';
+import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { SpinWheelCanvas, Prize } from './SpinWheelCanvas';
@@ -74,9 +73,14 @@ const styles = StyleSheet.create({
   },
   spinBtn: {
     width: '100%',
-    height: 52,
-    borderRadius: BORDER_RADIUS.md,
+    height: 56,
+    borderRadius: 24,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 5,
   },
   spinGrad: {
     flex: 1,
@@ -86,15 +90,15 @@ const styles = StyleSheet.create({
   spinText: {
     color: 'white',
     fontWeight: '900',
-    fontSize: FONTS.size.md,
+    fontSize: FONTS.size.lg,
     letterSpacing: 1,
   },
   cooldownContainer: {
     width: '100%',
     padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
-    alignItems: 'center',
+    borderRadius: 24,
     borderWidth: 1,
+    alignItems: 'center',
   },
   cooldownLabel: {
     fontSize: FONTS.size.sm,

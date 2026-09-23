@@ -1,8 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useProgressStore, RecordWinOptions } from '../store/progressStore';
 import { useTheme } from './useTheme';
-import { addScore, markDailyDone, ScoreEntry } from '../services/storage.service';
-import { submitScore } from '../services/leaderboard.service';
+import { markDailyDone, ScoreEntry } from '../services/storage.service';
 import { audioService } from '../services/audio.service';
 import { GameResultOverlayProps, ResultButton } from '../components/GameResultOverlay';
 
@@ -40,18 +39,17 @@ export function useGameSession(): GameSession {
       setShowConfetti(true);
       audioService.play('win');
       audioService.triggerHaptic('success');
-      await progress.earnXP(r.xpEarned);
-      await progress.addGems(r.gemsEarned);
       if (r.stats) {
-        await progress.recordWin({ ...r.stats, xpEarned: r.xpEarned });
+        // Tek yazıcı: XP, gem ve skor recordWin içinde işlenir
+        await progress.recordWin({ ...r.stats, xpEarned: r.xpEarned, gemsEarned: r.gemsEarned });
         if (r.stats.isDaily) {
           await markDailyDone();
           await progress.refreshDaily();
         }
+      } else {
+        await progress.earnXP(r.xpEarned);
+        await progress.addGems(r.gemsEarned);
       }
-      const entry: ScoreEntry = { date: new Date().toISOString(), ...r.score, xpEarned: r.xpEarned };
-      await addScore(entry);
-      await submitScore(entry);
     } else {
       audioService.play('loss');
       audioService.triggerHaptic('warning');

@@ -1,24 +1,18 @@
 import { Platform } from 'react-native';
 import * as RNIap from 'react-native-iap';
+import { PRODUCT_IDS as STORE_PRODUCT_IDS, GEM_PACKAGES } from '../constants/products';
 
-// Product IDs must match App Store Connect / Google Play Console exactly
-export const PRODUCT_IDS = {
-  PREMIUM: Platform.OS === 'ios' ? 'com.logos.premium' : 'com.logos.premium',
-  GEMS_100:  Platform.OS === 'ios' ? 'com.logos.gems100'  : 'com.logos.gems100',
-  GEMS_500:  Platform.OS === 'ios' ? 'com.logos.gems500'  : 'com.logos.gems500',
-  GEMS_1200: Platform.OS === 'ios' ? 'com.logos.gems1200' : 'com.logos.gems1200',
-  GEMS_3000: Platform.OS === 'ios' ? 'com.logos.gems3000' : 'com.logos.gems3000',
-} as const;
-
-export type ProductId = typeof PRODUCT_IDS[keyof typeof PRODUCT_IDS];
+// Re-export from products.ts for backward compatibility
+export const PRODUCT_IDS = STORE_PRODUCT_IDS;
 
 /** Maps product ID to gem amount (0 = premium upgrade) */
 export const PRODUCT_GEM_AMOUNTS: Record<string, number> = {
-  [PRODUCT_IDS.PREMIUM]:   0,
-  [PRODUCT_IDS.GEMS_100]:  100,
-  [PRODUCT_IDS.GEMS_500]:  500,
-  [PRODUCT_IDS.GEMS_1200]: 1200,
-  [PRODUCT_IDS.GEMS_3000]: 3000,
+  [PRODUCT_IDS.GEM_PACK_1]: 100,
+  [PRODUCT_IDS.GEM_PACK_2]: 250,
+  [PRODUCT_IDS.GEM_PACK_3]: 500,
+  [PRODUCT_IDS.GEM_PACK_4]: 1200,
+  [PRODUCT_IDS.GEM_PACK_5]: 3000,
+  [PRODUCT_IDS.PREMIUM_MONTHLY]: 0,
 };
 
 let connectionEstablished = false;
@@ -40,8 +34,9 @@ export async function initIAP(): Promise<boolean> {
 export async function fetchProducts(): Promise<RNIap.Product[]> {
   if (!connectionEstablished || Platform.OS === 'web') return [];
   try {
-    const products = await RNIap.getProducts({ skus: Object.values(PRODUCT_IDS) });
-    return products;
+    const gemIds = GEM_PACKAGES.map(p => p.id);
+    const products = await RNIap.fetchProducts({ skus: gemIds, type: 'in-app' });
+    return products as RNIap.Product[];
   } catch (e) {
     console.warn('[IAP] fetchProducts failed:', e);
     return [];
@@ -51,7 +46,6 @@ export async function fetchProducts(): Promise<RNIap.Product[]> {
 /** Request a purchase — returns productId on success, null on failure/cancel */
 export async function purchaseProduct(productId: string): Promise<string | null> {
   if (Platform.OS === 'web') {
-    // On web: simulate for development only
     console.warn('[IAP] Purchases not available on web platform.');
     return null;
   }
@@ -60,11 +54,10 @@ export async function purchaseProduct(productId: string): Promise<string | null>
     return null;
   }
   try {
-    const purchase = await RNIap.requestPurchase({ sku: productId });
-    // Acknowledge the purchase to prevent refund by the store
-    if (purchase && (purchase as RNIap.ProductPurchase).transactionId) {
+    const purchase = await RNIap.requestPurchase({ type: 'in-app', request: { apple: { sku: productId }, google: { skus: [productId] } } });
+    if (purchase && (purchase as any).transactionId) {
       try {
-        await RNIap.finishTransaction({ purchase: purchase as RNIap.ProductPurchase, isConsumable: productId !== PRODUCT_IDS.PREMIUM });
+        await RNIap.finishTransaction({ purchase: purchase as any, isConsumable: productId !== PRODUCT_IDS.PREMIUM_MONTHLY });
       } catch (finishErr) {
         console.warn('[IAP] finishTransaction failed:', finishErr);
       }
@@ -73,14 +66,14 @@ export async function purchaseProduct(productId: string): Promise<string | null>
   } catch (e: unknown) {
     const err = e as { code?: string; message?: string };
     if (err.code === 'E_USER_CANCELLED') {
-      return null; // User cancelled — not an error
+      return null;
     }
     console.warn('[IAP] requestPurchase failed:', err.message);
     return null;
   }
 }
 
-/** Restore previous purchases (for iOS) */
+/** Restore previous purchases */
 export async function restorePurchases(): Promise<string[]> {
   if (Platform.OS === 'web') return [];
   if (!connectionEstablished) return [];

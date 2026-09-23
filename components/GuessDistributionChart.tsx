@@ -3,16 +3,41 @@ import { View } from 'react-native';
 import { Svg, Rect, Text as SvgText } from 'react-native-svg';
 import { SPACING } from '../constants/theme';
 
-export function GuessDistributionChart({ distribution, theme }: { distribution: Record<number, number>; theme: any }) {
-  const values = [1, 2, 3, 4, 5, 6].map(k => distribution[k] || 0);
+export function GuessDistributionChart({
+  distribution,
+  theme,
+  language = 'tr',
+}: {
+  distribution: Record<number, number>;
+  theme: any;
+  language?: string;
+}) {
+  // Dağılımdaki tüm anahtarları göster (6'dan fazla tahmin dahil), yoksa 1-6 varsayılanı
+  const keys = Object.keys(distribution)
+    .map(Number)
+    .filter(n => Number.isFinite(n) && n > 0)
+    .sort((a, b) => a - b);
+  const labels = keys.length ? keys.slice(0, 10) : [1, 2, 3, 4, 5, 6];
+  const values = labels.map(k => distribution[k] || 0);
   const maxValue = Math.max(...values, 1);
   const chartHeight = 110;
-  const chartWidth = 300;
   const barWidth = 32;
   const gap = 16;
+  const chartWidth = labels.length * (barWidth + gap) + 10;
+
+  const summary = labels.map((l, i) => `${l}:${values[i]}`).join(', ');
 
   return (
-    <View style={{ alignItems: 'center', marginVertical: SPACING.md }}>
+    <View
+      style={{ alignItems: 'center', marginVertical: SPACING.md }}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={
+        language === 'en'
+          ? `Guess distribution. ${summary}`
+          : `Tahmin dağılımı. ${summary}`
+      }
+    >
       <Svg width={chartWidth} height={chartHeight + 25}>
         {values.map((val, idx) => {
           const barHeight = (val / maxValue) * chartHeight;
@@ -58,7 +83,7 @@ export function GuessDistributionChart({ distribution, theme }: { distribution: 
                 fontWeight="800"
                 textAnchor="middle"
               >
-                {idx + 1}
+                {labels[idx]}
               </SvgText>
             </React.Fragment>
           );

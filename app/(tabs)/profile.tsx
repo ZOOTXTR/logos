@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View, Text, StyleSheet, SafeAreaView,
-  ScrollView, StatusBar, TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, SafeAreaView, ScrollView, StatusBar, TouchableOpacity, Image } from 'react-native';
+import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
-import { getStats, getUnlockedAchievements, getScores, FullStats, ScoreEntry } from '../../services/storage.service';
+import { getStats, getUnlockedAchievements, getScores, FullStats, ScoreEntry, storageGet } from '../../services/storage.service';
 import { ACHIEVEMENTS } from '../../constants/achievements';
 import { LevelBar } from '../../components/LevelBar';
 import { StoreModal } from '../../components/StoreModal';
@@ -23,6 +21,9 @@ import { ProfileAchievementList } from '../../components/ProfileAchievementList'
 import { GuessDistributionChart } from '../../components/GuessDistributionChart';
 import { TimeHistoryChart } from '../../components/TimeHistoryChart';
 
+import { AuraBackground } from '../../components/design/AuraBackground';
+import { WidgetCard } from '../../components/design/WidgetCard';
+
 export default function ProfileScreen() {
   const progress = useProgress();
   const { theme, language } = useTheme();
@@ -30,186 +31,180 @@ export default function ProfileScreen() {
   const [stats, setStats] = useState<FullStats | null>(null);
   const [unlockedIds, setUnlockedIds] = useState<string[]>([]);
   const [scores, setScores] = useState<ScoreEntry[]>([]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [showStore, setShowStore] = useState(false);
   const [showAlbum, setShowAlbum] = useState(false);
   const [showSync, setShowSync] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
 
   useEffect(() => {
-    Promise.all([getStats(), getUnlockedAchievements(), getScores()]).then(([s, ua, sc]) => {
+    Promise.all([
+      getStats(),
+      getUnlockedAchievements(),
+      getScores(),
+      storageGet('gq_user_email'),
+      storageGet('gq_user_photo'),
+      storageGet('gq_user_name'),
+    ]).then(([s, ua, sc, email, photo, name]) => {
       setStats(s);
       setUnlockedIds(ua);
       setScores(sc);
+      setUserEmail(email);
+      setUserPhoto(photo);
+      setUserName(name);
     });
   }, []);
 
-  if (progress.loading) {
-    return <LoadingView />;
+  useEffect(() => {
+    if (!showSync) {
+      storageGet('gq_user_email').then(setUserEmail);
+      storageGet('gq_user_photo').then(setUserPhoto);
+      storageGet('gq_user_name').then(setUserName);
+    }
+  }, [showSync]);
+
+  if (progress.loading || !stats) {
+    return <LoadingView message={language === 'en' ? 'Loading Profile...' : 'Profil Yükleniyor...'} />;
   }
 
-  const winRate = stats && stats.gamesPlayed > 0
-    ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100)
-    : 0;
-
+  const winRate = stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
   const unlockedCount = unlockedIds.length;
   const totalAchievements = ACHIEVEMENTS.length;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.background} />
-      <LinearGradient colors={[theme.colors.background, theme.colors.surface]} style={styles.container}>
+      <AuraBackground theme={theme} />
+      
+      <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
 
           {/* Profil Başlık */}
-          <LinearGradient
-            colors={progress.premium ? ['#F59E0B', '#D97706'] : [theme.colors.primary, theme.colors.primaryDark]}
-            style={styles.profileCard}
-          >
-            <Text style={styles.avatar}>{progress.premium ? '👑' : '🎮'}</Text>
-            <Text style={styles.username}>
-              {language === 'en' ? 'Logos Player' : 'Logos Oyuncusu'}
+          <WidgetCard theme={theme} variant="glass" style={{ marginVertical: SPACING.xl, paddingVertical: SPACING.lg, alignItems: 'center' }}>
+            <View style={[styles.avatarContainer, { borderColor: progress.premium ? '#F59E0B' : theme.colors.primary }]}>
+              {userPhoto ? (
+                <Image source={{ uri: userPhoto }} style={styles.avatarImage} />
+              ) : (
+                <LinearGradient
+                  colors={progress.premium ? ['#F59E0B', '#D97706'] : [theme.colors.primary, theme.colors.primaryDark]}
+                  style={styles.avatarGradient}
+                >
+                  <Text style={styles.avatarEmoji}>{progress.premium ? '👑' : '🎮'}</Text>
+                </LinearGradient>
+              )}
+              {progress.premium && (
+                <View style={styles.premiumIconBadge}>
+                  <Text style={styles.premiumIconText}>✨</Text>
+                </View>
+              )}
+            </View>
+
+            <Text style={[styles.usernameText, { color: theme.colors.text }]}>
+              {userName || (language === 'en' ? 'Player' : 'Oyuncu')}
             </Text>
-            {progress.premium && (
-              <View style={styles.premiumBadge}>
-                <Text style={styles.premiumText}>✨ {t.premiumMember}</Text>
+            {userEmail && (
+              <View style={[styles.emailBadge, { borderColor: theme.colors.border, backgroundColor: theme.colors.surface + '80' }]}>
+                <Text style={[styles.emailText, { color: theme.colors.textSecondary }]}>{userEmail}</Text>
               </View>
             )}
-          </LinearGradient>
 
-          {/* Level Bar */}
+            {progress.premium && (
+              <LinearGradient colors={['#F59E0B', '#D97706']} style={styles.premiumBadge}>
+                <Text style={styles.premiumText}>PREMIUM</Text>
+              </LinearGradient>
+            )}
+          </WidgetCard>
+
+          {/* Level Bar (Bento stil) */}
           {progress.levelInfo && (
-            <View style={styles.section}>
+            <WidgetCard theme={theme} variant="glass" style={{ marginBottom: SPACING.lg }}>
               <LevelBar xp={progress.xp} levelInfo={progress.levelInfo} />
-            </View>
-          )}          {/* Çıkartma Albümü */}
-          <TouchableOpacity 
-            style={[styles.albumCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.primaryLight }]} 
-            onPress={() => {
-              audioService.triggerHaptic('light');
-              setShowAlbum(true);
-            }}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.albumEmoji}>🎫</Text>
-            <View style={styles.albumTextContainer}>
-              <Text style={[styles.albumTitle, { color: theme.colors.text }]}>
-                {language === 'en' ? 'Sticker Album' : 'Çıkartma Albümü'}
-              </Text>
-              <Text style={[styles.albumDesc, { color: theme.colors.textSecondary }]}>
-                {language === 'en' ? 'Collect unique stickers and earn gems!' : 'Eşsiz çıkartmaları biriktir, gem kazan!'}
-              </Text>
-            </View>
-            <Text style={[styles.albumArrow, { color: theme.colors.primaryLight }]}>›</Text>
-          </TouchableOpacity>
+            </WidgetCard>
+          )}
 
-          {/* Bulut Yedekleme Portal Kartı */}
-          <TouchableOpacity 
-            style={[styles.albumCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.primaryLight }]} 
-            onPress={() => {
-              audioService.triggerHaptic('light');
-              setShowSync(true);
-            }}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.albumEmoji}>☁️</Text>
-            <View style={styles.albumTextContainer}>
-              <Text style={[styles.albumTitle, { color: theme.colors.text }]}>
-                {language === 'en' ? 'Cloud Backup Portal' : 'Bulut Yedekleme Portalı'}
-              </Text>
-              <Text style={[styles.albumDesc, { color: theme.colors.textSecondary }]}>
-                {language === 'en' ? 'Link your account and sync your progress.' : 'Hesabını bağla ve ilerlemeni yedekle.'}
-              </Text>
-            </View>
-            <Text style={[styles.albumArrow, { color: theme.colors.primaryLight }]}>›</Text>
-          </TouchableOpacity>
-          {/* Gem Kartı */}
-          <TouchableOpacity style={[styles.gemCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]} onPress={() => setShowStore(true)}>
-            <Text style={[styles.gemValue, { color: theme.colors.gem }]}>💎 {progress.gems}</Text>
-            <Text style={[styles.gemLabel, { color: theme.colors.textSecondary }]}>{t.gemBalance}</Text>
-            <View style={[styles.gemBtn, { backgroundColor: theme.colors.gem }]}>
-              <Text style={styles.gemBtnText}>{language === 'en' ? '+ Buy' : '+ Satın Al'}</Text>
-            </View>
-          </TouchableOpacity>
+          {/* Aksiyon Buttonları (4lü Bento Grid) */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginBottom: SPACING.lg }}>
+            <WidgetCard theme={theme} variant="glass" onPress={() => setShowStore(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>💎</Text>
+              <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{progress.gems} Gem</Text>
+              <Text style={{ color: theme.colors.accent, fontSize: FONTS.size.xs, fontWeight: '700', marginTop: 4 }}>+ Al</Text>
+            </WidgetCard>
 
-          {/* Invite Friends */}
-          <TouchableOpacity
-            style={[styles.albumCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.primaryLight }]}
-            onPress={() => {
-              audioService.triggerHaptic('light');
-              setShowInvite(true);
-            }}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.albumEmoji}>🎉</Text>
-            <View style={styles.albumTextContainer}>
-              <Text style={[styles.albumTitle, { color: theme.colors.text }]}>
-                {language === 'en' ? 'Invite Friends' : 'Arkadaş Davet Et'}
-              </Text>
-              <Text style={[styles.albumDesc, { color: theme.colors.textSecondary }]}>
-                {language === 'en' ? 'Invite friends and earn 50 💎 each!' : 'Arkadaşlarını davet et, her biri için 50 💎 kazan!'}
-              </Text>
-            </View>
-            <Text style={[styles.albumArrow, { color: theme.colors.primaryLight }]}>›</Text>
-          </TouchableOpacity>
+            <WidgetCard theme={theme} variant="glass" onPress={() => setShowAlbum(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>🎫</Text>
+              <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{language === 'en' ? 'Album' : 'Albüm'}</Text>
+            </WidgetCard>
 
-          {/* İstatistikler */}
+            <WidgetCard theme={theme} variant="glass" onPress={() => setShowSync(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>☁️</Text>
+              <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{language === 'en' ? 'Cloud Sync' : 'Bulut'}</Text>
+            </WidgetCard>
+
+            <WidgetCard theme={theme} variant="glass" onPress={() => setShowInvite(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+              <Text style={{ fontSize: 32, marginBottom: 8 }}>🎉</Text>
+              <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{language === 'en' ? 'Invite' : 'Davet'}</Text>
+            </WidgetCard>
+          </View>
+
           {stats && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>📊 {t.statsHeader}</Text>
+            <WidgetCard theme={theme} variant="glass" style={{ marginBottom: SPACING.lg }}>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>📊 {language === 'en' ? 'Stats' : 'İstatistikler'}</Text>
               <View style={styles.statsGrid}>
-                <ProfileStatsCard emoji="🎮" value={stats.gamesPlayed} label={language === 'en' ? 'Games' : 'Oyun'} theme={theme} />
+                <ProfileStatsCard emoji="🎮" value={stats.gamesPlayed} label={language === 'en' ? 'Played' : 'Oynanan'} theme={theme} />
                 <ProfileStatsCard emoji="🏆" value={stats.gamesWon} label={language === 'en' ? 'Wins' : 'Kazanma'} theme={theme} />
                 <ProfileStatsCard emoji="📈" value={`${winRate}%`} label={language === 'en' ? 'Rate' : 'Oran'} theme={theme} />
                 <ProfileStatsCard emoji="🔥" value={progress.streak.max} label={language === 'en' ? 'Max Streak' : 'Mak. Seri'} theme={theme} />
-                <ProfileStatsCard emoji="⚡" value={stats.speedModeWins} label="Speed" theme={theme} />
+                <ProfileStatsCard emoji="⚡" value={stats.speedModeWins} label={language === 'en' ? 'Speed' : 'Hızlı'} theme={theme} />
                 <ProfileStatsCard emoji="🎯" value={stats.perfectGames} label={language === 'en' ? 'Perfect' : 'Mükemmel'} theme={theme} />
               </View>
-            </View>
+            </WidgetCard>
           )}
 
           {stats && (
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>📊 {language === 'en' ? 'Performance Charts' : 'Performans Grafikleri'}</Text>
               
-              <View style={[styles.chartCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+              <WidgetCard theme={theme} variant="glass" style={{ padding: SPACING.md }}>
                 <Text style={[styles.chartTitle, { color: theme.colors.textSecondary }]}>
                   📊 {language === 'en' ? 'Guess Distribution' : 'Tahmin Dağılımı'}
                 </Text>
-                <GuessDistributionChart distribution={stats.guessDistribution} theme={theme} />
-              </View>
+                <GuessDistributionChart distribution={stats.guessDistribution || {}} theme={theme} language={language} />
+              </WidgetCard>
 
-              <View style={[styles.chartCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, marginTop: SPACING.md }]}>
+              <WidgetCard theme={theme} variant="glass" style={{ padding: SPACING.md, marginTop: SPACING.md }}>
                 <Text style={[styles.chartTitle, { color: theme.colors.textSecondary }]}>
-                  ⚡ {language === 'en' ? 'Solve Speed History' : 'Hız/Süre Gelişimi (Son 6 Oyun)'}
+                  ⚡ {language === 'en' ? 'Solve Speed History' : 'Hız/Süre Gelişimi'}
                 </Text>
-                <TimeHistoryChart scores={scores} theme={theme} language={language} />
-              </View>
+                <TimeHistoryChart scores={scores || []} theme={theme} language={language} />
+              </WidgetCard>
             </View>
           )}
 
           {/* Başarımlar */}
-          <View style={styles.section}>
+          <WidgetCard theme={theme} variant="glass" style={{ marginBottom: SPACING.lg }}>
             <View style={styles.achievHeader}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>🏅 {t.achievementsHeader}</Text>
+              <Text style={[styles.sectionTitle, { color: theme.colors.text, marginBottom: 0 }]}>🏅 {t.achievementsHeader}</Text>
               <Text style={[styles.achievCount, { color: theme.colors.accent }]}>{unlockedCount}/{totalAchievements}</Text>
             </View>
             <ProfileAchievementList achievements={ACHIEVEMENTS} unlockedIds={unlockedIds} theme={theme} language={language} />
-          </View>
+          </WidgetCard>
 
           {/* Premium */}
           {!progress.premium && (
-            <TouchableOpacity style={styles.premiumPromo} onPress={() => setShowStore(true)}>
+            <WidgetCard theme={theme} variant="primary" onPress={() => setShowStore(true)} style={{ padding: 0, overflow: 'hidden', marginBottom: SPACING.lg }}>
               <LinearGradient colors={['#F59E0B', '#D97706']} style={styles.premiumGrad}>
                 <Text style={styles.promoTitle}>👑 {t.upgradePremium}</Text>
                 <Text style={styles.promoDesc}>{t.premiumPromo}</Text>
                 <Text style={styles.promoPrice}>{t.pricePromo}</Text>
               </LinearGradient>
-            </TouchableOpacity>
+            </WidgetCard>
           )}
 
           <View style={{ height: SPACING.xl }} />
         </ScrollView>
-      </LinearGradient>
+      </View>
 
       <StoreModal
         visible={showStore}
@@ -245,19 +240,84 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { flex: 1, paddingHorizontal: SPACING.md },
-  profileCard: {
-    borderRadius: BORDER_RADIUS.xl, padding: SPACING.xl,
-    alignItems: 'center', marginVertical: SPACING.md,
+  container: { flex: 1, paddingHorizontal: SPACING.md, maxWidth: 600, alignSelf: 'center', width: '100%' },
+  profileHeaderContainer: {
+    alignItems: 'center',
+    marginVertical: SPACING.xl,
+    paddingVertical: SPACING.md,
   },
-  avatar: { fontSize: 64, marginBottom: SPACING.sm },
-  username: { fontSize: FONTS.size.xl, fontWeight: '800' },
-  premiumBadge: {
-    marginTop: SPACING.sm, backgroundColor: 'rgba(0,0,0,0.2)',
-    paddingHorizontal: SPACING.md, paddingVertical: 4,
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 4,
+    padding: 2,
+    marginBottom: SPACING.md,
+  },
+  avatarGradient: {
+    flex: 1,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImage: {
+    flex: 1,
+    borderRadius: 50,
+    width: '100%',
+    height: '100%',
+  },
+  avatarEmoji: {
+    fontSize: 48,
+  },
+  premiumIconBadge: {
+    position: 'absolute',
+    bottom: -5,
+    right: -5,
+    backgroundColor: '#000',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+  },
+  premiumIconText: {
+    fontSize: 14,
+  },
+  usernameText: {
+    fontSize: FONTS.size.xxl,
+    fontWeight: '900',
+    marginBottom: SPACING.xs,
+  },
+  emailBadge: {
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 4,
     borderRadius: BORDER_RADIUS.full,
+    borderWidth: 1,
+    marginBottom: SPACING.sm,
   },
-  premiumText: { color: COLORS.text, fontWeight: '800', fontSize: FONTS.size.sm, letterSpacing: 1 },
+  emailText: {
+    fontSize: FONTS.size.sm,
+    fontWeight: '600',
+  },
+  premiumBadge: {
+    marginTop: SPACING.xs,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 6,
+    borderRadius: BORDER_RADIUS.full,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  premiumText: {
+    color: '#fff',
+    fontWeight: '900',
+    fontSize: FONTS.size.xs,
+    letterSpacing: 1.5,
+  },
   section: { marginBottom: SPACING.lg },
   sectionTitle: { fontSize: FONTS.size.md, fontWeight: '700', marginBottom: SPACING.sm },
   gemCard: {
