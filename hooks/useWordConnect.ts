@@ -48,6 +48,26 @@ const LEVELS_TR: LevelConfig[] = [
       ['SAAT', 0, 2, 'V'],
       ['ATA', 0, 4, 'V'],
     ]
+  },
+  {
+    letters: ['M', 'A', 'S', 'A', 'L'],
+    targetWords: ['MASAL', 'MASA', 'ALMA', 'SAL'],
+    layout: [
+      ['MASAL', 0, 0, 'H'],
+      ['MASA', 0, 0, 'V'],
+      ['ALMA', 0, 1, 'V'],
+      ['SAL', 0, 2, 'V'],
+    ]
+  },
+  {
+    letters: ['S', 'E', 'L', 'A', 'M'],
+    targetWords: ['SELAM', 'SAL', 'ELMA', 'ALEM'],
+    layout: [
+      ['SELAM', 0, 0, 'H'],
+      ['SAL', 0, 0, 'V'],
+      ['ELMA', 0, 1, 'V'],
+      ['ALEM', 0, 3, 'V'],
+    ]
   }
 ];
 
@@ -70,6 +90,26 @@ const LEVELS_EN: LevelConfig[] = [
       ['EACH', 0, 1, 'V'],
       ['CAPE', 0, 3, 'V'],
       ['PEA', 0, 0, 'V'],
+    ]
+  },
+  {
+    letters: ['S', 'T', 'O', 'N', 'E'],
+    targetWords: ['STONE', 'SON', 'TONE', 'NEST'],
+    layout: [
+      ['STONE', 0, 0, 'H'],
+      ['SON', 0, 0, 'V'],
+      ['TONE', 0, 1, 'V'],
+      ['NEST', 0, 3, 'V'],
+    ]
+  },
+  {
+    letters: ['B', 'R', 'E', 'A', 'D'],
+    targetWords: ['BREAD', 'BEAR', 'READ', 'ARE'],
+    layout: [
+      ['BREAD', 0, 0, 'H'],
+      ['BEAR', 0, 0, 'V'],
+      ['READ', 0, 1, 'V'],
+      ['ARE', 0, 3, 'V'],
     ]
   }
 ];

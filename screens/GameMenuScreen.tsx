@@ -59,12 +59,19 @@ export function GameMenuScreen({
         <Text style={[styles.logo, { color: theme.colors.text }]}>💎 Logos</Text>
         <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
           <TouchableOpacity
-            style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, paddingHorizontal: 12, paddingVertical: 6, margin: 0 }]}
+            style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, paddingHorizontal: 12, paddingVertical: 6, margin: 0, minHeight: 44, justifyContent: 'center' }]}
             onPress={() => { audioService.triggerHaptic('light'); setShowHelp(true); }}
+            accessibilityRole="button"
+            accessibilityLabel={language === 'en' ? 'Help' : 'Yardım'}
           >
             <Text style={{ color: theme.colors.textSecondary, fontWeight: '700', fontSize: 12 }}>❓ {language === 'en' ? 'Help' : 'Yardım'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem }]} onPress={() => setShowStore(true)}>
+          <TouchableOpacity
+            style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem, minHeight: 44, justifyContent: 'center' }]}
+            onPress={() => setShowStore(true)}
+            accessibilityRole="button"
+            accessibilityLabel={language === 'en' ? `Store, ${gems} gems` : `Mağaza, ${gems} elmas`}
+          >
             <Text style={[styles.gemPillText, { color: theme.colors.gem }]}>💎 {gems}</Text>
           </TouchableOpacity>
         </View>
@@ -94,6 +101,8 @@ export function GameMenuScreen({
           style={[styles.spinBanner, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
           onPress={() => { audioService.triggerHaptic('light'); setShowSpin(true); }}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={language === 'en' ? 'Lucky Daily Spin' : 'Günlük Şans Çarkı'}
         >
           <Text style={styles.spinBannerEmoji}>🎡</Text>
           <View style={styles.spinBannerTextContainer}>
@@ -110,6 +119,8 @@ export function GameMenuScreen({
           style={[styles.spinBanner, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
           onPress={() => { audioService.triggerHaptic('light'); router.push('/multiplayer' as any); }}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel={language === 'en' ? 'Online Duel' : 'Çevrimiçi Düello'}
         >
           <Text style={styles.spinBannerEmoji}>⚔️</Text>
           <View style={styles.spinBannerTextContainer}>

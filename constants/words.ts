@@ -64,8 +64,29 @@ export const WORD_BANK: Record<Exclude<Category, 'random'>, string[]> = {
   ],
 };
 
-// Tüm kelimeleri birleştir
-export const ALL_WORDS: string[] = Object.values(WORD_BANK).flat();
+// Doğrulama sözlüğüne (VALIDATION_DICT_TR) göre doğrulanmış ek 5 harfli Türkçe
+// kelimeler. Havuzu zenginleştirir; hepsi oynanabilir/doğrulanabilir kelimelerdir.
+export const WORDS_5_TR_EXTRA: string[] = [
+  'KİTAP', 'KALEM', 'SİLGİ', 'TAHTA', 'SINIF', 'BİLGİ', 'BİLİM', 'SANAT', 'MÜZİK', 'RESİM',
+  'TARİH', 'EKMEK', 'KAHVE', 'TABAK', 'ÇATAL', 'İNSAN', 'KADIN', 'ERKEK', 'ÇOCUK', 'MUTLU',
+  'HÜZÜN', 'KEDER', 'KORKU', 'CESUR', 'SABIR', 'ZAMAN', 'HAFTA', 'BEYAZ', 'SİYAH', 'YEŞİL',
+  'PEMBE', 'HESAP', 'ALTIN', 'GÜMÜŞ', 'MADEN', 'DEMİR', 'KÖPRÜ', 'CADDE', 'SOKAK', 'ŞEHİR',
+  'VATAN', 'BEYİN', 'BEDEN', 'HASTA', 'SABAH', 'AKŞAM', 'VAKİT', 'KUZEY', 'GÜNEY', 'EVREN',
+  'ROKET', 'BAHÇE', 'DUVAR', 'TAVAN', 'ZEMİN', 'SINAV', 'HAYAT', 'DOĞUM', 'YAŞAM', 'HAYAL',
+  'GÜZEL', 'DOĞRU', 'KOLAY', 'BÜYÜK', 'KÜÇÜK', 'ALÇAK', 'GENİŞ', 'HIZLI', 'YAVAŞ', 'SICAK',
+  'SOĞUK', 'SERİN', 'ISLAK', 'TEMİZ', 'KİRLİ', 'TEYZE', 'CEKET', 'ŞAPKA', 'KEMER', 'YÜZÜK',
+  'KOLYE', 'SAHİL', 'LİMAN', 'YATAK', 'PERDE', 'FIRIN', 'PASTA', 'LOKUM', 'AYRAN', 'KİRAZ',
+  'KABAK', 'MARUL', 'HİNDİ', 'ARABA', 'MOTOR', 'BARIŞ', 'SEVGİ', 'SAYGI', 'GÜÇLÜ', 'ZAYIF',
+  'DERİN', 'KALIN', 'DÜZEN', 'ÇEŞME', 'KAVGA', 'SORUN', 'CEVAP', 'NEDEN', 'NASIL', 'KİMSE',
+  'ŞİMDİ', 'BELKİ', 'TABİİ', 'DUYGU', 'DÜŞÜN', 'SEZGİ', 'İNANÇ', 'ROMAN', 'MASAL', 'SAHNE',
+  'ŞARKI', 'TÜRKÜ', 'MAKAM', 'RİTİM', 'SAYFA', 'DENEY', 'HÜCRE', 'ÇELİK', 'TUĞLA', 'TEMEL',
+  'İPLİK', 'DÜĞME', 'MAKAS', 'TARAK', 'FIRÇA', 'SABUN', 'HAVLU', 'BIÇAK', 'CEZVE', 'TATLI',
+  'BURUK', 'SÜTLÜ', 'YAĞLI', 'BALLI', 'MERAK', 'KAYGI', 'TELAŞ', 'KURAL', 'HAKLI', 'SUÇLU',
+  'MASUM', 'TANIK', 'DELİL', 'SELAM', 'HABER', 'DÜNYA', 'MİLLİ', 'BAŞKA', 'ÇEKİÇ', 'FİKİR',
+];
+
+// Tüm kelimeleri birleştir (tekrarlar ayıklanır)
+export const ALL_WORDS: string[] = Array.from(new Set([...Object.values(WORD_BANK).flat(), ...WORDS_5_TR_EXTRA]));
 
 export const WORD_LENGTH = 5;
 export const DIFFICULTY_MAX_GUESSES: Record<Difficulty, number> = {

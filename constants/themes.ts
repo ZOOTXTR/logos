@@ -53,7 +53,7 @@ export const THEMES: Theme[] = [
       primaryDark: '#5B21B6', accent: '#F59E0B', accentLight: '#FCD34D',
       correct: '#10B981', present: '#F59E0B', absent: '#374151',
       empty: '#1F2937', gem: '#38BDF8', gemDark: '#0284C7',
-      text: '#F9FAFB', textSecondary: '#9CA3AF', textMuted: '#6B7280',
+      text: '#F9FAFB', textSecondary: '#9CA3AF', textMuted: '#8B93A6',
       border: '#374151', borderLight: '#4B5563', error: '#EF4444', warning: '#F59E0B',
     },
   },
@@ -72,7 +72,7 @@ export const THEMES: Theme[] = [
       primaryDark: '#4C1D95', accent: '#D97706', accentLight: '#F59E0B',
       correct: '#059669', present: '#D97706', absent: '#9CA3AF',
       empty: '#E5E7EB', gem: '#0284C7', gemDark: '#0369A1',
-      text: '#111827', textSecondary: '#6B7280', textMuted: '#9CA3AF',
+      text: '#111827', textSecondary: '#6B7280', textMuted: '#6B7280',
       border: '#E5E7EB', borderLight: '#F3F4F6', error: '#DC2626', warning: '#D97706',
     },
   },
@@ -148,7 +148,7 @@ export const THEMES: Theme[] = [
       primaryDark: '#00BFA5', accent: '#FFD700', accentLight: '#FFE55C',
       correct: '#64FFDA', present: '#FFD700', absent: '#1E3A5F',
       empty: '#0D2137', gem: '#64FFDA', gemDark: '#00BFA5',
-      text: '#CCD6F6', textSecondary: '#8892B0', textMuted: '#495670',
+      text: '#CCD6F6', textSecondary: '#8892B0', textMuted: '#7E8AA8',
       border: '#1E3A5F', borderLight: '#233554', error: '#FF6B6B', warning: '#FFD700',
     },
   },
@@ -179,7 +179,7 @@ export const THEMES: Theme[] = [
       gemDark:       '#9A7A42',   // Dark gold gem
       text:          '#F0EDE8',   // Warm off-white
       textSecondary: '#B8A98A',   // Aged parchment
-      textMuted:     '#6B6055',   // Dark muted tone
+      textMuted:     '#94886F',   // Accessible muted tone
       border:        '#2A2A3E',   // Subtle dark border
       borderLight:   '#38384E',   // Slightly lighter border
       error:         '#FF4D6D',   // Vivid red

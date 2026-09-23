@@ -86,7 +86,7 @@ export default function DuelScreen() {
           await progress.recordWin({
             guesses: 1, mode: 'duel', difficulty: 'normal', category: 'random',
             isSpeed: false, isExpert: false, isPerfect: false, isDaily: false,
-            elapsedSeconds: 0, xpEarned: 200, gemsEarned: 50,
+            elapsedSeconds: 0, xpEarned: 120, gemsEarned: 15,
           });
           setResultOverlay({
             visible: true,
@@ -94,8 +94,8 @@ export default function DuelScreen() {
             title: t.duelVictoryTitle,
             message: t.duelVictoryMsg,
             word: game.targetWord,
-            gemsAwarded: 50,
-            xpAwarded: 200,
+            gemsAwarded: 15,
+            xpAwarded: 120,
             buttons: [{ label: t.continue, onPress: () => { handleNext(); setResultOverlay(r => ({ ...r, visible: false })); }, primary: true }],
             theme,
             language,
