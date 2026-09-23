@@ -40,6 +40,12 @@ jobs:
 
   android-build:
     name: Android AAB Build (Local Gradle)
+    # NOT: Bu iş, `google-services.json` ve `release.keystore` dosyalarına ihtiyaç duyar;
+    # ikisi de gitignore'lu (özel) olduğu için normal push'ta derlenemez. Etkinleştirmek için:
+    #   1) `GOOGLE_SERVICES_JSON` (base64) repo secret'ı ekleyip aşağıda dosyaya yazın,
+    #   2) keystore'u base64 secret olarak ekleyip signingConfig'i sağlayın.
+    # Şimdilik yalnızca manuel tetiklemede (workflow_dispatch) çalışır.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
