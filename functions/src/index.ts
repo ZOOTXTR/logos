@@ -10,14 +10,39 @@ const PLAY_SERVICE_ACCOUNT = defineSecret("PLAY_SERVICE_ACCOUNT");
 const PACKAGE_NAME = "com.zovtex.logos";
 
 // Sunucu tarafı ürün beyaz listesi (istemciye güvenilmez)
+// NOT: constants/products.ts ile birebir eşleşmeli. Hem güncel (gem_pack_*) hem
+// eski (gems_*) SKU'lar geri-uyumluluk için kabul edilir.
 const ALLOWED_PRODUCTS = new Set<string>([
-  "gems_100", "gems_250", "gems_500", "gems_1200", "gems_3000", "premium_monthly",
+  "gem_pack_1", "gem_pack_2", "gem_pack_3", "gem_pack_4", "gem_pack_5", "premium_monthly",
+  "gems_100", "gems_250", "gems_500", "gems_1200", "gems_3000",
 ]);
+
+// Ürün -> gem karşılığı (sunucu tarafı ledger/denetim için)
+const PRODUCT_GEMS: Record<string, number> = {
+  gem_pack_1: 100,
+  gem_pack_2: 250,
+  gem_pack_3: 500,
+  gem_pack_4: 1200,
+  gem_pack_5: 3000,
+  gems_100: 100,
+  gems_250: 250,
+  gems_500: 500,
+  gems_1200: 1200,
+  gems_3000: 3000,
+};
 
 // 1. Liderlik tablosu için sunucu tarafı skor hesaplama (temel anti-cheat)
 export const submitScore = functions.onCall({ region: "us-central1" }, async (request) => {
   const { auth, data } = request;
   if (!auth) throw new functions.HttpsError("unauthenticated", "Giriş yapmalısınız.");
+
+  // Basit hız sınırı: aynı kullanıcı 15 sn'de bir skor gönderebilir (script/spam azaltır).
+  const throttleRef = db.collection("users").doc(auth.uid);
+  const throttleSnap = await throttleRef.get();
+  const lastScoreAt = throttleSnap.exists ? Number(throttleSnap.get("lastScoreAt") ?? 0) : 0;
+  if (lastScoreAt && Date.now() - lastScoreAt < 15000) {
+    throw new functions.HttpsError("resource-exhausted", "Çok sık skor gönderimi.");
+  }
 
   const guesses = Number(data?.guesses);
   const timeSeconds = Number(data?.timeSeconds);
@@ -57,6 +82,8 @@ export const submitScore = functions.onCall({ region: "us-central1" }, async (re
     date: new Date().toISOString(),
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
+
+  await throttleRef.set({ lastScoreAt: Date.now() }, { merge: true });
 
   return { success: true, score: points };
 });
@@ -171,6 +198,28 @@ export const verifyPurchase = functions.onCall(
           isSubscription,
           verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
+
+        // Entitlement SUNUCUDA verilir (istemciye güvenilmez).
+        const userRef = db.collection("users").doc(auth.uid);
+        if (isSubscription) {
+          await userRef.set(
+            {
+              isPremium: true,
+              premiumProductId: productId,
+              premiumUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        } else {
+          const gems = PRODUCT_GEMS[productId] ?? 0;
+          await userRef.set(
+            {
+              purchasedGems: admin.firestore.FieldValue.increment(gems),
+              lastPurchaseAt: admin.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        }
       }
 
       return { success: true, verified };
@@ -181,3 +230,44 @@ export const verifyPurchase = functions.onCall(
     }
   }
 );
+
+// 5. Hesap silme (Google Play zorunluluğu) — tüm kullanıcı verisi sunucuda silinir
+export const deleteAccount = functions.onCall({ region: "us-central1" }, async (request) => {
+  const { auth } = request;
+  if (!auth) throw new functions.HttpsError("unauthenticated", "Giriş yapmalısınız.");
+  const uid = auth.uid;
+
+  // rewards alt koleksiyonu
+  const rewardsSnap = await db.collection("users").doc(uid).collection("rewards").get();
+  if (!rewardsSnap.empty) {
+    const b = db.batch();
+    rewardsSnap.forEach((d) => b.delete(d.ref));
+    await b.commit();
+  }
+
+  await db.collection("users").doc(uid).delete();
+  await db.collection("cloud_saves").doc(uid).delete();
+
+  // IAP makbuzları
+  const receiptsSnap = await db.collection("iap_receipts").where("uid", "==", uid).get();
+  if (!receiptsSnap.empty) {
+    const b = db.batch();
+    receiptsSnap.forEach((d) => b.delete(d.ref));
+    await b.commit();
+  }
+
+  // Referans kayıtları (davet eden veya davet edilen olarak)
+  const [asReferrer, asClaimer] = await Promise.all([
+    db.collection("referrals").where("referrerId", "==", uid).get(),
+    db.collection("referrals").where("claimerId", "==", uid).get(),
+  ]);
+  if (!asReferrer.empty || !asClaimer.empty) {
+    const b = db.batch();
+    asReferrer.forEach((d) => b.delete(d.ref));
+    asClaimer.forEach((d) => b.delete(d.ref));
+    await b.commit();
+  }
+
+  await admin.auth().deleteUser(uid);
+  return { success: true };
+});

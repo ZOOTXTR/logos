@@ -86,7 +86,7 @@ export const DIFFICULTY_INFO: Record<Difficulty, { label: string; emoji: string;
 export type GameMode = 'classic' | 'speed' | 'daily';
 export const GAME_MODE_INFO: Record<GameMode, { label: string; emoji: string; description: string }> = {
   classic: { label: 'Klasik',   emoji: '🎯', description: 'Süresiz, klasik kelime oyunu' },
-  speed:   { label: 'Hızlı',    emoji: '⚡', description: '90 sn sayaç, 2x Gem & XP!' },
+  speed:   { label: 'Hızlı',    emoji: '⚡', description: '90 sn sayaç, 2x XP & bonus Gem!' },
   daily:   { label: 'Günlük',   emoji: '🌟', description: 'Bugünün özel kelimesi, +100 Gem!' },
 };
 

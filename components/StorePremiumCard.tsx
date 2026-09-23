@@ -49,11 +49,11 @@ export function StorePremiumCard({
           <Text style={styles.premiumTitle}>{t.upgradePremium}</Text>
           <View style={styles.premiumFeatures}>
             {[
-              language === 'en' ? '✅ Ad-free hints' : '✅ Reklamsız ipucu',
-              language === 'en' ? '✅ Unlimited games' : '✅ Sınırsız oyun',
-              language === 'en' ? '✅ Special themes' : '✅ Özel temalar',
-              language === 'en' ? '✅ 2x Gem multiplier' : '✅ 2x Gem kazanma',
-              language === 'en' ? '✅ 500 Gems bonus' : '✅ 500 Gem hediye',
+              language === 'en' ? '✅ +50% daily spin reward' : '✅ Günlük çark ödülü +50%',
+              language === 'en' ? '✅ Unlimited free hints' : '✅ Sınırsız ücretsiz ipucu',
+              language === 'en' ? '✅ Free keyboard sweep' : '✅ Ücretsiz klavye süpürme',
+              language === 'en' ? '✅ Exclusive premium modes' : '✅ Özel premium modlar',
+              language === 'en' ? '✅ Exclusive premium themes' : '✅ Özel premium temalar',
             ].map((f, i) => (
               <Text key={i} style={styles.premiumFeature}>{f}</Text>
             ))}

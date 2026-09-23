@@ -34,7 +34,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       emoji: '⚡',
       gradient: ['#F59E0B', '#D97706'],
       route: '/blitz',
-      badge: '2x Gem!',
+      badge: '⚡ XP!',
     },
     {
       id: 'chain',

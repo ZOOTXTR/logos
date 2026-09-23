@@ -78,4 +78,18 @@ functions/lib/
 google-services.json
 GQ_DETAYLI_INCELEME_RAPORU.md
 
+# Firebase CLI local cache
+.firebase/
+# One-off debug artifacts (never commit)
+DumpBilling*
+ExtractListener*
+history.txt
+rewrite_readme*.js
+final_patch.py
+# Security review reports (keep local)
+GQ_DETAYLI_INCELEME_RAPORU_v1.0.89.md
+GUNCEL_DENETIM_RAPORU_v1.0.89.md
+OYUN_DEGERLENDIRME_50_PERSONA.md
+PLAY_KAPALI_TEST_50_PLAN.md
+
 

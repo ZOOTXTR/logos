@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirebaseDb, getFirebaseFunctions, FIRESTORE_COLLECTIONS } from '../config/firebase';
 import { httpsCallable } from 'firebase/functions';
-import { getGems, setGems, getXP, setXP, getStats, getStreak, setStreak, getUnlockedAchievements, getScores, getUnlockedCategories, setUnlockedCategories, isPremium, setPremium } from './storage.service';
+import { getXP, setXP, getStats, getStreak, setStreak, getUnlockedAchievements, getScores, getUnlockedCategories, setUnlockedCategories, setPremium } from './storage.service';
 import { doc, setDoc, getDoc, collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { getCurrentUser } from './auth.service';
+import { getCurrentUser, getUserProfile } from './auth.service';
 
 export interface UserProgressData {
   gems: number;
@@ -78,9 +78,7 @@ class CloudService {
     if (isChild === 'child') return false; // COPPA block
 
     try {
-      const [gems, premium, xp, stats, streakResult, achievements, scores, categories] = await Promise.all([
-        getGems(),
-        isPremium(),
+      const [xp, stats, streakResult, achievements, scores, categories] = await Promise.all([
         getXP(),
         getStats(),
         getStreak(),
@@ -89,9 +87,9 @@ class CloudService {
         getUnlockedCategories(),
       ]);
 
+      // NOT: Ekonomi alanları (gems/isPremium) bilinçli olarak buluta YAZILMAZ.
+      // Bunlar sunucu otoritesindedir; cloud_saves üzerinden forge edilemez.
       const payload = {
-        gems,
-        isPremium: premium,
         xp,
         level: 1,
         unlockedThemes: categories,
@@ -144,8 +142,13 @@ class CloudService {
     }
 
     try {
-      await setGems((data.gems as number) ?? 150);
-      await setPremium(!!data.isPremium);
+      // Ekonomi (gems) buluttan geri YÜKLENMEZ — yalnızca yerel değer geçerlidir.
+      // Premium ise yalnızca sunucudaki users/{uid}.isPremium true ise YÜKSELTİLİR
+      // (asla düşürülmez; böylece mevcut aboneler etkilenmez, forge ise imkânsızdır).
+      const profile = await getUserProfile(userId);
+      if (profile && (profile as { isPremium?: boolean }).isPremium === true) {
+        await setPremium(true);
+      }
       if (typeof data.xp === 'number') await setXP(data.xp);
       await setUnlockedCategories((data.unlockedThemes as string[]) ?? []);
       if (Array.isArray(data.unlockedAchievements)) {

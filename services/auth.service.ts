@@ -1,6 +1,7 @@
 import { signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, EmailAuthProvider, linkWithCredential } from 'firebase/auth';
-import { doc, setDoc, getDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { getFirebaseAuth, getFirebaseDb, FIRESTORE_COLLECTIONS } from '../config/firebase';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
+import { getFirebaseAuth, getFirebaseDb, getFirebaseFunctions, FIRESTORE_COLLECTIONS } from '../config/firebase';
 import { storageGet, storageSet, storageRemove } from './storage.service';
 import { setUserContext, clearUserContext } from './error-reporting.service';
 
@@ -131,10 +132,16 @@ export async function deleteAccount(): Promise<boolean> {
     const auth = getFirebaseAuth();
     const user = auth.currentUser;
     if (user) {
-      const db = getFirebaseDb();
-      // Sunucu tarafı kişisel verileri (best-effort) sil
-      try { await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.CLOUD_SAVES, user.uid)); } catch { /* yoksay */ }
-      try { await deleteDoc(doc(db, FIRESTORE_COLLECTIONS.USERS, user.uid)); } catch { /* yoksay */ }
+      // Sunucu tarafında tüm kişisel veriyi (profil, bulut kaydı, IAP makbuzları,
+      // referanslar ve auth kaydı) silen callable. Firestore kuralları istemci
+      // silmesini engellediği için yalnızca Admin SDK ile mümkündür.
+      try {
+        const deleteFn = httpsCallable(getFirebaseFunctions(), 'deleteAccount');
+        await deleteFn({});
+      } catch (e) {
+        console.warn('Server-side deleteAccount failed:', e);
+        return false;
+      }
       try { await user.delete(); } catch { /* yeniden kimlik doğrulama gerekebilir */ }
     }
     await storageRemove(AUTH_UID_KEY);

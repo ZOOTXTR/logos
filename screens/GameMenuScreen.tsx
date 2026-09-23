@@ -142,6 +142,7 @@ export function GameMenuScreen({
         visible={showSpin}
         onClose={() => setShowSpin(false)}
         gems={gems}
+        premium={premium}
         onAddGems={(g) => { onAddGems(g); onShowGemShower(true); }}
       />
       <HelpModal

@@ -96,7 +96,7 @@ export const TRANSLATIONS = {
     // Profile & Shop
     premiumMember: 'PREMIUM ÜYE',
     upgradePremium: 'Premium\'a Geç',
-    premiumPromo: 'Reklamsız ipucu · Sınırsız oyun · 500 Gem',
+    premiumPromo: 'Günlük çark +%50 · Sınırsız ipucu · Özel temalar',
     pricePromo: '₺149.99 · Tek Seferlik',
     gemBalance: 'Gem Bakiyeniz',
     buyGems: 'Gem Satın Al',
@@ -265,7 +265,7 @@ export const TRANSLATIONS = {
     // Profile & Shop
     premiumMember: 'PREMIUM MEMBER',
     upgradePremium: 'Upgrade to Premium',
-    premiumPromo: 'Ad-free hints · Unlimited games · 500 Gems',
+    premiumPromo: '+50% daily spin · Unlimited hints · Exclusive themes',
     pricePromo: '$4.99 · One-Time Buy',
     gemBalance: 'Your Gem Balance',
     buyGems: 'Buy Gems',

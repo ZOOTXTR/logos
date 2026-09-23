@@ -17,6 +17,7 @@ interface DailySpinModalProps {
   onClose: () => void;
   gems: number;
   onAddGems: (g: number) => void;
+  premium?: boolean;
 }
 
 const PRIZES: Prize[] = [
@@ -30,7 +31,7 @@ const PRIZES: Prize[] = [
 
 const SLICE_ANGLE = (2 * Math.PI) / PRIZES.length;
 
-export function DailySpinModal({ visible, onClose, gems, onAddGems }: DailySpinModalProps) {
+export function DailySpinModal({ visible, onClose, gems, onAddGems, premium = false }: DailySpinModalProps) {
   const { theme, language } = useTheme();
   const [canSpin, setCanSpin] = useState(true);
   const [cooldownText, setCooldownText] = useState('');
@@ -67,10 +68,11 @@ export function DailySpinModal({ visible, onClose, gems, onAddGems }: DailySpinM
     const lastSpin = await storageGet('gq_last_spin_time');
     if (!lastSpin) { setCanSpin(true); return; }
     const diff = Date.now() - parseInt(lastSpin, 10);
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-    if (diff < ONE_DAY_MS) {
+    // Premium: günde 2 çevirme (12 saat). Normal: günde 1 (24 saat).
+    const PERIOD_MS = (premium ? 12 : 24) * 60 * 60 * 1000;
+    if (diff < PERIOD_MS) {
       setCanSpin(false);
-      const rem = ONE_DAY_MS - diff;
+      const rem = PERIOD_MS - diff;
       const h = Math.floor(rem / 3600000);
       const m = Math.floor((rem % 3600000) / 60000);
       setCooldownText(language === 'en' ? `Next spin in: ${h}h ${m}m` : `Kalan Süre: ${h}sa ${m}dk`);
@@ -106,11 +108,14 @@ export function DailySpinModal({ visible, onClose, gems, onAddGems }: DailySpinM
   const handleSpinComplete = async (prize: Prize) => {
     audioService.triggerHaptic('success');
     audioService.play('win');
-    onAddGems(prize.value);
+    const awarded = premium ? Math.round(prize.value * 1.5) : prize.value;
+    onAddGems(awarded);
     await storageSet('gq_last_spin_time', String(Date.now()));
     showCustomAlert(
       language === 'en' ? '🎉 Congratulations!' : '🎉 Tebrikler!',
-      language === 'en' ? `You won ${prize.label}!` : `Kazandınız: ${prize.label}!`,
+      language === 'en'
+        ? `You won ${awarded} 💎!${premium ? ' (+50% Premium bonus)' : ''}`
+        : `Kazandınız: ${awarded} 💎!${premium ? ' (%50 Premium bonusu)' : ''}`,
       [{
         text: 'Tamam!',
         onPress: () => {
@@ -147,6 +152,12 @@ export function DailySpinModal({ visible, onClose, gems, onAddGems }: DailySpinM
                 </TouchableOpacity>
               )}
             </LinearGradient>
+
+            {premium && (
+              <Text style={styles.premiumNote}>
+                {language === 'en' ? '👑 Premium: +50% reward & 2 spins/day' : '👑 Premium: +%50 ödül ve günde 2 çevirme'}
+              </Text>
+            )}
 
             <SpinPrizeTable prizes={PRIZES} theme={theme} language={language} />
 
@@ -205,4 +216,5 @@ const styles = StyleSheet.create({
   },
   closeBtn: { padding: 4 },
   closeBtnText: { color: 'rgba(255,255,255,0.8)', fontSize: 18, fontWeight: 'bold' },
+  premiumNote: { textAlign: 'center', paddingTop: SPACING.sm, fontWeight: '800', color: COLORS.gem, fontSize: FONTS.size.sm },
 });

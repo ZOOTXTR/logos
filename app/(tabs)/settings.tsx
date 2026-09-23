@@ -7,7 +7,7 @@ import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { storageGet, storageSet } from '../../services/storage.service';
-import { restorePurchases } from '../../services/iap.service';
+import { useIAPManager } from '../../hooks/useIAPManager';
 import { deleteAccount } from '../../services/auth.service';
 import { THEMES } from '../../constants/themes';
 import { useTheme } from '../../hooks/useTheme';
@@ -38,6 +38,15 @@ export default function SettingsScreen() {
   const progress = useProgress();
   const t = TRANSLATIONS[language];
 
+  // Restore akışı: tek IAP katmanı (useIAPManager) üzerinden, doğrulamalı.
+  const iap = useIAPManager({
+    visible: true,
+    onPurchase: async () => {},
+    onPurchasePremium: progress.unlockPremium,
+    language,
+    showAlert: (title, msg) => Alert.alert(title, msg),
+  });
+
   const [musicEnabled, setMusicEnabledState] = useState(true);
 
   React.useEffect(() => {
@@ -53,20 +62,7 @@ export default function SettingsScreen() {
   };
 
   const handleRestorePurchases = async () => {
-    try {
-      const restored = await restorePurchases();
-      Alert.alert(
-        language === 'en' ? 'Restore Purchases' : 'Satın Alımları Geri Yükle',
-        restored.length
-          ? (language === 'en' ? 'Your previous purchases have been restored.' : 'Geçmiş satın alımlarınız geri yüklendi.')
-          : (language === 'en' ? 'No purchases to restore.' : 'Geri yüklenecek satın alma bulunamadı.')
-      );
-    } catch {
-      Alert.alert(
-        language === 'en' ? 'Restore Failed' : 'Geri Yükleme Başarısız',
-        language === 'en' ? 'Could not restore purchases.' : 'Satın alımlar geri yüklenemedi.'
-      );
-    }
+    await iap.handleRestore();
   };
 
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);

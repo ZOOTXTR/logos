@@ -40,11 +40,15 @@ jobs:
 
   android-build:
     name: Android AAB Build (Local Gradle)
-    # NOT: Bu iş, `google-services.json` ve `release.keystore` dosyalarına ihtiyaç duyar;
-    # ikisi de gitignore'lu (özel) olduğu için normal push'ta derlenemez. Etkinleştirmek için:
-    #   1) `GOOGLE_SERVICES_JSON` (base64) repo secret'ı ekleyip aşağıda dosyaya yazın,
-    #   2) keystore'u base64 secret olarak ekleyip signingConfig'i sağlayın.
-    # Şimdilik yalnızca manuel tetiklemede (workflow_dispatch) çalışır.
+    # NOT: Bu iş `google-services.json` ve `release.keystore` dosyalarına ihtiyaç duyar.
+    # Gerekli repo secret'ları (Settings > Secrets and variables > Actions):
+    #   GOOGLE_SERVICES_JSON_BASE64   -> google-services.json (base64)
+    #   ANDROID_KEYSTORE_BASE64       -> release.keystore (base64)
+    #   ANDROID_KEYSTORE_PASSWORD     -> keystore sifresi
+    #   ANDROID_KEY_ALIAS             -> anahtar alias (orn. logos-key-alias)
+    #   ANDROID_KEY_PASSWORD          -> anahtar sifresi
+    # R8/ProGuard + kaynak kucultme app.json > expo-build-properties ile aciktir;
+    # prebuild sonrasi mapping.txt uretilir ve artifact olarak yuklenir.
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -58,12 +62,65 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - run: npm ci --legacy-peer-deps
-      - run: npx expo prebuild --platform android --clean
+
+      - name: Write google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "::error::GOOGLE_SERVICES_JSON_BASE64 secret is missing"; exit 1
+          fi
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > google-services.json
+
+      - name: Write release keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 secret is missing"; exit 1
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Prebuild Android (release signing via plugin)
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: npx expo prebuild --platform android --clean
+
       - name: Build Release AAB
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           cd android
           ./gradlew bundleRelease
+
       - uses: actions/upload-artifact@v4
         with:
           name: app-release.aab
           path: android/app/build/outputs/bundle/release/app-release.aab
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mapping
+          path: |
+            android/app/build/outputs/mapping/release/mapping.txt
+            android/app/build/outputs/mapping/release/configuration.txt
+          if-no-files-found: warn
+
+      # OPSIYONEL: AAB + kod gosterme dosyasini Play'e otomatik yukle.
+      # Kullanmak icin bir Google Play servis hesabi JSON'unu PLAY_SERVICE_ACCOUNT_JSON
+      # secret'i olarak ekleyip asagidaki blogun yorumunu kaldirin.
+      # - name: Upload to Google Play (internal track)
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+      #     packageName: com.zovtex.logos
+      #     releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+      #     mappingFile: android/app/build/outputs/mapping/release/mapping.txt
+      #     track: internal
