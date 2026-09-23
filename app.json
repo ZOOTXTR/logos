@@ -76,6 +76,7 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "zootxtr"
+    "owner": "zootxtr",
+    "newArchEnabled": true
   }
 }
