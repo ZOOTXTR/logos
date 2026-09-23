@@ -57,7 +57,8 @@ export default function ModesScreen() {
               style={styles.modeCard}
               onPress={() => handleModePress(mode)}
               activeOpacity={0.85}
-              accessibilityLabel={`Play ${mode.title}`}
+              accessibilityRole="button"
+              accessibilityLabel={language === 'en' ? `Play ${mode.title}` : `${mode.title} modunu oyna`}
             >
               <LinearGradient
                 colors={mode.gradient}

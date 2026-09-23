@@ -187,8 +187,12 @@ export default function DordleScreen() {
         setShowConfetti(true);
         audioService.play('win');
         audioService.triggerHaptic('success');
-        await progress.earnXP(150);
-        await progress.addGems(50);
+        await progress.recordWin({
+          guesses: Math.max(1, game.currentRow + 1),
+          mode: 'dordle', difficulty: 'normal', category: 'random',
+          isSpeed: false, isExpert: false, isPerfect: false, isDaily: false,
+          elapsedSeconds: 0, xpEarned: 150, gemsEarned: 50,
+        });
         if (isMounted) {
           setResultOverlay({
             visible: true,

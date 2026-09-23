@@ -124,8 +124,12 @@ export default function WordConnectScreen() {
       const allFound = game.wordsFound.length + 1 === game.targetWords.length;
       if (allFound) {
         setShowConfetti(true);
-        await progress.earnXP(100);
-        await progress.addGems(30);
+        await progress.recordWin({
+          guesses: Math.max(1, game.wordsFound.length + 1),
+          mode: 'wordconnect', difficulty: 'normal', category: 'random',
+          isSpeed: false, isExpert: false, isPerfect: false, isDaily: false,
+          elapsedSeconds: 0, xpEarned: 100, gemsEarned: 30,
+        });
         setResultOverlay({
           visible: true,
           title: language === 'en' ? 'Level Complete!' : 'Bölüm Tamamlandı!',

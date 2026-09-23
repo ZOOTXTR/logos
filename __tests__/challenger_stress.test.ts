@@ -140,27 +140,36 @@ describe('Challenger M2 Adversarial Test Suite', () => {
       const { result } = renderHook(() => useWordChain('tr'));
       expect(result.current.lives).toBe(3);
 
-      // Try empty / invalid word
+      // Boş giriş can GÖTÜRMEZ (yalnızca uyarı)
       act(() => {
         result.current.setInput('   ');
       });
       act(() => {
         const res = result.current.submitWord();
-        expect(res).toBe('wrong_start');
+        expect(res).toBe('invalid');
       });
-      expect(result.current.lives).toBe(2);
+      expect(result.current.lives).toBe(3);
 
-      // Exhaust remaining lives
+      // Yanlış başlangıç harfi can götürür
       act(() => {
         result.current.setInput('WRONG1');
       });
       act(() => {
         result.current.submitWord();
       });
-      expect(result.current.lives).toBe(1);
+      expect(result.current.lives).toBe(2);
 
       act(() => {
         result.current.setInput('WRONG2');
+      });
+      act(() => {
+        result.current.submitWord();
+      });
+      expect(result.current.lives).toBe(1);
+      expect(result.current.status).toBe('playing');
+
+      act(() => {
+        result.current.setInput('WRONG3');
       });
       act(() => {
         result.current.submitWord();

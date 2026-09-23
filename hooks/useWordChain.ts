@@ -55,8 +55,18 @@ export function useWordChain(lang: 'tr' | 'en' = 'tr') {
     const lastWord = state.lastWord;
     const lastChar = lastWord[lastWord.length - 1];
 
+    // Boş girişte can GİTMEZ; yalnızca uyarı göster.
+    if (!word) {
+      setState(prev => ({
+        ...prev,
+        errorMessage: lang === 'en' ? 'Enter a word!' : 'Bir kelime girin!',
+        currentInput: '',
+      }));
+      return 'invalid';
+    }
+
     if (!word.startsWith(lastChar)) {
-      setState(prev => ({ ...prev, lives: prev.lives - 1, errorMessage: 'Kelime son harfle başlamalı!', currentInput: '', status: prev.lives - 1 <= 0 ? 'lost' : 'playing' }));
+      setState(prev => ({ ...prev, lives: prev.lives - 1, errorMessage: lang === 'en' ? `Word must start with "${lastChar}"!` : `Kelime "${lastChar}" harfiyle başlamalı!`, currentInput: '', status: prev.lives - 1 <= 0 ? 'lost' : 'playing' }));
       return 'wrong_start';
     }
 
@@ -64,7 +74,7 @@ export function useWordChain(lang: 'tr' | 'en' = 'tr') {
       setState(prev => ({
         ...prev,
         lives: prev.lives - 1,
-        errorMessage: 'Bu kelime zaten kullanıldı!',
+        errorMessage: lang === 'en' ? 'This word was already used!' : 'Bu kelime zaten kullanıldı!',
         currentInput: '',
         status: prev.lives - 1 <= 0 ? 'lost' : 'playing',
       }));
@@ -74,7 +84,7 @@ export function useWordChain(lang: 'tr' | 'en' = 'tr') {
       setState(prev => ({
         ...prev,
         lives: prev.lives - 1,
-        errorMessage: 'Geçersiz kelime!',
+        errorMessage: lang === 'en' ? 'Invalid word!' : 'Geçersiz kelime!',
         currentInput: '',
         status: prev.lives - 1 <= 0 ? 'lost' : 'playing',
       }));

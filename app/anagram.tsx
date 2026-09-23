@@ -44,8 +44,12 @@ export default function AnagramScreen() {
       setShowConfetti(true);
       audioService.play('win');
       audioService.triggerHaptic('success');
-      await progress.earnXP(75);
-      await progress.addGems(20);
+      await progress.recordWin({
+        guesses: Math.max(1, game.attempts),
+        mode: 'anagram', difficulty: 'normal', category: 'random',
+        isSpeed: false, isExpert: false, isPerfect: false, isDaily: false,
+        elapsedSeconds: 0, xpEarned: 75, gemsEarned: 20,
+      });
       setResultOverlay({
         visible: true,
         title: language === 'en' ? 'Correct!' : 'Doğru!',

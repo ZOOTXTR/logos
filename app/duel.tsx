@@ -83,8 +83,11 @@ export default function DuelScreen() {
           setShowConfetti(true);
           audioService.play('win');
           audioService.triggerHaptic('success');
-          await progress.earnXP(200);
-          await progress.addGems(50);
+          await progress.recordWin({
+            guesses: 1, mode: 'duel', difficulty: 'normal', category: 'random',
+            isSpeed: false, isExpert: false, isPerfect: false, isDaily: false,
+            elapsedSeconds: 0, xpEarned: 200, gemsEarned: 50,
+          });
           setResultOverlay({
             visible: true,
             emoji: '🏆',

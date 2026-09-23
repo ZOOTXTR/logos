@@ -492,7 +492,7 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
         expect(res).toBe('wrong_start');
       });
       expect(result.current.lives).toBe(2);
-      expect(result.current.errorMessage).toContain('Kelime son');
+      expect(result.current.errorMessage).toContain('harfiyle başlamalı');
     });
 
     it('prevents reusing words already in the chain', () => {
