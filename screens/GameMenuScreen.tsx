@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -55,7 +54,7 @@ export function GameMenuScreen({
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <AuraBackground theme={theme} />
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
         <Text style={[styles.logo, { color: theme.colors.text }]}>💎 Logos</Text>
         <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
@@ -162,7 +161,7 @@ export function GameMenuScreen({
         onClose={() => setShowHelp(false)}
       />
       <GemShower active={showGemShower} onComplete={() => onShowGemShower(false)} />
-      </SafeAreaView>
+      </View>
     </View>
   );
 }

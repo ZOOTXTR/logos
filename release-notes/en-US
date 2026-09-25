@@ -1,7 +1,3 @@
 What's new
 
-- Fixed Anagram mode crash
-- Fixed "Continue" button on result screen
-- Account session now persists across launches
-- Notification and offline connectivity improvements
-- Status bar/notch alignment
+- Top bar no longer overlaps the notch/status bar (Classic and Word Chain)

@@ -1,7 +1,3 @@
 Yenilikler
 
-- Anagram modu çökme sorunu düzeltildi
-- Sonuç ekranı "Devam" butonu düzeltildi
-- Hesap oturumu artık açılış sonrası korunuyor
-- Bildirim ve çevrimdışı bağlantı iyileştirmeleri
-- Üst çubuk/çentik uyumu
+- Üst çubuk artık çentik/durum çubuğuyla çakışmıyor (Klasik ve Kelime Zinciri)
