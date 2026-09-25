@@ -115,13 +115,13 @@ jobs:
             android/app/build/outputs/mapping/release/configuration.txt
           if-no-files-found: warn
 
-      - name: Upload to Google Play (closed testing / alpha)
+      - name: Upload to Google Play (internal test)
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.zovtex.logos
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           mappingFile: android/app/build/outputs/mapping/release/mapping.txt
-          track: alpha
+          track: internal
           status: completed
           whatsNewDirectory: release-notes
