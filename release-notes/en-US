@@ -1,5 +1,6 @@
 What's new
 
-- Accessibility: screen reader roles added across buttons
-- Contrast and labeling improvements
-- Stability and performance improvements
+- UI fixes: emoji and Turkish character corruption resolved
+- Fixed Classic screen and Profile
+- Empty-state message for charts
+- Stability improvements

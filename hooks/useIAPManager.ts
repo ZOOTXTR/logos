@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initConnection,
@@ -53,6 +54,8 @@ export function useIAPManager({
 
   useEffect(() => {
     if (!visible) return;
+    // Web'de react-native-iap yok (E_IAP_NOT_AVAILABLE) — IAP akışını atla.
+    if (Platform.OS === 'web') return;
     let cancelled = false;
 
     const initIAP = async () => {

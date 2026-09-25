@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView, StatusBar, TouchableOpacity, Image } from 'react-native';
 import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -126,23 +126,23 @@ export default function ProfileScreen() {
 
           {/* Aksiyon Buttonları (4lü Bento Grid) */}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginBottom: SPACING.lg }}>
-            <WidgetCard theme={theme} variant="glass" onPress={() => setShowStore(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+            <WidgetCard span={1} theme={theme} variant="glass" onPress={() => setShowStore(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
               <Text style={{ fontSize: 32, marginBottom: 8 }}>💎</Text>
               <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{progress.gems} Gem</Text>
               <Text style={{ color: theme.colors.accent, fontSize: FONTS.size.xs, fontWeight: '700', marginTop: 4 }}>+ Al</Text>
             </WidgetCard>
 
-            <WidgetCard theme={theme} variant="glass" onPress={() => setShowAlbum(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+            <WidgetCard span={1} theme={theme} variant="glass" onPress={() => setShowAlbum(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
               <Text style={{ fontSize: 32, marginBottom: 8 }}>🎫</Text>
               <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{language === 'en' ? 'Album' : 'Albüm'}</Text>
             </WidgetCard>
 
-            <WidgetCard theme={theme} variant="glass" onPress={() => setShowSync(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+            <WidgetCard span={1} theme={theme} variant="glass" onPress={() => setShowSync(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
               <Text style={{ fontSize: 32, marginBottom: 8 }}>☁️</Text>
               <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{language === 'en' ? 'Cloud Sync' : 'Bulut'}</Text>
             </WidgetCard>
 
-            <WidgetCard theme={theme} variant="glass" onPress={() => setShowInvite(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
+            <WidgetCard span={1} theme={theme} variant="glass" onPress={() => setShowInvite(true)} style={{ flex: 1, minWidth: '45%', alignItems: 'center' }}>
               <Text style={{ fontSize: 32, marginBottom: 8 }}>🎉</Text>
               <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '800' }}>{language === 'en' ? 'Invite' : 'Davet'}</Text>
             </WidgetCard>

@@ -36,11 +36,11 @@ export function AuraBackground({ theme }: AuraBackgroundProps) {
       <Animated.View style={[StyleSheet.absoluteFill, styles.blobContainer, animatedStyle]}>
         <View style={[styles.blob, { backgroundColor: theme.colors.primary, top: -height * 0.1, left: -width * 0.2 }]} />
         <View style={[styles.blob, { backgroundColor: theme.colors.accent, bottom: -height * 0.1, right: -width * 0.2 }]} />
-        <View style={[styles.blob, { backgroundColor: (theme.colors as any).success || '#00E5FF', top: height * 0.3, right: -width * 0.1, opacity: 0.5 }]} />
+        <View style={[styles.blob, { backgroundColor: theme.colors.primaryLight, top: height * 0.3, right: -width * 0.1, opacity: 0.3 }]} />
       </Animated.View>
       
-      {/* Glass overlay to blur the blobs */}
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: theme.colors.background + 'B3' }]} />
+      {/* Glass overlay to soften the blobs */}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: theme.colors.background + 'D9' }]} />
     </View>
   );
 }
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    opacity: 0.6,
+    opacity: 0.35,
     // Note: React Native doesn't have true CSS blur for Views without heavy packages,
     // so we simulate it with an overlay and opacity
   }

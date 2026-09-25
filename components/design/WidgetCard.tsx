@@ -4,17 +4,17 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 import { COLORS, BORDER_RADIUS } from '../../constants/theme';
 import { Theme } from '../../constants/themes';
 
-interface WidgetCardProps {
+export interface WidgetCardProps {
   children: React.ReactNode;
   onPress?: () => void;
   style?: ViewStyle | ViewStyle[];
   theme: Theme;
   disabled?: boolean;
   variant?: 'primary' | 'surface' | 'glass';
-  span?: 1 | 2; // 1 = square, 2 = wide rectangle
+  span?: 1 | 2 | 'auto'; // 1 = square, 2 = wide rectangle, auto = content height
 }
 
-export function WidgetCard({ children, onPress, style, theme, disabled, variant = 'surface', span = 1 }: WidgetCardProps) {
+export function WidgetCard({ children, onPress, style, theme, disabled, variant = 'surface', span = 'auto' }: WidgetCardProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -48,10 +48,14 @@ export function WidgetCard({ children, onPress, style, theme, disabled, variant 
     <Animated.View style={[
       styles.container,
       { backgroundColor: bgColor, borderColor },
-      span === 2 ? styles.span2 : styles.span1,
+      span === 1 && styles.span1,
+      span === 2 && styles.span2,
       style,
       animatedStyle
     ]}>
+      {variant === 'glass' && (
+        <View style={[styles.glossy, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
+      )}
       <Pressable accessibilityRole="button"
         onPress={onPress}
         onPressIn={handlePressIn}
@@ -59,9 +63,6 @@ export function WidgetCard({ children, onPress, style, theme, disabled, variant 
         disabled={disabled}
         style={styles.pressable}
       >
-        {variant === 'glass' && (
-          <View style={[styles.glossy, { backgroundColor: 'rgba(255,255,255,0.08)' }]} />
-        )}
         {children}
       </Pressable>
     </Animated.View>

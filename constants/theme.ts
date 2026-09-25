@@ -40,14 +40,17 @@ export const COLORS = {
   borderLight: '#4B5563',
 } as const;
 
+// NOT: Android'de geçersiz fontFamily ('System') Text içindeki emoji gliflerini
+// düşürüp "??"/gri kutu olarak gösterir. Bu yüzden fontFamily VERMİYORUZ
+// (undefined) ve sistem fontunu (emoji fallback dahil) kullanıyoruz.
 export const FONTS = {
-  regular: 'System',
-  medium: 'System',
-  semibold: 'System',
-  bold: 'System',
-  extrabold: 'System',
-  display: 'System',
-  displayMedium: 'System',
+  regular: undefined,
+  medium: undefined,
+  semibold: undefined,
+  bold: undefined,
+  extrabold: undefined,
+  display: undefined,
+  displayMedium: undefined,
   size: {
     xs: 10,
     sm: 12,

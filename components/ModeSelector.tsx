@@ -16,9 +16,9 @@ interface Props {
 }
 
 const MODES = [
-  { id: 'classic' as GameMode, icon: '??', titleKey: 'modeClassicTitle', descKey: 'modeClassicDesc' },
-  { id: 'speed' as GameMode, icon: '?', titleKey: 'modeBlitzTitle', descKey: 'modeBlitzDesc' },
-  { id: 'daily' as GameMode, icon: '??', titleKey: 'dailyChallenge', descKey: 'dailyChallengeDesc' },
+  { id: 'classic' as GameMode, icon: '🎯', titleKey: 'modeClassicTitle', descKey: 'modeClassicDesc' },
+  { id: 'speed' as GameMode, icon: '⚡', titleKey: 'modeBlitzTitle', descKey: 'modeBlitzDesc' },
+  { id: 'daily' as GameMode, icon: '🌟', titleKey: 'dailyChallenge', descKey: 'dailyChallengeDesc' },
 ];
 const CATS: Category[] = ['random', 'hayvanlar', 'sehirler', 'yiyecek', 'meslekler', 'doga', 'spor'];
 const DIFFS: Difficulty[] = ['easy', 'normal', 'hard', 'expert'];
@@ -62,16 +62,16 @@ export function ModeSelector({ onStart, gems, streak, levelTitle, level, dailyDo
         
         <WidgetCard theme={theme} variant='glass' style={styles.statWidget}>
           <Text style={[styles.sl, { color: theme.colors.textMuted }]}>{language === 'en' ? 'Streak' : 'Seri'}</Text>
-          <Text style={[styles.sv, { color: theme.colors.text }]}>?? {streak}</Text>
+          <Text style={[styles.sv, { color: theme.colors.text }]}>🔥 {streak}</Text>
         </WidgetCard>
         
         <WidgetCard theme={theme} variant='glass' style={styles.statWidget}>
           <Text style={[styles.sl, { color: theme.colors.textMuted }]}>Gem</Text>
-          <Text style={[styles.sv, { color: theme.colors.gem }]}>?? {gems}</Text>
+          <Text style={[styles.sv, { color: theme.colors.gem }]}>💎 {gems}</Text>
         </WidgetCard>
       </View>
 
-      <Text style={[styles.section, { color: theme.colors.textSecondary }]}>?? {language === 'en' ? 'Game Mode' : 'Oyun Modu'}</Text>
+      <Text style={[styles.section, { color: theme.colors.textSecondary }]}>🎯 {language === 'en' ? 'Game Mode' : 'Oyun Modu'}</Text>
       
       {/* Bento Mode Grid */}
       <View style={{ flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.md }}>
@@ -81,32 +81,32 @@ export function ModeSelector({ onStart, gems, streak, levelTitle, level, dailyDo
           span={2} 
           onPress={() => handleMode('classic')}
         >
-          <Text style={{ fontSize: 32, marginBottom: 8 }}>??</Text>
+          <Text style={{ fontSize: 32, marginBottom: 8 }}>🎯</Text>
           <Text style={{ color: mode === 'classic' ? theme.colors.card : theme.colors.text, fontSize: 18, fontWeight: '900' }}>
             {language === 'en' ? 'Classic' : 'Klasik'}
           </Text>
         </WidgetCard>
         <View style={{ flex: 1, gap: SPACING.sm }}>
           <WidgetCard theme={theme} variant={mode === 'speed' ? 'primary' : 'glass'} onPress={() => handleMode('speed')}>
-            <Text style={{ fontSize: 24, marginBottom: 4 }}>?</Text>
+            <Text style={{ fontSize: 24, marginBottom: 4 }}>⚡</Text>
             <Text style={{ color: mode === 'speed' ? theme.colors.card : theme.colors.text, fontSize: 12, fontWeight: '800' }}>Blitz</Text>
           </WidgetCard>
           <WidgetCard theme={theme} variant={mode === 'daily' ? 'primary' : 'glass'} disabled={dailyDone} onPress={() => handleMode('daily')}>
-            <Text style={{ fontSize: 24, marginBottom: 4 }}>??</Text>
+            <Text style={{ fontSize: 24, marginBottom: 4 }}>🌟</Text>
             <Text style={{ color: mode === 'daily' ? theme.colors.card : theme.colors.text, fontSize: 12, fontWeight: '800', opacity: dailyDone ? 0.5 : 1 }}>Daily</Text>
           </WidgetCard>
         </View>
       </View>
 
       {mode === 'classic' && <>
-        <Text style={[styles.section, { color: theme.colors.textSecondary }]}>?? {language === 'en' ? 'Category' : 'Kategori'}</Text>
+        <Text style={[styles.section, { color: theme.colors.textSecondary }]}>📊 {language === 'en' ? 'Category' : 'Kategori'}</Text>
         <View style={styles.cgrid}>{CATS.map(c => {
           const info = CATEGORY_INFO[c];
-          return <TouchableOpacity accessibilityRole="button" key={c} style={[styles.cc, { backgroundColor: theme.colors.card + '88', borderColor: theme.colors.border + '55' }, cat === c && { borderColor: info.color, borderWidth: 2, backgroundColor: info.color + '44' }]} onPress={() => handleCat(c)} activeOpacity={0.8}><Text style={styles.ce}>{unlockedCategories.includes(c) ? info.emoji : '??'}</Text><Text style={[styles.cl, { color: theme.colors.textSecondary }, cat === c && { color: info.color }]}>{language === 'en' && c === 'random' ? 'Random' : info.label}</Text></TouchableOpacity>;
+          return <TouchableOpacity accessibilityRole="button" key={c} style={[styles.cc, { backgroundColor: theme.colors.card + '88', borderColor: theme.colors.border + '55' }, cat === c && { borderColor: info.color, borderWidth: 2, backgroundColor: info.color + '44' }]} onPress={() => handleCat(c)} activeOpacity={0.8}><Text style={styles.ce}>{unlockedCategories.includes(c) ? info.emoji : '🔒'}</Text><Text style={[styles.cl, { color: theme.colors.textSecondary }, cat === c && { color: info.color }]}>{language === 'en' && c === 'random' ? 'Random' : info.label}</Text></TouchableOpacity>;
         })}</View>
       </>}
 
-      <Text style={[styles.section, { color: theme.colors.textSecondary }]}>?? {language === 'en' ? 'Difficulty' : 'Zorluk'}</Text>
+      <Text style={[styles.section, { color: theme.colors.textSecondary }]}>⚙️ {language === 'en' ? 'Difficulty' : 'Zorluk'}</Text>
       <View style={styles.row}>{DIFFS.map(d => {
         const info = DIFFICULTY_INFO[d];
         return <TouchableOpacity accessibilityRole="button" key={d} style={[styles.dc, { backgroundColor: theme.colors.card + '88', borderColor: theme.colors.border + '55' }, diff === d && { borderColor: info.color, backgroundColor: info.color + '44' }]} onPress={() => { audioService.play('click'); setDiff(d); }} activeOpacity={0.8}><Text style={styles.de}>{info.emoji}</Text><Text style={[styles.dl, { color: theme.colors.textSecondary }, diff === d && { color: info.color }]}>{language === 'en' && d === 'easy' ? 'Easy' : language === 'en' && d === 'normal' ? 'Normal' : language === 'en' && d === 'hard' ? 'Hard' : language === 'en' && d === 'expert' ? 'Expert' : info.label}</Text></TouchableOpacity>;
@@ -114,7 +114,7 @@ export function ModeSelector({ onStart, gems, streak, levelTitle, level, dailyDo
 
       <TouchableOpacity accessibilityRole="button" style={styles.btn} onPress={() => { audioService.play('click'); onStart(mode, cat, diff); }} activeOpacity={0.85}>
         <LinearGradient colors={[theme.colors.primary, theme.colors.primaryDark]} style={styles.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-          <Text style={styles.bt}>{mode === 'daily' ? '📅 OYNA' : mode === 'speed' ? '⚡ OYNA' : '📅 OYNA'}</Text>
+          <Text style={styles.bt}>{mode === 'daily' ? '📅 OYNA' : mode === 'speed' ? '⚡ OYNA' : '🎯 OYNA'}</Text>
         </LinearGradient>
       </TouchableOpacity>
     </View>

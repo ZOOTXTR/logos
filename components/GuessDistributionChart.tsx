@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { Text } from './CustomText';
 import { Svg, Rect, Text as SvgText } from 'react-native-svg';
 import { SPACING } from '../constants/theme';
 
@@ -20,6 +21,32 @@ export function GuessDistributionChart({
   const labels = keys.length ? keys.slice(0, 10) : [1, 2, 3, 4, 5, 6];
   const values = labels.map(k => distribution[k] || 0);
   const maxValue = Math.max(...values, 1);
+
+  // Veri yoksa bariz "boş" görünmesin: açık bir boş-durum mesajı göster.
+  if (!values.some(v => v > 0)) {
+    return (
+      <View
+        style={{
+          padding: SPACING.md,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.colors.card,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          minHeight: 120,
+          marginVertical: SPACING.md,
+        }}
+      >
+        <Text style={{ fontSize: 24, marginBottom: 8 }}>📊</Text>
+        <Text style={{ color: theme.colors.textSecondary, fontSize: 12, textAlign: 'center', fontWeight: '600' }}>
+          {language === 'en'
+            ? 'Play games to see your guess distribution!'
+            : 'Tahmin dağılımını görmek için biraz oyun oynayın!'}
+        </Text>
+      </View>
+    );
+  }
   const chartHeight = 110;
   const barWidth = 32;
   const gap = 16;
