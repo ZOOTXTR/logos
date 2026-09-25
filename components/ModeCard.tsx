@@ -37,7 +37,7 @@ export function ModeCard({
       disabled={locked}
       accessibilityRole="button"
       accessibilityState={{ disabled: locked }}
-      accessibilityLabel={language === 'en' ? `Play ${title} mode` : `${title} modunu oyna`}
+      accessibilityLabel={title}
     >
       <LinearGradient
         colors={[theme.colors.card, locked ? theme.colors.absent : theme.colors.surfaceLight]}

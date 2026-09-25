@@ -1,6 +1,7 @@
 What's new
 
-- UI fixes: emoji and Turkish character corruption resolved
-- Fixed Classic screen and Profile
-- Empty-state message for charts
-- Stability improvements
+- Fixed Anagram mode crash
+- Fixed "Continue" button on result screen
+- Account session now persists across launches
+- Notification and offline connectivity improvements
+- Status bar/notch alignment

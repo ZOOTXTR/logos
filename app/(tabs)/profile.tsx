@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, StatusBar, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';

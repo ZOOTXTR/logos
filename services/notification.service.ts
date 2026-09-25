@@ -76,7 +76,9 @@ class NotificationService {
 
       await Notifications.scheduleNotificationAsync({
         content: { title: dailyTitle, body: dailyBody, sound: true },
-        trigger: { type: Notifications.SchedulableTriggerInputTypes.CALENDAR, hour: 10, minute: 0, repeats: true },
+        trigger: Platform.OS === 'android'
+          ? { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 10, minute: 0 }
+          : { type: Notifications.SchedulableTriggerInputTypes.CALENDAR, hour: 10, minute: 0, repeats: true },
       });
 
       const eveningTitle = language === 'en' ? '🔥 Protect Your Streak!' : '🔥 Serini Koruma Zamanı!';
@@ -86,7 +88,9 @@ class NotificationService {
 
       await Notifications.scheduleNotificationAsync({
         content: { title: eveningTitle, body: eveningBody, sound: true },
-        trigger: { type: Notifications.SchedulableTriggerInputTypes.CALENDAR, hour: 20, minute: 0, repeats: true },
+        trigger: Platform.OS === 'android'
+          ? { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 20, minute: 0 }
+          : { type: Notifications.SchedulableTriggerInputTypes.CALENDAR, hour: 20, minute: 0, repeats: true },
       });
 
     } catch (e) {

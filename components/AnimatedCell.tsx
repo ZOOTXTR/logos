@@ -84,10 +84,17 @@ function AnimatedCellComponent({ letter, colIndex, rowIndex, currentRow, cellSiz
     }
   }, [isTyping, letter.char]);
 
+  // Renkler JS thread'inde hesaplanır: worklet içinden worklet olmayan fonksiyon
+  // çağırmak release build'de "Object is not a function" ile çöker.
+  const evaluatedBg = getLetterBg(letter.status, colorBlind, theme);
+  const evaluatedBorder = getLetterBorder(letter.status, theme);
+  const emptyBg = theme.colors.empty;
+  const emptyBorder = theme.colors.border;
+
   const containerStyle = useAnimatedStyle(() => {
     const rotateY = interpolate(flipVal.value, [0, 1], [0, 180]);
-    const bg = flipVal.value >= 0.5 ? getLetterBg(letter.status, colorBlind, theme) : theme.colors.empty;
-    const border = flipVal.value >= 0.5 ? getLetterBorder(letter.status, theme) : theme.colors.border;
+    const bg = flipVal.value >= 0.5 ? evaluatedBg : emptyBg;
+    const border = flipVal.value >= 0.5 ? evaluatedBorder : emptyBorder;
     return {
       transform: [{ rotateY: `${rotateY}deg` }, { scale: scaleVal.value }],
       backgroundColor: bg,

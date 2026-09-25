@@ -1,6 +1,7 @@
 Yenilikler
 
-- Arayüz onarımları: emoji ve Türkçe karakter bozulmaları giderildi
-- Klasik ekran ve Profil düzeltildi
-- Boş grafikler için bilgilendirme eklendi
-- Kararlılık iyileştirmeleri
+- Anagram modu çökme sorunu düzeltildi
+- Sonuç ekranı "Devam" butonu düzeltildi
+- Hesap oturumu artık açılış sonrası korunuyor
+- Bildirim ve çevrimdışı bağlantı iyileştirmeleri
+- Üst çubuk/çentik uyumu

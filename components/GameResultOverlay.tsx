@@ -80,7 +80,12 @@ export function GameResultOverlay({
                   styles.button,
                   btn.primary ? styles.buttonPrimary : { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
                 ]}
-                onPress={btn.onPress}
+                onPress={() => {
+                  // Buton kendi state'ini kapatmasa bile overlay açık kalmasın
+                  // (ör. Anagram "Devam" oyuncuyu pencerede kilitliyordu).
+                  onClose?.();
+                  btn.onPress();
+                }}
                 activeOpacity={0.8}
                 accessibilityRole="button"
                 accessibilityLabel={btn.label}

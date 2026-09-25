@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, StatusBar, Alert,  } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert,  } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -58,7 +59,7 @@ export default function ModesScreen() {
               onPress={() => handleModePress(mode)}
               activeOpacity={0.85}
               accessibilityRole="button"
-              accessibilityLabel={language === 'en' ? `Play ${mode.title}` : `${mode.title} modunu oyna`}
+              accessibilityLabel={mode.title}
             >
               <LinearGradient
                 colors={mode.gradient}
