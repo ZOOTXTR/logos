@@ -12,18 +12,32 @@ import {
   purchaseUpdatedListener,
   purchaseErrorListener,
   getAvailablePurchases,
+  Purchase,
 } from 'react-native-iap';
 import { GEM_PACKAGES, PRODUCT_IDS, GemPackage } from '../constants/products';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 
-const getLocalizedPrice = (item: any): string => {
+interface IAPItem {
+  productId?: string;
+  displayPrice?: string;
+  localizedPrice?: string;
+  price?: string;
+  subscriptionOffers?: Array<{ pricingPhases?: Array<{ formattedPrice?: string }> }>;
+}
+
+interface VerifyResult {
+  success: boolean;
+  verified: boolean;
+}
+
+const getLocalizedPrice = (item: IAPItem): string => {
   if (item.displayPrice) {
     return item.displayPrice;
   }
   if ('localizedPrice' in item) {
-    return (item as any).localizedPrice || (item as any).price || '';
+    return item.localizedPrice || item.price || '';
   }
-  const offer = (item as any).subscriptionOffers?.[0]?.pricingPhases?.[0];
+  const offer = item.subscriptionOffers?.[0]?.pricingPhases?.[0];
   return offer?.formattedPrice ?? item.price ?? '';
 };
 
@@ -38,7 +52,7 @@ export function useIAPManager({
   onPurchase: (productId: string, gems: number) => Promise<void>;
   onPurchasePremium: () => Promise<void>;
   language: string;
-  showAlert: (title: string, msg: string, buttons?: any[]) => void;
+  showAlert: (title: string, msg: string, buttons?: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'default' | 'destructive' }>) => void;
 }) {
   const [prices, setPrices] = useState<Record<string, string> | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
@@ -71,7 +85,7 @@ export function useIAPManager({
             [...(productResults || []), ...(subscriptionResults || [])].reduce<Record<string, string>>(
               (acc, item) => {
                 const price = getLocalizedPrice(item);
-                if (price) acc[(item as any).productId] = price;
+                if (price) acc[item.productId ?? ''] = price;
                 return acc;
               },
               {}
@@ -85,7 +99,7 @@ export function useIAPManager({
 
     initIAP();
 
-    const handlePurchase = async (purchase: any) => {
+    const handlePurchase = async (purchase: Purchase) => {
       try {
         const isGem = GEM_PACKAGES.some(p => p.id === purchase.productId);
         if (!purchase.isAcknowledgedAndroid) {
@@ -98,7 +112,7 @@ export function useIAPManager({
               purchaseToken: purchase.purchaseToken,
               isSubscription: !isGem,
             });
-            const data = validationResult.data as any;
+            const data = validationResult.data as VerifyResult;
             if (!data.success || !data.verified) {
               throw new Error('Verification failed');
             }
@@ -182,7 +196,7 @@ export function useIAPManager({
 
   const verifiedTokensRef = useRef<Set<string>>(new Set());
 
-  const verifyReceipt = async (purchase: any, isSubscription: boolean): Promise<boolean> => {
+  const verifyReceipt = async (purchase: Purchase, isSubscription: boolean): Promise<boolean> => {
     const token: string | undefined = purchase?.purchaseToken;
     if (token && verifiedTokensRef.current.has(token)) return true;
     const verifyPurchaseFn = httpsCallable(getFunctions(), 'verifyPurchase');
@@ -191,7 +205,7 @@ export function useIAPManager({
       purchaseToken: token,
       isSubscription,
     });
-    const data = validationResult.data as any;
+    const data = validationResult.data as VerifyResult;
     if (data?.success && data?.verified) {
       if (token) verifiedTokensRef.current.add(token);
       return true;

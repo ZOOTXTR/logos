@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { AuraBackground } from '../../components/design/AuraBackground';
+import type { Href } from 'expo-router';
 import { WidgetCard } from '../../components/design/WidgetCard';
-import { View, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import { Text } from '../../components/CustomText';
-import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
 import { storageGet, storageSet } from '../../services/storage.service';
 import { useIAPManager } from '../../hooks/useIAPManager';
 import { deleteAccount } from '../../services/auth.service';
-import { THEMES } from '../../constants/themes';
 import { useTheme } from '../../hooks/useTheme';
 import { useProgress } from '../../hooks/useProgress';
 import { audioService } from '../../services/audio.service';
@@ -22,6 +20,9 @@ import { AboutModal } from '../../components/AboutModal';
 import { CustomAlert } from '../../components/CustomAlert';
 import { InviteModal } from '../../components/InviteModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { TopBar } from '../../components/TopBar';
+import { Settings as SettingsIcon } from 'lucide-react-native';
+import { ThemeSelector } from '../../components/ThemeSelector';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -59,6 +60,24 @@ export default function SettingsScreen() {
     setMusicEnabledState(val);
     await storageSet('gq_music_enabled', String(val));
     await audioService.toggleBgMusic(val);
+  };
+
+  const [volume, setVolumeState] = useState(audioService.getVolume());
+
+  const handleVolume = (v: number) => {
+    setVolumeState(v);
+    audioService.setVolume(v);
+  };
+
+  const [hardMode, setHardMode] = useState(false);
+
+  React.useEffect(() => {
+    storageGet('gq_hard_mode').then(v => setHardMode(v === 'true'));
+  }, []);
+
+  const handleToggleHardMode = (val: boolean) => {
+    setHardMode(val);
+    storageSet('gq_hard_mode', String(val));
   };
 
   const handleRestorePurchases = async () => {
@@ -156,10 +175,16 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: c.background }]}>
       <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={c.background} />
-      <AuraBackground theme={theme} />
+      <TopBar gems={progress.gems} />
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={[styles.title, { color: c.text }]}>⚙️ {t.settingsTitle}</Text>
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <SettingsIcon size={14} color={c.primary} />
+              <Text style={[styles.eyebrow, { color: c.primary }]}>{t.settingsTitle}</Text>
+            </View>
+            <Text style={[styles.title, { color: c.text }]}>{t.settingsTitle}</Text>
+          </View>
 
           <WidgetCard theme={theme} variant="glass" style={{ marginBottom: SPACING.lg, padding: SPACING.md, alignItems: 'center' }}>
             <Text style={[styles.gemBarText, { color: c.gem }]}>💎 {progress.gems} {t.gemBalance}</Text>
@@ -180,6 +205,8 @@ export default function SettingsScreen() {
               <View style={[styles.divider, { backgroundColor: c.border }]} />
               <SettingToggle label={t.dyslexiaFont} emoji="📖" value={dyslexiaFont} onToggle={setDyslexiaFont} colors={c} language={language} />
               <View style={[styles.divider, { backgroundColor: c.border }]} />
+              <SettingToggle label={language === 'en' ? 'Hard Mode' : 'Zor Mod'} emoji="🎯" value={hardMode} onToggle={handleToggleHardMode} colors={c} language={language} />
+              <View style={[styles.divider, { backgroundColor: c.border }]} />
 
               <TouchableOpacity accessibilityRole="button"
                 style={styles.settingRow}
@@ -199,38 +226,55 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: c.text }]}>🎨 {t.themeHeader}</Text>
-            <View style={styles.themeGrid}>
-              {THEMES.map(tData => {
-                const isActive = theme.id === tData.id;
-                const isUnlocked = unlockedThemes.includes(tData.id);
-                const isPremiumTheme = tData.gemCost === -1;
-                return (
-                  <TouchableOpacity accessibilityRole="button"
-                    key={tData.id}
-                    style={[styles.themeCard, { backgroundColor: c.card, borderColor: c.border }, isActive && { borderColor: c.primaryLight }]}
-                    onPress={() => handleThemeSelect(tData.id, tData.gemCost)}
-                    activeOpacity={0.8}
+            <Text style={[styles.sectionTitle, { color: c.text }]}>🔊 {language === 'en' ? 'Sound & Preview' : 'Ses ve Önizleme'}</Text>
+            <WidgetCard theme={theme} variant="glass" style={{ padding: SPACING.md }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.sm }}>
+                <Text style={{ color: c.textSecondary, fontSize: FONTS.size.sm, fontWeight: '600' }}>
+                  {language === 'en' ? 'Volume' : 'Ses Seviyesi'}
+                </Text>
+                <Text style={{ color: c.accent, fontWeight: '800', fontSize: FONTS.size.sm }}>
+                  {soundEnabled ? `%${Math.round(volume * 100)}` : (language === 'en' ? 'Muted' : 'Sessiz')}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', gap: SPACING.xs }}>
+                {[{ label: language === 'en' ? 'Mute' : 'Sessiz', v: 0 }, { label: '%30', v: 0.3 }, { label: '%70', v: 0.7 }, { label: '%100', v: 1 }].map((p) => {
+                  const active = volume === p.v;
+                  return (
+                    <TouchableOpacity
+                      key={p.label}
+                      accessibilityRole="button"
+                      onPress={() => handleVolume(p.v)}
+                      style={[styles.volPreset, { backgroundColor: c.surface, borderColor: c.border }, active && { backgroundColor: c.primary + '33', borderColor: c.primary }]}
+                    >
+                      <Text style={{ color: active ? c.primaryLight : c.textMuted, fontSize: 11, fontWeight: '700' }}>{p.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: SPACING.xs, marginTop: SPACING.md }}>
+                {[
+                  { key: 'click', label: language === 'en' ? 'Click' : 'Tık', emoji: '👆' },
+                  { key: 'win', label: language === 'en' ? 'Win' : 'Kazanma', emoji: '🏆' },
+                  { key: 'loss', label: language === 'en' ? 'Loss' : 'Kaybetme', emoji: '💔' },
+                ].map((s) => (
+                  <TouchableOpacity
+                    key={s.key}
+                    accessibilityRole="button"
+                    onPress={() => audioService.play(s.key as 'click' | 'win' | 'loss')}
+                    style={[styles.soundTest, { backgroundColor: c.surface, borderColor: c.border }]}
                   >
-                    <LinearGradient colors={tData.preview} style={styles.themePreview}>
-                      {isActive && <Text style={styles.activeCheck}>✓</Text>}
-                      {!isUnlocked && <Text style={styles.lockIcon}>{isPremiumTheme ? '👑' : '🔒'}</Text>}
-                    </LinearGradient>
-                    <Text style={styles.themeEmoji}>{tData.emoji}</Text>
-                    <Text style={[styles.themeName, { color: c.text }]}>{language === 'en' ? (tData.nameEn ?? tData.name) : tData.name}</Text>
-                    {!isUnlocked && (
-                      <Text style={styles.themePrice}>
-                        {isPremiumTheme ? 'Premium' : `${tData.gemCost} 💎`}
-                      </Text>
-                    )}
-                    {isUnlocked && !isActive && (
-                      <Text style={[styles.themeFree, { color: c.textMuted }]}>{language === 'en' ? 'Select' : 'Seç'}</Text>
-                    )}
-                    {isActive && <Text style={[styles.themeActive, { color: c.primaryLight }]}>{language === 'en' ? 'Active' : 'Aktif'}</Text>}
+                    <Text style={{ fontSize: 16 }}>{s.emoji}</Text>
+                    <Text style={{ color: c.textSecondary, fontSize: 11, fontWeight: '700', marginTop: 2 }}>{s.label}</Text>
                   </TouchableOpacity>
-                );
-              })}
-            </View>
+                ))}
+              </View>
+            </WidgetCard>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: c.text }]}>🎨 {t.themeHeader}</Text>
+            <ThemeSelector onSelect={handleThemeSelect} />
           </View>
 
           <View style={styles.section}>
@@ -267,7 +311,7 @@ export default function SettingsScreen() {
               </TouchableOpacity>
               <View style={[styles.divider, { backgroundColor: c.border }]} />
               <TouchableOpacity accessibilityRole="button" style={styles.accountRow}
-                onPress={() => router.push('/tutorial' as any)}>
+                onPress={() => router.push('/tutorial' as Href)}>
                 <Text style={styles.accountEmoji}>🎓</Text>
                 <Text style={[styles.accountLabel, { color: c.text }]}>{language === 'en' ? 'Play Tutorial' : 'Eğitimi Oyna'}</Text>
                 <Text style={{ color: c.textMuted, fontSize: FONTS.size.md }}>›</Text>
@@ -349,7 +393,10 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { flex: 1, paddingHorizontal: SPACING.md, maxWidth: 600, alignSelf: 'center', width: '100%' },
-  title: { fontSize: FONTS.size.xxl, fontWeight: '900', paddingVertical: SPACING.md },
+  header: { paddingVertical: SPACING.md },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  title: { fontSize: FONTS.size.xl, fontWeight: '800' },
   gemBar: { borderRadius: BORDER_RADIUS.md, padding: SPACING.sm, marginBottom: SPACING.lg, borderWidth: 1, alignItems: 'center' },
   gemBarText: { fontWeight: '700', fontSize: FONTS.size.md },
   section: { marginBottom: SPACING.lg },
@@ -375,4 +422,6 @@ const styles = StyleSheet.create({
   accountLabel: { flex: 1, fontSize: FONTS.size.md },
 
   gem: { color: COLORS.gem },
+  volPreset: { flex: 1, paddingVertical: 8, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  soundTest: { flex: 1, paddingVertical: 12, borderRadius: 12, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
 });

@@ -39,6 +39,8 @@ export interface FullStats {
   lateNightGames: number;
   totalXP: number;
   guessDistribution: Record<number, number>;
+  gamesPlayedByDifficulty: Record<string, number>;
+  gamesWonByDifficulty: Record<string, number>;
 }
 
 export interface ScoreEntry {
@@ -48,6 +50,7 @@ export interface ScoreEntry {
   guesses: number;
   timeSeconds?: number;
   xpEarned: number;
+  difficulty?: string;
 }
 
 const DEFAULT_STATS: FullStats = {
@@ -61,6 +64,8 @@ const DEFAULT_STATS: FullStats = {
   lateNightGames: 0,
   totalXP: 0,
   guessDistribution: {},
+  gamesPlayedByDifficulty: {},
+  gamesWonByDifficulty: {},
 };
 
 import * as SecureStore from 'expo-secure-store';

@@ -2,27 +2,33 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
-import { getScores, getStreak, ScoreEntry } from '../../services/storage.service';
-import { getGlobalLeaderboard, submitScore, LeaderboardEntry } from '../../services/leaderboard.service';
-import { initAuth, getCurrentUser } from '../../services/auth.service';
+import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { getScores, getStreak, getStats, ScoreEntry, FullStats } from '../../services/storage.service';
+import { getGlobalLeaderboard, getWeeklyLeaderboard, submitScore, claimWeeklyReward, LeaderboardEntry } from '../../services/leaderboard.service';
+import { getCurrentUser } from '../../services/auth.service';
 import { useTheme } from '../../hooks/useTheme';
+import { useProgress } from '../../hooks/useProgress';
 import { TRANSLATIONS } from '../../constants/translations';
+import { DIFFICULTY_INFO, Difficulty } from '../../constants/words';
 import { FilterChips } from '../../components/FilterChips';
 import { ScoreRow } from '../../components/ScoreRow';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AuraBackground } from '../../components/design/AuraBackground';
 import { WidgetCard } from '../../components/design/WidgetCard';
+import { TopBar } from '../../components/TopBar';
+import { Trophy } from 'lucide-react-native';
 
 type FilterMode = 'all' | 'classic' | 'speed' | 'daily' | 'anagram' | 'dordle' | 'chain' | 'wordconnect' | 'duel';
 
 export default function LeaderboardScreen() {
   const { theme, language } = useTheme();
+  const progress = useProgress();
   const t = TRANSLATIONS[language];
 
   const [tab, setTab] = useState<'local' | 'global'>('local');
+  const [period, setPeriod] = useState<'tum' | 'haftalik'>('tum');
   const [scores, setScores] = useState<ScoreEntry[]>([]);
   const [streak, setStreak] = useState({ current: 0, max: 0 });
+  const [stats, setStats] = useState<FullStats | null>(null);
   const [filter, setFilter] = useState<FilterMode>('all');
   const [globalScores, setGlobalScores] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,20 +46,22 @@ export default function LeaderboardScreen() {
   ];
 
   useEffect(() => {
-    Promise.all([getScores(), getStreak()]).then(([s, st]) => {
+    Promise.all([getScores(), getStreak(), getStats()]).then(([s, st, statsData]) => {
       setScores(s);
       setStreak(st);
+      setStats(statsData);
     });
   }, []);
 
   useEffect(() => {
     if (tab !== 'global') return;
     setLoading(true);
-    getGlobalLeaderboard(50).then(entries => {
+    const fetcher = period === 'haftalik' ? getWeeklyLeaderboard(50) : getGlobalLeaderboard(50);
+    fetcher.then(entries => {
       setGlobalScores(entries);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [tab]);
+  }, [tab, period]);
 
   const handleSubmitScore = async () => {
     if (scores.length === 0) return;
@@ -65,9 +73,19 @@ export default function LeaderboardScreen() {
     setLoading(true);
     const best = scores.reduce((prev, curr) => (prev.xpEarned > curr.xpEarned) ? prev : curr, scores[0]);
     await submitScore(best);
-    const entries = await getGlobalLeaderboard(50);
+    const entries = period === 'haftalik' ? await getWeeklyLeaderboard(50) : await getGlobalLeaderboard(50);
     setGlobalScores(entries);
     setLoading(false);
+  };
+
+  const handleClaimWeekly = async () => {
+    const res = await claimWeeklyReward();
+    if (res && res.success) {
+      await progress.addGems(res.prize);
+      alert(`🏆 ${language === 'en' ? `You ranked #${res.rank}!` : `#${res.rank}. sıradasınız!`} +${res.prize} 💎`);
+    } else {
+      alert(language === 'en' ? 'No weekly reward available, already claimed, or sign in required.' : 'Haftalık ödül yok, zaten alındı veya giriş gerekli.');
+    }
   };
 
   const filteredScores = useMemo(() => {
@@ -82,13 +100,20 @@ export default function LeaderboardScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme.colors.background} />
-      <AuraBackground theme={theme} />
+      <TopBar gems={progress.gems} />
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
 
           {/* Başlık */}
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>🏆 {t.leaderboardTitle}</Text>
+            <View style={styles.headerRow}>
+              <Trophy size={14} color={theme.colors.present} />
+              <Text style={[styles.eyebrow, { color: theme.colors.present }]}>{t.leaderboardTitle}</Text>
+            </View>
+            <Text style={[styles.title, { color: theme.colors.text }]}>{t.leaderboardTitle}</Text>
+            <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
+              {language === 'en' ? 'Climb the ranks and track your performance.' : 'Sıralamanı yükselt ve başarılarını incele.'}
+            </Text>
           </View>
 
           {/* Tab Bar */}
@@ -135,6 +160,39 @@ export default function LeaderboardScreen() {
                   <Text style={[styles.summaryLabel, { color: theme.colors.textMuted }]}>{t.totalXp}</Text>
                 </WidgetCard>
               </View>
+
+              {/* Başarı & Zorluk Dağılımı */}
+              {stats && (
+                <WidgetCard theme={theme} variant="glass" style={{ marginBottom: SPACING.lg, padding: SPACING.md }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm }}>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.text, marginBottom: 0 }]}>📊 {language === 'en' ? 'Difficulty Win Rate' : 'Zorluk Başarı Dağılımı'}</Text>
+                    <Text style={{ color: theme.colors.correct, fontSize: FONTS.size.sm, fontWeight: '800' }}>
+                      %{stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0} {language === 'en' ? 'Avg' : 'Ort.'}
+                    </Text>
+                  </View>
+                  {(['easy', 'normal', 'hard', 'expert'] as Difficulty[]).map((d) => {
+                    const info = DIFFICULTY_INFO[d];
+                    const played = stats.gamesPlayedByDifficulty[d] || 0;
+                    const won = stats.gamesWonByDifficulty[d] || 0;
+                    const rate = played > 0 ? Math.round((won / played) * 100) : 0;
+                    return (
+                      <View key={d} style={{ marginBottom: SPACING.sm }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <Text style={{ color: theme.colors.text, fontSize: FONTS.size.sm, fontWeight: '600' }}>
+                            {info.emoji} {language === 'en' && d === 'easy' ? 'Easy' : language === 'en' && d === 'normal' ? 'Normal' : language === 'en' && d === 'hard' ? 'Hard' : language === 'en' && d === 'expert' ? 'Expert' : info.label}
+                          </Text>
+                          <Text style={{ color: info.color, fontSize: FONTS.size.sm, fontWeight: '800' }}>
+                            {won}/{played} • %{rate}
+                          </Text>
+                        </View>
+                        <View style={{ height: 6, borderRadius: 3, backgroundColor: theme.colors.surface, overflow: 'hidden' }}>
+                          <View style={{ width: `${rate}%`, height: '100%', borderRadius: 3, backgroundColor: info.color }} />
+                        </View>
+                      </View>
+                    );
+                  })}
+                </WidgetCard>
+              )}
 
               {/* En İyi Sonuçlar */}
               {bestScore && (
@@ -206,6 +264,32 @@ export default function LeaderboardScreen() {
                 </TouchableOpacity>
               </View>
 
+              <View style={[styles.periodSeg, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                {([['tum', language === 'en' ? 'All Time' : 'Tüm Zamanlar'], ['haftalik', language === 'en' ? 'Weekly' : 'Haftalık']] as const).map(([id, label]) => {
+                  const active = period === id;
+                  return (
+                    <TouchableOpacity
+                      key={id}
+                      accessibilityRole="button"
+                      onPress={() => setPeriod(id)}
+                      style={[styles.periodBtn, active && { backgroundColor: theme.colors.primary }]}
+                    >
+                      <Text style={[styles.periodText, { color: active ? '#F4F4F5' : theme.colors.textMuted }]}>{label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {period === 'haftalik' && (
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  onPress={handleClaimWeekly}
+                  style={[styles.claimBtn, { backgroundColor: '#F59E0B' }]}
+                >
+                  <Text style={styles.claimBtnText}>🏆 {language === 'en' ? 'Claim Weekly Reward' : 'Haftalık Ödül Al'}</Text>
+                </TouchableOpacity>
+              )}
+
               {loading ? (
                 <WidgetCard theme={theme} variant="glass" style={{ alignItems: 'center', padding: SPACING.xl }}>
                   <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -254,7 +338,10 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { flex: 1, paddingHorizontal: SPACING.md },
   header: { paddingVertical: SPACING.md },
-  title: { fontSize: FONTS.size.xxl, fontWeight: '900' },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  subtitle: { fontSize: 12, marginTop: 2 },
+  title: { fontSize: FONTS.size.xl, fontWeight: '800' },
 
   tabRow: { flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.lg },
   tabButton: { flex: 1, paddingVertical: SPACING.sm, borderRadius: BORDER_RADIUS.md, alignItems: 'center' },
@@ -294,4 +381,9 @@ const styles = StyleSheet.create({
   globalName: { fontSize: FONTS.size.md, fontWeight: '700' },
   globalMode: { fontSize: FONTS.size.xs, marginTop: 2 },
   globalScore: { fontSize: FONTS.size.lg, fontWeight: '900' },
+  periodSeg: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, padding: 4, gap: 4, marginBottom: SPACING.sm },
+  periodBtn: { flex: 1, height: 32, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  periodText: { fontSize: 12, fontWeight: '700' },
+  claimBtn: { height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: SPACING.sm },
+  claimBtnText: { color: '#0B0C10', fontSize: 14, fontWeight: '800' },
 });

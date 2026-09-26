@@ -1,14 +1,14 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, TouchableOpacity, StyleSheet, Platform,  } from 'react-native';
 import { Text } from '../components/CustomText';
-import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
-import { GameMode, Category, Difficulty, GAME_MODE_INFO, CATEGORY_INFO, DIFFICULTY_INFO } from '../constants/words';
+import { GameMode, Category, Difficulty, GAME_MODE_INFO, CATEGORY_INFO, DIFFICULTY_INFO, Board, LetterStatus } from '../constants/words';
+import { Achievement } from '../constants/achievements';
 import { HINT_GEM_COST } from '../constants/products';
 import { GameBoard } from '../components/GameBoard';
+import { GuessHistory } from '../components/GuessHistory';
 import { Keyboard } from '../components/Keyboard';
 import { HintModal } from '../components/HintModal';
-import { AuraBackground } from '../components/design/AuraBackground';
 import { HelpModal } from '../components/HelpModal';
 import { StoreModal } from '../components/StoreModal';
 import { Timer } from '../components/Timer';
@@ -29,22 +29,24 @@ interface GamePlayScreenProps {
   language: string;
   colorBlind: boolean;
   game: {
-    board: any[][];
+    board: Board;
     currentRow: number;
     currentCol: number;
     targetWord: string;
     gameStatus: 'playing' | 'won' | 'lost';
-    revealedLetters: Record<string, any>;
+    revealedLetters: Record<string, LetterStatus>;
     hintsUsed: number;
     timeLeft: number;
     elapsedSeconds: number;
     maxGuesses: number;
     addLetter: (l: string) => void;
     deleteLetter: () => void;
-    submitGuess: () => 'short' | 'not_valid' | 'not_ready' | 'submitted';
+    submitGuess: () => 'short' | 'not_valid' | 'not_ready' | 'hard_mode' | 'submitted';
     resetGame: (d?: Difficulty, m?: GameMode, c?: Category, l?: 'tr' | 'en') => void;
     useHint: (lang?: string) => string | null;
     useSweeper: () => string[];
+    shuffleRow: () => void;
+    revealFirstLetter: () => string | null;
     addTime: (s: number) => void;
   };
   gameConfig: { mode: GameMode; category: Category; difficulty: Difficulty };
@@ -53,7 +55,7 @@ interface GamePlayScreenProps {
   unlockedCategories: string[];
   showConfetti: boolean;
   showGemShower: boolean;
-  newAchievement: any;
+  newAchievement: Achievement | null;
   onBackToMenu: () => void;
   onRetry: () => void;
   onAddGems: (amount: number) => Promise<number>;
@@ -136,6 +138,12 @@ export function GamePlayScreen({
       showCustomAlert(
         language === 'en' ? 'Loading' : 'Yükleniyor',
         language === 'en' ? 'Dictionary is loading, please wait...' : 'Sözlük yükleniyor, lütfen bekleyin...'
+      );
+    } else if (result === 'hard_mode') {
+      audioService.triggerHaptic('warning');
+      showCustomAlert(
+        language === 'en' ? 'Hard Mode' : 'Zor Mod',
+        language === 'en' ? 'Revealed letters must be used!' : 'Açılan harfleri kullanmak zorundasınız!'
       );
     } else if (gameConfigRef.current.mode === 'speed' && g.gameStatus === 'playing') {
       g.addTime(15);
@@ -262,7 +270,6 @@ export function GamePlayScreen({
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <AuraBackground theme={theme} />
       <View style={styles.container}>
       <View style={styles.topBar}>
         <TouchableOpacity accessibilityRole="button" style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]} onPress={handleMenu}>
@@ -300,8 +307,12 @@ export function GamePlayScreen({
       )}
 
       <View style={styles.boardContainer}>
-        <GameBoard board={game.board as any} currentRow={game.currentRow} />
+        <GameBoard board={game.board} currentRow={game.currentRow} />
       </View>
+
+      {game.gameStatus === 'playing' && (
+        <GuessHistory board={game.board} currentRow={game.currentRow} maxGuesses={game.maxGuesses} theme={theme} language={language as 'tr' | 'en'} />
+      )}
 
       {game.gameStatus === 'playing' && (
         <View style={styles.boosterRow}>
@@ -322,6 +333,26 @@ export function GamePlayScreen({
             <Text style={styles.boosterEmoji}>🧹</Text>
             <Text style={[styles.boosterLabel, { color: theme.colors.text }]}>
               {language === 'en' ? 'Sweep (30💎)' : 'Süpürge (30💎)'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity accessibilityRole="button"
+            style={[styles.boosterBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
+            onPress={() => { audioService.triggerHaptic('light'); game.shuffleRow(); }}
+          >
+            <Text style={styles.boosterEmoji}>🔀</Text>
+            <Text style={[styles.boosterLabel, { color: theme.colors.text }]}>
+              {language === 'en' ? 'Shuffle' : 'Karıştır'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity accessibilityRole="button"
+            style={[styles.boosterBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
+            onPress={() => { audioService.triggerHaptic('light'); const first = game.revealFirstLetter(); if (first) { showCustomAlert('🔤', language === 'en' ? `First letter: ${first}` : `İlk harf: ${first}`); } }}
+          >
+            <Text style={styles.boosterEmoji}>🔤</Text>
+            <Text style={[styles.boosterLabel, { color: theme.colors.text }]}>
+              {language === 'en' ? 'First Letter' : 'İlk Harf'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -429,8 +460,8 @@ const styles = StyleSheet.create({
   },
   gemPillText: { color: COLORS.gem, fontWeight: '700', fontSize: FONTS.size.sm },
   boardContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  boosterRow: { flexDirection: 'row', gap: SPACING.md, marginBottom: SPACING.sm },
-  boosterBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, minHeight: 44, borderRadius: BORDER_RADIUS.md, borderWidth: 1.5 },
+  boosterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginBottom: SPACING.sm },
+  boosterBtn: { flexGrow: 1, flexBasis: '45%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, minHeight: 44, borderRadius: BORDER_RADIUS.md, borderWidth: 1.5 },
   boosterEmoji: { fontSize: 16 },
   boosterLabel: { fontSize: 11, fontWeight: '800' },
   keyboardWrap: { paddingBottom: SPACING.sm },

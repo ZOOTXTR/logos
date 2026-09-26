@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, StatusBar, Alert, Dimensions, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Alert, Platform } from 'react-native';
 import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useDuel } from '../hooks/useDuel';
 import { useProgress } from '../hooks/useProgress';
 import { useTheme } from '../hooks/useTheme';
+import { Theme } from '../constants/themes';
 import { audioService } from '../services/audio.service';
 import { Keyboard } from '../components/Keyboard';
 import { Confetti } from '../components/Confetti';
@@ -15,7 +16,6 @@ import { TRANSLATIONS } from '../constants/translations';
 import { LoadingView } from '../components/LoadingView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width, height } = Dimensions.get('window');
 const PLAYER_CELL_SIZE = 40;
 const BOT_CELL_SIZE = 22;
 
@@ -24,14 +24,13 @@ export default function DuelScreen() {
   const progress = useProgress();
   const { theme, language, colorBlind } = useTheme();
   
-  const [levelIdx, setLevelIdx] = useState(0);
   const game = useDuel('random', language);
   const [showConfetti, setShowConfetti] = useState(false);
   const [resultOverlay, setResultOverlay] = useState<{
     visible: boolean; title: string; emoji: string; message: string; word?: string;
     gemsAwarded?: number; xpAwarded?: number;
     buttons: { label: string; onPress: () => void; primary?: boolean }[];
-    theme: any; language: string;
+    theme: Theme; language: string;
   }>({
     visible: false, title: '', emoji: '', message: '', word: '',
     buttons: [], gemsAwarded: 0, xpAwarded: 0, theme, language,

@@ -3,8 +3,8 @@ import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Image } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
-import { getStats, getUnlockedAchievements, getScores, FullStats, ScoreEntry, storageGet } from '../../services/storage.service';
+import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { getStats, getUnlockedAchievements, getScores, FullStats, ScoreEntry, storageGet, storageSet } from '../../services/storage.service';
 import { ACHIEVEMENTS } from '../../constants/achievements';
 import { LevelBar } from '../../components/LevelBar';
 import { StoreModal } from '../../components/StoreModal';
@@ -13,7 +13,6 @@ import { useTheme } from '../../hooks/useTheme';
 import { TRANSLATIONS } from '../../constants/translations';
 import { StickerAlbumModal } from '../../components/StickerAlbumModal';
 import { CloudSyncModal } from '../../components/CloudSyncModal';
-import { audioService } from '../../services/audio.service';
 import { LoadingView } from '../../components/LoadingView';
 import { InviteModal } from '../../components/InviteModal';
 import { ProfileStatsCard } from '../../components/ProfileStatsCard';
@@ -22,8 +21,28 @@ import { ProfileAchievementList } from '../../components/ProfileAchievementList'
 import { GuessDistributionChart } from '../../components/GuessDistributionChart';
 import { TimeHistoryChart } from '../../components/TimeHistoryChart';
 
-import { AuraBackground } from '../../components/design/AuraBackground';
 import { WidgetCard } from '../../components/design/WidgetCard';
+import { TopBar } from '../../components/TopBar';
+import { User as UserIcon } from 'lucide-react-native';
+
+const AVATARS = ['🎮', '🧠', '🦊', '🐉', '⚡', '🌟', '👑', '🔥'];
+
+const FRAMES = [
+  { id: 'mor', color: '#7C5CFF' },
+  { id: 'altin', color: '#F59E0B' },
+  { id: 'camgobegi', color: '#38BDF8' },
+  { id: 'yesil', color: '#22C55E' },
+  { id: 'pembe', color: '#EC4899' },
+  { id: 'gumus', color: '#A1A1AA' },
+];
+
+function getLeague(level: number): { name: string; emoji: string; color: string } {
+  if (level >= 50) return { name: 'Efsane Lig', emoji: '👑', color: '#F59E0B' };
+  if (level >= 30) return { name: 'Zümrüt Lig', emoji: '💎', color: '#34D399' };
+  if (level >= 15) return { name: 'Altın Lig', emoji: '🏅', color: '#F59E0B' };
+  if (level >= 8) return { name: 'Gümüş Lig', emoji: '🥈', color: '#A1A1AA' };
+  return { name: 'Bronz Lig', emoji: '🥉', color: '#CD7F32' };
+}
 
 export default function ProfileScreen() {
   const progress = useProgress();
@@ -35,6 +54,8 @@ export default function ProfileScreen() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [frame, setFrame] = useState<string | null>(null);
   const [showStore, setShowStore] = useState(false);
   const [showAlbum, setShowAlbum] = useState(false);
   const [showSync, setShowSync] = useState(false);
@@ -48,13 +69,17 @@ export default function ProfileScreen() {
       storageGet('gq_user_email'),
       storageGet('gq_user_photo'),
       storageGet('gq_user_name'),
-    ]).then(([s, ua, sc, email, photo, name]) => {
+      storageGet('gq_avatar'),
+      storageGet('gq_frame'),
+    ]).then(([s, ua, sc, email, photo, name, av, fr]) => {
       setStats(s);
       setUnlockedIds(ua);
       setScores(sc);
       setUserEmail(email);
       setUserPhoto(photo);
       setUserName(name);
+      setAvatar(av);
+      setFrame(fr);
     });
   }, []);
 
@@ -73,18 +98,37 @@ export default function ProfileScreen() {
   const winRate = stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
   const unlockedCount = unlockedIds.length;
   const totalAchievements = ACHIEVEMENTS.length;
+  const league = getLeague(progress.levelInfo?.level ?? 1);
+
+  const handleAvatarSelect = (emoji: string) => {
+    setAvatar(emoji);
+    storageSet('gq_avatar', emoji);
+  };
+
+  const handleFrameSelect = (color: string) => {
+    setFrame(color);
+    storageSet('gq_frame', color);
+  };
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme.colors.background} />
-      <AuraBackground theme={theme} />
+      <TopBar gems={progress.gems} />
       
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
 
           {/* Profil Başlık */}
-          <WidgetCard theme={theme} variant="glass" style={{ marginVertical: SPACING.xl, paddingVertical: SPACING.lg, alignItems: 'center' }}>
-            <View style={[styles.avatarContainer, { borderColor: progress.premium ? '#F59E0B' : theme.colors.primary }]}>
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <UserIcon size={14} color={theme.colors.primary} />
+              <Text style={[styles.eyebrow, { color: theme.colors.primary }]}>{t.tabProfile}</Text>
+            </View>
+            <Text style={[styles.title, { color: theme.colors.text }]}>{language === 'en' ? 'Profile' : 'Profil'}</Text>
+          </View>
+
+          <WidgetCard theme={theme} variant="glass" style={{ marginBottom: SPACING.lg, paddingVertical: SPACING.lg, alignItems: 'center' }}>
+            <View style={[styles.avatarContainer, { borderColor: frame ?? (progress.premium ? '#F59E0B' : theme.colors.primary) }]}>
               {userPhoto ? (
                 <Image source={{ uri: userPhoto }} style={styles.avatarImage} />
               ) : (
@@ -92,7 +136,7 @@ export default function ProfileScreen() {
                   colors={progress.premium ? ['#F59E0B', '#D97706'] : [theme.colors.primary, theme.colors.primaryDark]}
                   style={styles.avatarGradient}
                 >
-                  <Text style={styles.avatarEmoji}>{progress.premium ? '👑' : '🎮'}</Text>
+                  <Text style={styles.avatarEmoji}>{avatar ?? (progress.premium ? '👑' : '🎮')}</Text>
                 </LinearGradient>
               )}
               {progress.premium && (
@@ -116,6 +160,35 @@ export default function ProfileScreen() {
                 <Text style={styles.premiumText}>PREMIUM</Text>
               </LinearGradient>
             )}
+
+            <View style={[styles.leagueBadge, { borderColor: league.color + '66', backgroundColor: league.color + '1A' }]}>
+              <Text style={styles.leagueEmoji}>{league.emoji}</Text>
+              <Text style={[styles.leagueName, { color: league.color }]}>{league.name}</Text>
+            </View>
+
+            <View style={styles.avatarRow}>
+              {AVATARS.map((emoji) => (
+                <TouchableOpacity
+                  key={emoji}
+                  accessibilityRole="button"
+                  onPress={() => handleAvatarSelect(emoji)}
+                  style={[styles.avatarChip, { borderColor: theme.colors.border, backgroundColor: theme.colors.surface }, avatar === emoji && { borderColor: theme.colors.primary, backgroundColor: theme.colors.primary + '22' }]}
+                >
+                  <Text style={styles.avatarChipEmoji}>{emoji}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <View style={styles.frameRow}>
+              {FRAMES.map((f) => (
+                <TouchableOpacity
+                  key={f.id}
+                  accessibilityRole="button"
+                  onPress={() => handleFrameSelect(f.color)}
+                  style={[styles.frameChip, { backgroundColor: f.color }, frame === f.color && styles.frameChipActive]}
+                />
+              ))}
+            </View>
           </WidgetCard>
 
           {/* Level Bar (Bento stil) */}
@@ -242,6 +315,10 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   container: { flex: 1, paddingHorizontal: SPACING.md, maxWidth: 600, alignSelf: 'center', width: '100%' },
+  header: { paddingVertical: SPACING.md },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  title: { fontSize: FONTS.size.xl, fontWeight: '800' },
   profileHeaderContainer: {
     alignItems: 'center',
     marginVertical: SPACING.xl,
@@ -319,6 +396,15 @@ const styles = StyleSheet.create({
     fontSize: FONTS.size.xs,
     letterSpacing: 1.5,
   },
+  leagueBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: SPACING.sm, paddingHorizontal: SPACING.md, paddingVertical: 5, borderRadius: BORDER_RADIUS.full, borderWidth: 1 },
+  leagueEmoji: { fontSize: 14 },
+  leagueName: { fontSize: FONTS.size.xs, fontWeight: '800' },
+  avatarRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: SPACING.xs, marginTop: SPACING.md, paddingHorizontal: SPACING.md },
+  avatarChip: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
+  avatarChipEmoji: { fontSize: 20 },
+  frameRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: SPACING.sm, marginTop: SPACING.sm, paddingHorizontal: SPACING.md },
+  frameChip: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: 'transparent' },
+  frameChipActive: { borderColor: '#FFFFFF' },
   section: { marginBottom: SPACING.lg },
   sectionTitle: { fontSize: FONTS.size.md, fontWeight: '700', marginBottom: SPACING.sm },
   gemCard: {

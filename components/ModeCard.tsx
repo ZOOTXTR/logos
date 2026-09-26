@@ -52,8 +52,8 @@ export function ModeCard({
         </Text>
         <View style={styles.badgeRow}>
           {premium && (
-            <View style={[styles.badge, { backgroundColor: theme.colors.accent + '33' }]}>
-              <Text style={[styles.badgeText, { color: theme.colors.accent }]}>👑 Premium</Text>
+            <View style={[styles.badge, { backgroundColor: '#F59E0B33' }]}>
+              <Text style={[styles.badgeText, { color: '#F59E0B' }]}>👑 Premium</Text>
             </View>
           )}
           {!locked && gemCost > 0 && (

@@ -3,11 +3,12 @@ import { View, StyleSheet, TouchableOpacity, TextInput,  } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 
 interface CloudLoginFormProps {
   onLogin: (email: string, password: string) => void;
   onGoogleLogin: () => void;
-  theme: any;
+  theme: Theme;
   language: string;
   initialEmail?: string;
 }

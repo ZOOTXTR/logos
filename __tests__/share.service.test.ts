@@ -1,4 +1,4 @@
-import { Share, Platform } from 'react-native';
+import { Share } from 'react-native';
 import { shareScoreGrid } from '../services/share.service';
 
 jest.mock('react-native', () => ({

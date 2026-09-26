@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, StatusBar, Dimensions, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
-import { useProgress } from '../hooks/useProgress';
 import { storageSet } from '../services/storage.service';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import { TRANSLATIONS } from '../constants/translations';
-
-const { width } = Dimensions.get('window');
 
 interface Slide {
   emoji: string;
@@ -48,7 +45,6 @@ const SLIDES: Slide[] = [
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const progress = useProgress();
   const { language } = useTheme();
   const t = TRANSLATIONS[language];
   const [currentSlide, setCurrentSlide] = useState(0);

@@ -104,11 +104,12 @@ export const DIFFICULTY_INFO: Record<Difficulty, { label: string; emoji: string;
   expert: { label: 'Uzman',  emoji: '💀', color: '#7C3AED', xpBonus: 100},
 };
 
-export type GameMode = 'classic' | 'speed' | 'daily';
+export type GameMode = 'classic' | 'speed' | 'daily' | 'turnuva';
 export const GAME_MODE_INFO: Record<GameMode, { label: string; emoji: string; description: string }> = {
   classic: { label: 'Klasik',   emoji: '🎯', description: 'Süresiz, klasik kelime oyunu' },
   speed:   { label: 'Hızlı',    emoji: '⚡', description: '90 sn sayaç, 2x XP & bonus Gem!' },
   daily:   { label: 'Günlük',   emoji: '🌟', description: 'Bugünün özel kelimesi, +100 Gem!' },
+  turnuva: { label: 'Turnuva',  emoji: '🏆', description: 'Haftalık büyük turnuva, 2.5x puan!' },
 };
 
 export type LetterStatus = 'correct' | 'present' | 'absent' | 'empty' | 'tbd';

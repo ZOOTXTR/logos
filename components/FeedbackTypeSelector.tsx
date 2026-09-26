@@ -2,13 +2,14 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 
 type FeedbackType = 'bug' | 'suggestion' | 'complaint' | 'other';
 
 interface FeedbackTypeSelectorProps {
   selectedType: FeedbackType;
   onSelect: (type: FeedbackType) => void;
-  theme: any;
+  theme: Theme;
   language: string;
 }
 

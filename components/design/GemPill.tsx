@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '../CustomText';
-import { FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { BORDER_RADIUS } from '../../constants/theme';
 import { Theme } from '../../constants/themes';
 
 interface GemPillProps {
@@ -17,13 +17,13 @@ export function GemPill({ theme, gems, style }: GemPillProps) {
         styles.pill,
         {
           backgroundColor: theme.colors.card,
-          borderColor: theme.colors.primaryLight,
+          borderColor: theme.colors.gem,
         },
         style,
       ]}
     >
-      <Text style={styles.gem}>◆</Text>
-      <Text style={[styles.count, { color: theme.colors.primaryLight }]}>{gems}</Text>
+      <Text style={[styles.gem, { color: theme.colors.gem }]}>◆</Text>
+      <Text style={[styles.count, { color: theme.colors.text }]}>{gems}</Text>
     </View>
   );
 }
@@ -35,12 +35,12 @@ const styles = StyleSheet.create({
     gap: 7,
     paddingHorizontal: 13,
     paddingVertical: 7,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
   },
-  gem: { color: '#D9B65A', fontSize: 11 },
+  gem: { fontSize: 11 },
   count: {
-    fontFamily: FONTS.extrabold,
+    fontWeight: '800',
     fontSize: 14,
   },
 });

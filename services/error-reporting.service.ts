@@ -1,5 +1,12 @@
 import crashlytics from '@react-native-firebase/crashlytics';
-const c = crashlytics as any;
+
+type CrashlyticsApi = () => {
+  log: (message: string) => void;
+  setAttributes: (attributes: Record<string, string>) => void;
+  recordError: (error: Error) => void;
+  setUserId: (userId: string) => void;
+};
+const c = crashlytics as unknown as CrashlyticsApi;
 
 function safe(fn: () => void) {
   try {

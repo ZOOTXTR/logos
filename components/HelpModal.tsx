@@ -1,11 +1,9 @@
 import React from 'react';
-import { Modal, View, StyleSheet, ScrollView, TouchableOpacity, Dimensions,  } from 'react-native';
+import { Modal, View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
-
-const { width } = Dimensions.get('window');
 
 interface HelpModalProps {
   visible: boolean;

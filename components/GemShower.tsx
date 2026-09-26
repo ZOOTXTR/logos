@@ -7,7 +7,6 @@ import Animated, {
   withTiming,
   withSequence,
   Easing,
-  runOnJS,
 } from 'react-native-reanimated';
 
 interface GemShowerProps {

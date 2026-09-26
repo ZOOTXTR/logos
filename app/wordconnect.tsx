@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, StatusBar, Alert, Dimensions, PanResponder } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Alert, PanResponder } from 'react-native';
 import { Text } from '../components/CustomText';
-import { Svg, Line, Circle as SvgCircle } from 'react-native-svg';
+import { Svg, Line } from 'react-native-svg';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useWordConnect } from '../hooks/useWordConnect';
 import { useProgress } from '../hooks/useProgress';
 import { useTheme } from '../hooks/useTheme';
+import { Theme } from '../constants/themes';
 import { audioService } from '../services/audio.service';
 import { Confetti } from '../components/Confetti';
 import { TRANSLATIONS } from '../constants/translations';
@@ -16,7 +17,6 @@ import { LoadingView } from '../components/LoadingView';
 import { GameResultOverlay } from '../components/GameResultOverlay';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window');
 const CELL_SIZE = 40;
 const WHEEL_SIZE = 180;
 const LETTER_BTN_SIZE = 44;
@@ -34,7 +34,7 @@ export default function WordConnectScreen() {
     visible: boolean; title: string; emoji: string; message: string; word?: string;
     gemsAwarded?: number; xpAwarded?: number;
     buttons: { label: string; onPress: () => void; primary?: boolean }[];
-    theme: any; language: string; onClose?: () => void;
+    theme: Theme; language: string; onClose?: () => void;
   }>({ visible: false, title: '', emoji: '', message: '', buttons: [], theme, language });
 
 

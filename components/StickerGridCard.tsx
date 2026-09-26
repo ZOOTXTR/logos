@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from './CustomText';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 import { Sticker } from '../constants/stickers';
 
 const RARITY_COLORS = {
@@ -14,7 +15,7 @@ interface StickerGridCardProps {
   sticker: Sticker;
   isUnlocked: boolean;
   language: string;
-  theme: any;
+  theme: Theme;
 }
 
 export function StickerGridCard({ sticker, isUnlocked, language, theme }: StickerGridCardProps) {

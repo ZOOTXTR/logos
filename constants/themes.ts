@@ -1,5 +1,3 @@
-import { COLORS } from './theme';
-
 export interface ThemeColors {
   background: string;
   surface: string;
@@ -33,157 +31,127 @@ export interface Theme {
   description: string;
   descEn?: string;
   gemCost: number;    // 0 = ücretsiz, -1 = premium
-  preview: [string, string]; // gradient önizleme renkleri
+  preview: [string, string];
   colors: ThemeColors;
 }
 
+// Birebir AI Studio paletleri. accent = tema vurgusu = gem rengi (AI Studio'daki gibi).
+// present (#F59E0B) ve correct (#22C55E) oyun rengi olarak sabittir.
+const TXT = { text: '#F4F4F5', textSecondary: '#A1A1AA', textMuted: '#71717A' };
+
 export const THEMES: Theme[] = [
   {
-    id: 'dark',
-    name: 'Karanlık',
-    nameEn: 'Dark',
-    emoji: '🌙',
-    description: 'Varsayılan koyu tema',
-    descEn: 'Default dark theme',
-    gemCost: 0,
-    preview: ['#0D0D1A', '#1A1A2E'],
-    colors: {
-      background: '#0D0D1A', surface: '#1A1A2E', surfaceLight: '#16213E',
-      card: '#1E1E3A', primary: '#7C3AED', primaryLight: '#A78BFA',
-      primaryDark: '#5B21B6', accent: '#F59E0B', accentLight: '#FCD34D',
-      correct: '#10B981', present: '#F59E0B', absent: '#374151',
-      empty: '#1F2937', gem: '#38BDF8', gemDark: '#0284C7',
-      text: '#F9FAFB', textSecondary: '#9CA3AF', textMuted: '#8B93A6',
-      border: '#374151', borderLight: '#4B5563', error: '#EF4444', warning: '#F59E0B',
-    },
-  },
-  {
-    id: 'light',
-    name: 'Aydınlık',
-    nameEn: 'Light',
-    emoji: '☀️',
-    description: 'Temiz beyaz tema',
-    descEn: 'Clean white theme',
-    gemCost: 100,
-    preview: ['#F8FAFC', '#E2E8F0'],
-    colors: {
-      background: '#F8FAFC', surface: '#FFFFFF', surfaceLight: '#F1F5F9',
-      card: '#FFFFFF', primary: '#6D28D9', primaryLight: '#8B5CF6',
-      primaryDark: '#4C1D95', accent: '#D97706', accentLight: '#F59E0B',
-      correct: '#059669', present: '#D97706', absent: '#9CA3AF',
-      empty: '#E5E7EB', gem: '#0284C7', gemDark: '#0369A1',
-      text: '#111827', textSecondary: '#6B7280', textMuted: '#6B7280',
-      border: '#E5E7EB', borderLight: '#F3F4F6', error: '#DC2626', warning: '#D97706',
-    },
-  },
-  {
-    id: 'neon',
-    name: 'Neon',
-    nameEn: 'Neon',
-    emoji: '🌈',
-    description: 'Parlak neon renkler',
-    descEn: 'Bright neon colors',
-    gemCost: 250,
-    preview: ['#0A0A0F', '#0D0D1A'],
-    colors: {
-      background: '#0A0A0F', surface: '#0D0D1A', surfaceLight: '#111118',
-      card: '#12121E', primary: '#FF00FF', primaryLight: '#FF66FF',
-      primaryDark: '#CC00CC', accent: '#00FFFF', accentLight: '#66FFFF',
-      correct: '#00FF88', present: '#FFD700', absent: '#222230',
-      empty: '#1A1A28', gem: '#00FFFF', gemDark: '#00CCCC',
-      text: '#FFFFFF', textSecondary: '#CCCCFF', textMuted: '#8888AA',
-      border: '#FF00FF44', borderLight: '#FF00FF22', error: '#FF0055', warning: '#FFD700',
-    },
-  },
-  {
-    id: 'nature',
-    name: 'Doğa',
-    nameEn: 'Nature',
-    emoji: '🌿',
-    description: 'Sakin yeşil tonlar',
-    descEn: 'Calm green tones',
-    gemCost: 200,
-    preview: ['#0A1A0A', '#0F2A0F'],
-    colors: {
-      background: '#0A1A0A', surface: '#0F2A0F', surfaceLight: '#122712',
-      card: '#163016', primary: '#22C55E', primaryLight: '#4ADE80',
-      primaryDark: '#15803D', accent: '#FACC15', accentLight: '#FDE047',
-      correct: '#16A34A', present: '#CA8A04', absent: '#2D4A2D',
-      empty: '#1A3A1A', gem: '#67E8F9', gemDark: '#22D3EE',
-      text: '#F0FDF4', textSecondary: '#86EFAC', textMuted: '#4ADE80',
-      border: '#166534', borderLight: '#15803D', error: '#EF4444', warning: '#FACC15',
-    },
-  },
-  {
-    id: 'fire',
-    name: 'Ateş',
-    nameEn: 'Fire',
-    emoji: '🔥',
-    description: 'Yakıcı kırmızı tonlar',
-    descEn: 'Blazing red tones',
-    gemCost: 300,
-    preview: ['#1A0A00', '#2A0F00'],
-    colors: {
-      background: '#1A0A00', surface: '#2A0F00', surfaceLight: '#2D1100',
-      card: '#3A1500', primary: '#EF4444', primaryLight: '#F87171',
-      primaryDark: '#B91C1C', accent: '#F97316', accentLight: '#FB923C',
-      correct: '#EF4444', present: '#F97316', absent: '#4A2000',
-      empty: '#2A1500', gem: '#FCD34D', gemDark: '#F59E0B',
-      text: '#FFF7ED', textSecondary: '#FED7AA', textMuted: '#FDBA74',
-      border: '#7C2D12', borderLight: '#9A3412', error: '#DC2626', warning: '#F97316',
-    },
-  },
-  {
-    id: 'ocean',
-    name: 'Okyanus',
-    nameEn: 'Ocean',
-    emoji: '🌊',
-    description: 'Derin mavi tonlar',
-    descEn: 'Deep blue tones',
-    gemCost: 200,
-    preview: ['#020C1B', '#0A192F'],
-    colors: {
-      background: '#020C1B', surface: '#0A192F', surfaceLight: '#0D2137',
-      card: '#112240', primary: '#64FFDA', primaryLight: '#A8FFEE',
-      primaryDark: '#00BFA5', accent: '#FFD700', accentLight: '#FFE55C',
-      correct: '#64FFDA', present: '#FFD700', absent: '#1E3A5F',
-      empty: '#0D2137', gem: '#64FFDA', gemDark: '#00BFA5',
-      text: '#CCD6F6', textSecondary: '#8892B0', textMuted: '#7E8AA8',
-      border: '#1E3A5F', borderLight: '#233554', error: '#FF6B6B', warning: '#FFD700',
-    },
-  },
-  {
-    id: 'crystal',
-    name: 'Obsidian',
+    id: 'obsidian',
+    name: 'Obsidian Mor',
     nameEn: 'Obsidian',
     emoji: '🖤',
-    description: '👑 Özel Premium Karanlık Tema',
-    descEn: '👑 Premium dark theme',
-    gemCost: -1, // Premium only
-    preview: ['#050508', '#0C0C14'],
+    description: 'Klasik, sakin ve odaklanmış mor & camgöbeği',
+    descEn: 'Classic, calm violet & cyan',
+    gemCost: 0,
+    preview: ['#0B0C10', '#7C5CFF'],
     colors: {
-      background:    '#050508',   // Near-black, deepest void
-      surface:       '#0C0C14',   // Very dark navy-black
-      surfaceLight:  '#111120',   // Slightly lifted dark
-      card:          '#13131F',   // Dark card surface
-      primary:       '#C8A96E',   // Antique gold
-      primaryLight:  '#E2C98A',   // Pale gold highlight
-      primaryDark:   '#9A7A42',   // Deep gold shadow
-      accent:        '#5B8DEF',   // Sapphire blue
-      accentLight:   '#89ADFF',   // Light sapphire
-      correct:       '#4ADE80',   // Vivid emerald
-      present:       '#FBBF24',   // Warm amber
-      absent:        '#1C1C2E',   // Very dark void
-      empty:         '#111120',   // Empty cell dark
-      gem:           '#C8A96E',   // Gold gem
-      gemDark:       '#9A7A42',   // Dark gold gem
-      text:          '#F0EDE8',   // Warm off-white
-      textSecondary: '#B8A98A',   // Aged parchment
-      textMuted:     '#94886F',   // Accessible muted tone
-      border:        '#2A2A3E',   // Subtle dark border
-      borderLight:   '#38384E',   // Slightly lighter border
-      error:         '#FF4D6D',   // Vivid red
-      warning:       '#FBBF24',   // Gold warning
+      background: '#0B0C10', surface: '#121317', surfaceLight: '#17181D',
+      card: '#17181D', primary: '#7C5CFF', primaryLight: '#A78BFA',
+      primaryDark: '#6e4ef5', accent: '#38BDF8', accentLight: '#7DD3FC',
+      correct: '#22C55E', present: '#F59E0B', absent: '#26272B',
+      empty: '#1E1F24', gem: '#38BDF8', gemDark: '#0EA5E9',
+      text: TXT.text, textSecondary: TXT.textSecondary, textMuted: TXT.textMuted,
+      border: '#26272B', borderLight: '#32333A', error: '#EF4444', warning: '#F59E0B',
+    },
+  },
+  {
+    id: 'midnight',
+    name: 'Gece Mavisi',
+    nameEn: 'Midnight',
+    emoji: '🌌',
+    description: 'Derin okyanus laciverti ve kobalt gökyüzü',
+    descEn: 'Deep navy and cobalt',
+    gemCost: 100,
+    preview: ['#080E1A', '#3B82F6'],
+    colors: {
+      background: '#080E1A', surface: '#0F172A', surfaceLight: '#16213A',
+      card: '#1E293B', primary: '#3B82F6', primaryLight: '#60A5FA',
+      primaryDark: '#2563EB', accent: '#38BDF8', accentLight: '#7DD3FC',
+      correct: '#22C55E', present: '#F59E0B', absent: '#1E293B',
+      empty: '#16213A', gem: '#38BDF8', gemDark: '#0EA5E9',
+      text: TXT.text, textSecondary: TXT.textSecondary, textMuted: TXT.textMuted,
+      border: '#334155', borderLight: '#475569', error: '#EF4444', warning: '#F59E0B',
+    },
+  },
+  {
+    id: 'forest',
+    name: 'Orman Yeşili',
+    nameEn: 'Forest',
+    emoji: '🌿',
+    description: 'Taze zümrüt, çam ormanı ve ferah nane',
+    descEn: 'Fresh emerald and mint',
+    gemCost: 200,
+    preview: ['#07150E', '#10B981'],
+    colors: {
+      background: '#07150E', surface: '#0B2016', surfaceLight: '#0E271A',
+      card: '#132E20', primary: '#10B981', primaryLight: '#34D399',
+      primaryDark: '#059669', accent: '#34D399', accentLight: '#6EE7B7',
+      correct: '#22C55E', present: '#F59E0B', absent: '#132E20',
+      empty: '#0E271A', gem: '#34D399', gemDark: '#10B981',
+      text: TXT.text, textSecondary: TXT.textSecondary, textMuted: TXT.textMuted,
+      border: '#1F4A34', borderLight: '#2A5C40', error: '#EF4444', warning: '#F59E0B',
+    },
+  },
+  {
+    id: 'sunset',
+    name: 'Gün Batımı',
+    nameEn: 'Sunset',
+    emoji: '🌇',
+    description: 'Sıcak akşam kızıllığı, yakut ve kehribar',
+    descEn: 'Warm ruby sunset',
+    gemCost: 200,
+    preview: ['#160B0E', '#F43F5E'],
+    colors: {
+      background: '#160B0E', surface: '#211015', surfaceLight: '#2A1419',
+      card: '#2E161E', primary: '#F43F5E', primaryLight: '#FB7185',
+      primaryDark: '#E11D48', accent: '#FB923C', accentLight: '#FDBA74',
+      correct: '#22C55E', present: '#F59E0B', absent: '#2E161E',
+      empty: '#2A1419', gem: '#FB923C', gemDark: '#F97316',
+      text: TXT.text, textSecondary: TXT.textSecondary, textMuted: TXT.textMuted,
+      border: '#48232F', borderLight: '#5A2C3A', error: '#EF4444', warning: '#F59E0B',
+    },
+  },
+  {
+    id: 'cyber',
+    name: 'Siber Neon',
+    nameEn: 'Cyber',
+    emoji: '💜',
+    description: 'Fütüristik neon pembe ve siberpunk mavisi',
+    descEn: 'Neon pink cyberpunk',
+    gemCost: 300,
+    preview: ['#0D0B14', '#EC4899'],
+    colors: {
+      background: '#0D0B14', surface: '#151221', surfaceLight: '#1B1526',
+      card: '#1F1A30', primary: '#EC4899', primaryLight: '#F472B6',
+      primaryDark: '#DB2777', accent: '#06B6D4', accentLight: '#22D3EE',
+      correct: '#22C55E', present: '#F59E0B', absent: '#1F1A30',
+      empty: '#1B1526', gem: '#06B6D4', gemDark: '#0891B2',
+      text: TXT.text, textSecondary: TXT.textSecondary, textMuted: TXT.textMuted,
+      border: '#352C52', borderLight: '#463A66', error: '#EF4444', warning: '#F59E0B',
+    },
+  },
+  {
+    id: 'gold',
+    name: 'Kozmik Altın',
+    nameEn: 'Gold',
+    emoji: '👑',
+    description: 'Görkemli kraliyet altını ve sıcak bronz',
+    descEn: 'Royal cosmic gold',
+    gemCost: -1, // Premium only
+    preview: ['#120E06', '#F59E0B'],
+    colors: {
+      background: '#120E06', surface: '#1C160B', surfaceLight: '#241C0D',
+      card: '#271F10', primary: '#F59E0B', primaryLight: '#FBBF24',
+      primaryDark: '#D97706', accent: '#FBBF24', accentLight: '#FDE047',
+      correct: '#22C55E', present: '#F59E0B', absent: '#271F10',
+      empty: '#241C0D', gem: '#FBBF24', gemDark: '#F59E0B',
+      text: TXT.text, textSecondary: TXT.textSecondary, textMuted: TXT.textMuted,
+      border: '#3D311A', borderLight: '#4E4022', error: '#EF4444', warning: '#F59E0B',
     },
   },
 ];

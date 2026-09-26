@@ -27,15 +27,19 @@ export default function GameScreen() {
     mode: GameMode; category: Category; difficulty: Difficulty;
   }>({ mode: 'classic', category: 'random', difficulty: 'normal' });
 
+  const [hardMode, setHardMode] = useState(false);
+
   const progress = useProgress();
   const { theme, colorBlind, language } = useTheme();
-  const game = useGame(gameConfig.difficulty, gameConfig.mode, gameConfig.category, language);
+  const game = useGame(gameConfig.difficulty, gameConfig.mode, gameConfig.category, language, hardMode);
 
   useEffect(() => {
     const init = async () => {
       const onboarded = await storageGet('gq_onboarded');
       if (onboarded !== 'true') { router.replace('/onboarding'); return; }
       setDailyDone(await hasDoneDaily());
+      const hm = await storageGet('gq_hard_mode');
+      setHardMode(hm === 'true');
     };
     init();
   }, []);
@@ -55,7 +59,7 @@ export default function GameScreen() {
 
     if (!won) {
       audioService.play('loss'); audioService.triggerHaptic('warning');
-      await progress.recordLoss(); return;
+      await progress.recordLoss(gameConfig.difficulty); return;
     }
     setShowConfetti(true); setShowGemShower(true);
     audioService.play('win'); audioService.triggerHaptic('success');
@@ -70,6 +74,7 @@ export default function GameScreen() {
     if (isPerfect) xp += XP_REWARDS.PERFECT_GAME;
     if (isSpeed) xp *= XP_REWARDS.SPEED_MODE_MULTIPLIER;
     if (isDaily) xp += XP_REWARDS.DAILY_CHALLENGE;
+    if (gameConfig.mode === 'turnuva') xp = Math.round(xp * 2.5);
 
     // Tek yazıcı: XP, gem, istatistik ve skor progress.recordWin içinde işlenir
     await progress.recordWin({
@@ -115,7 +120,7 @@ export default function GameScreen() {
       ) : (
         <GamePlayScreen
           theme={theme} language={language} colorBlind={colorBlind}
-          game={game as any} gameConfig={gameConfig}
+          game={game} gameConfig={gameConfig}
           gems={progress.gems} premium={progress.premium}
           unlockedCategories={progress.unlockedCategories}
           showConfetti={showConfetti} showGemShower={showGemShower}

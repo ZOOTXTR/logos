@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { duelService, DuelSession } from '../services/duel.service';
 import { getCurrentUser } from '../services/auth.service';
-import { Category, getRandomWord } from '../constants/words';
 import { toTurkishUpper } from '../utils/turkish';
 
 type LetterStatus = 'empty' | 'absent' | 'present' | 'correct';
@@ -35,8 +34,8 @@ export function useMultiplayer() {
     try {
       const id = await duelService.findOrCreateMatch(user.uid, user.displayName || 'Player');
       setDuelId(id);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     }
   }, [user]);
 
@@ -87,12 +86,12 @@ export function useMultiplayer() {
     setPlayerBoard(prev => {
       const nextBoard = [...prev];
       const newRow = prev[playerRow].map(cell => ({ ...cell, status: 'absent' as LetterStatus }));
-      const targetChars = target.split('');
+      const targetChars: (string | null)[] = target.split('');
       
       newRow.forEach((cell, cIdx) => {
         if (cell.char === targetChars[cIdx]) {
           cell.status = 'correct';
-          targetChars[cIdx] = null as any;
+          targetChars[cIdx] = null;
         }
       });
       
@@ -101,7 +100,7 @@ export function useMultiplayer() {
           const matchIndex = targetChars.indexOf(cell.char);
           if (matchIndex !== -1) {
             cell.status = 'present';
-            targetChars[matchIndex] = null as any;
+            targetChars[matchIndex] = null;
           }
         }
       });

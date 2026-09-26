@@ -2,11 +2,12 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 import { Prize } from './SpinWheelCanvas';
 
 interface SpinPrizeTableProps {
   prizes: Prize[];
-  theme: any;
+  theme: Theme;
   language: string;
 }
 

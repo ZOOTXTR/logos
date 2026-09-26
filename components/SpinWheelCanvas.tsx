@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Svg, Path, G, Circle, Line, Text as SvgText } from 'react-native-svg';
+import { Theme } from '../constants/themes';
 
 export interface Prize {
   label: string;
@@ -36,7 +37,7 @@ function buildSlicePath(
 }
 
 interface SpinWheelCanvasProps {
-  theme: any;
+  theme: Theme;
   prizes: Prize[];
   spinAnim: Animated.Value;
 }

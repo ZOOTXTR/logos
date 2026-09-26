@@ -32,6 +32,7 @@ interface StorePackListProps {
   prices?: Record<string, string>;
   theme: Theme;
   language: 'tr' | 'en';
+  tab: 'elmas' | 'premium';
 }
 
 export function StorePackList({
@@ -44,68 +45,73 @@ export function StorePackList({
   prices,
   theme,
   language,
+  tab,
 }: StorePackListProps) {
   const t = TRANSLATIONS[language];
 
   return (
     <View>
-      <StorePremiumCard
-        isPremium={isPremium}
-        onPurchasePremium={onPremium}
-        price={prices?.[PRODUCT_IDS.PREMIUM_MONTHLY]}
-        theme={theme}
-        language={language}
-      />
+      {tab === 'premium' ? (
+        <StorePremiumCard
+          isPremium={isPremium}
+          onPurchasePremium={onPremium}
+          price={prices?.[PRODUCT_IDS.PREMIUM_MONTHLY]}
+          theme={theme}
+          language={language}
+        />
+      ) : (
+        <>
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+              🔤 {language === 'en' ? 'Category Word Packs' : 'Kelime Paketleri'}
+            </Text>
+            {CATEGORY_PRODUCTS.map((prod) => {
+              const isUnlocked = unlockedCategories.includes(prod.id);
+              return (
+                <TouchableOpacity accessibilityRole="button"
+                  key={prod.id}
+                  style={[styles.gemCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
+                  onPress={() => !isUnlocked && onUnlockCategory(prod)}
+                  activeOpacity={0.8}
+                  disabled={isUnlocked}
+                >
+                  <Text style={styles.gemIcon}>{prod.emoji}</Text>
+                  <View style={styles.gemInfo}>
+                    <Text style={[styles.gemAmount, { color: theme.colors.text }]}>
+                      {language === 'en' ? prod.nameEn : prod.name}
+                    </Text>
+                    <Text style={[styles.gemBonus, { color: theme.colors.textSecondary }]}>
+                      {isUnlocked
+                        ? (language === 'en' ? 'Unlocked' : 'Kilit Açık')
+                        : (language === 'en' ? 'Expand Category Pool' : 'Kelime Haznesini Genişlet')}
+                    </Text>
+                  </View>
+                  {isUnlocked ? (
+                    <Text style={{ color: theme.colors.correct, fontWeight: '800', fontSize: FONTS.size.sm }}>✓</Text>
+                  ) : (
+                    <Text style={styles.gemPrice}>{prod.cost} 💎</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
 
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-          🔤 {language === 'en' ? 'Category Word Packs' : 'Kelime Paketleri'}
-        </Text>
-        {CATEGORY_PRODUCTS.map((prod) => {
-          const isUnlocked = unlockedCategories.includes(prod.id);
-          return (
-            <TouchableOpacity accessibilityRole="button"
-              key={prod.id}
-              style={[styles.gemCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-              onPress={() => !isUnlocked && onUnlockCategory(prod)}
-              activeOpacity={0.8}
-              disabled={isUnlocked}
-            >
-              <Text style={styles.gemIcon}>{prod.emoji}</Text>
-              <View style={styles.gemInfo}>
-                <Text style={[styles.gemAmount, { color: theme.colors.text }]}>
-                  {language === 'en' ? prod.nameEn : prod.name}
-                </Text>
-                <Text style={[styles.gemBonus, { color: theme.colors.textSecondary }]}>
-                  {isUnlocked
-                    ? (language === 'en' ? 'Unlocked' : 'Kilit Açık')
-                    : (language === 'en' ? 'Expand Category Pool' : 'Kelime Haznesini Genişlet')}
-                </Text>
-              </View>
-              {isUnlocked ? (
-                <Text style={{ color: theme.colors.correct, fontWeight: '800', fontSize: FONTS.size.sm }}>✓</Text>
-              ) : (
-                <Text style={styles.gemPrice}>{prod.cost} 💎</Text>
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>💎 {t.buyGems}</Text>
-        {GEM_PACKAGES.map((pkg) => (
-          <StoreGemPackCard
-            key={pkg.id}
-            gemPackage={pkg}
-            onPurchase={onPurchaseGem}
-            isPurchasing={purchasing === pkg.id}
-            price={prices?.[pkg.id]}
-            theme={theme}
-            language={language}
-          />
-        ))}
-      </View>
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>💎 {t.buyGems}</Text>
+            {GEM_PACKAGES.map((pkg) => (
+              <StoreGemPackCard
+                key={pkg.id}
+                gemPackage={pkg}
+                onPurchase={onPurchaseGem}
+                isPurchasing={purchasing === pkg.id}
+                price={prices?.[pkg.id]}
+                theme={theme}
+                language={language}
+              />
+            ))}
+          </View>
+        </>
+      )}
 
       <View style={styles.footer}>
         <Text style={[styles.footerText, { color: theme.colors.textMuted }]}>

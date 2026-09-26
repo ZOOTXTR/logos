@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import { COLORS, SPACING } from '../constants/theme';
+import { SPACING } from '../constants/theme';
 import { Board } from '../constants/words';
 import { useTheme } from '../hooks/useTheme';
 import { AnimatedCell } from './AnimatedCell';

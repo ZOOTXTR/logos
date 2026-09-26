@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from './CustomText';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 import { Board } from '../constants/words';
 
 interface GameEndCertificateProps {
@@ -11,7 +12,7 @@ interface GameEndCertificateProps {
   currentRow: number;
   colorBlind: boolean;
   language: string;
-  theme: any;
+  theme: Theme;
   onShowDefinition: () => void;
   onShare: () => void;
   onRetry: () => void;

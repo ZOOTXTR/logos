@@ -1,43 +1,43 @@
 export const COLORS = {
-  // Arka plan
-  background: '#0D0D1A',
-  surface: '#1A1A2E',
-  surfaceLight: '#16213E',
-  card: '#1E1E3A',
+  // Arka plan — nötr, mavi-mor karışımı yok
+  background: '#0B0C10',
+  surface: '#121317',
+  surfaceLight: '#17181D',
+  card: '#17181D',
 
-  // Birincil
-  primary: '#7C3AED',
+  // Birincil — elektrik menekşe
+  primary: '#7C5CFF',
   primaryLight: '#A78BFA',
-  primaryDark: '#5B21B6',
+  primaryDark: '#6e4ef5',
 
-  // Vurgu
-  accent: '#F59E0B',
-  accentLight: '#FCD34D',
+  // Vurgu — tema vurgusu = gem rengi (AI Studio ile birebir)
+  accent: '#38BDF8',
+  accentLight: '#7DD3FC',
 
   // Oyun renkleri
-  correct: '#10B981',   // Yeşil - doğru yerde
-  present: '#F59E0B',   // Sarı - var ama yanlış yerde
-  absent: '#374151',    // Gri - yok
-  empty: '#1F2937',     // Boş hücre
+  correct: '#22C55E',
+  present: '#F59E0B',
+  absent: '#26272B',
+  empty: '#1E1F24',
 
   // Gem rengi
   gem: '#38BDF8',
-  gemDark: '#0284C7',
+  gemDark: '#0EA5E9',
 
   // Metin
-  text: '#F9FAFB',
-  textSecondary: '#9CA3AF',
-  textMuted: '#6B7280',
+  text: '#F4F4F5',
+  textSecondary: '#A1A1AA',
+  textMuted: '#71717A',
 
   // Durum
-  success: '#10B981',
+  success: '#22C55E',
   error: '#EF4444',
   warning: '#F59E0B',
-  info: '#3B82F6',
+  info: '#38BDF8',
 
   // Sınır
-  border: '#374151',
-  borderLight: '#4B5563',
+  border: '#26272B',
+  borderLight: '#32333A',
 } as const;
 
 // NOT: Android'de geçersiz fontFamily ('System') Text içindeki emoji gliflerini
@@ -52,13 +52,13 @@ export const FONTS = {
   display: undefined,
   displayMedium: undefined,
   size: {
-    xs: 10,
-    sm: 12,
-    md: 14,
-    lg: 16,
-    xl: 18,
-    xxl: 24,
-    xxxl: 32,
+    xs: 11,
+    sm: 13,
+    md: 15,
+    lg: 17,
+    xl: 20,
+    xxl: 26,
+    xxxl: 34,
     huge: 48,
   },
 } as const;
@@ -73,9 +73,9 @@ export const SPACING = {
 } as const;
 
 export const BORDER_RADIUS = {
-  sm: 6,
-  md: 12,
-  lg: 16,
-  xl: 24,
+  sm: 8,
+  md: 14,
+  lg: 18,
+  xl: 26,
   full: 9999,
 } as const;

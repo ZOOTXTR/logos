@@ -97,7 +97,7 @@ describe('Empirical Stress & Boundary Tests — Keyboard.tsx', () => {
 
       mockThemeContext.language = 'tr';
       const { getByText: getByTextTr } = render(
-        <Keyboard onKey={jest.fn()} onDelete={jest.fn()} onSubmit={jest.fn()} revealedLetters={{}} language={'invalid' as any} />
+        <Keyboard onKey={jest.fn()} onDelete={jest.fn()} onSubmit={jest.fn()} revealedLetters={{}} language={'invalid' as 'tr'} />
       );
       expect(getByTextTr('Ğ')).toBeTruthy();
       expect(getByTextTr('GÖNDER')).toBeTruthy();
@@ -184,7 +184,7 @@ describe('Empirical Stress & Boundary Tests — Keyboard.tsx', () => {
     it('handles colorblind indicators when active', () => {
       mockThemeContext.colorBlind = true;
 
-      const { getByText, queryByText } = render(
+      const { getByText } = render(
         <Keyboard
           onKey={jest.fn()}
           onDelete={jest.fn()}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from '../CustomText';
-import { FONTS, SPACING, BORDER_RADIUS } from '../../constants/theme';
+import { SPACING } from '../../constants/theme';
 import { Theme } from '../../constants/themes';
 
 interface SectionTitleProps {
@@ -16,10 +16,10 @@ interface SectionTitleProps {
 export function SectionTitle({ theme, title, icon, right, style, line }: SectionTitleProps) {
   return (
     <View style={[styles.row, style]}>
-      <Text style={[styles.title, { color: theme.colors.textSecondary }]}>
+      <Text style={[styles.title, { color: theme.colors.text }]}>
         {icon ? `${icon}  ` : ''}{title}
       </Text>
-      {line ? <View style={[styles.line, { backgroundColor: theme.colors.primaryLight }]} /> : null}
+      {line ? <View style={[styles.line, { backgroundColor: theme.colors.border }]} /> : null}
       {right ? <View>{right}</View> : null}
     </View>
   );
@@ -34,12 +34,10 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   title: {
-    fontFamily: FONTS.extrabold,
-    fontSize: 12,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+    fontWeight: '800',
+    fontSize: 15,
   },
-  line: { flex: 1, height: 1, opacity: 0.5 },
+  line: { flex: 1, height: 1 },
 });
 
 export const cardStyles = {
@@ -47,7 +45,7 @@ export const cardStyles = {
     backgroundColor: theme.colors.card,
     borderColor: theme.colors.border,
     borderWidth: 1,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: 18,
     padding: SPACING.md,
   }),
 };

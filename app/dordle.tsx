@@ -3,16 +3,16 @@ import { View, StyleSheet, TouchableOpacity, StatusBar, Share, Platform, useWind
 import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
-import { Board, LetterStatus, WORD_LENGTH } from '../constants/words';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Board, LetterStatus } from '../constants/words';
 import { useDordle } from '../hooks/useDordle';
 import { useProgress } from '../hooks/useProgress';
 import { useTheme } from '../hooks/useTheme';
+import { Theme } from '../constants/themes';
 import { Keyboard } from '../components/Keyboard';
 import { audioService } from '../services/audio.service';
 import { Confetti } from '../components/Confetti';
 import { GameResultOverlay, GameResultOverlayProps } from '../components/GameResultOverlay';
-import { TRANSLATIONS } from '../constants/translations';
 import { LoadingView } from '../components/LoadingView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -23,11 +23,11 @@ interface MiniBoardProps {
   currentRow: number;
   colorBlind: boolean;
   dyslexiaFont: boolean;
-  theme: any;
+  theme: Theme;
   cellSize: number;
 }
 
-const getCellBg = (status: LetterStatus, colorBlind: boolean, theme: any) => {
+const getCellBg = (status: LetterStatus, colorBlind: boolean, theme: Theme) => {
   if (status === 'empty' || status === 'tbd') return 'transparent';
   switch (status) {
     case 'correct': return colorBlind ? '#0072B2' : theme.colors.correct;
@@ -94,8 +94,6 @@ export default function DordleScreen() {
 
 
 
-  const t = TRANSLATIONS[language];
-
   const handleKey = useCallback((key: string) => {
     if (game.gameStatus !== 'playing') return;
     audioService.triggerHaptic('light');
@@ -155,7 +153,7 @@ export default function DordleScreen() {
 
     try {
       await Share.share({ message: shareText });
-    } catch (e) {
+    } catch {
       if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
         try {
           await navigator.clipboard.writeText(shareText);

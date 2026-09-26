@@ -231,6 +231,63 @@ export const verifyPurchase = functions.onCall(
   }
 );
 
+// 6. Haftalık turnuva ödülü — tembel (lazy) finalizasyon.
+// Haftalık liderlik, skorların `date` alanına göre (Pazartesi başı) filtrelenmesiyle
+// otomatik sıfırlanır; ayrı bir "reset" cron'u gerekmez. Bu fonksiyon, haftanın
+// turnuva skorlarını okuyup kullanıcının sıralamasını hesaplar ve (idempotent) ödül
+// elmasını rewards alt koleksiyonuna yazar. İstemci ödülü lokal bakiyesine ekler.
+export const claimWeeklyReward = functions.onCall({ region: "us-central1" }, async (request) => {
+  const { auth } = request;
+  if (!auth) throw new functions.HttpsError("unauthenticated", "Giriş yapmalısınız.");
+
+  const now = new Date();
+  const day = (now.getDay() + 6) % 7; // Monday = 0
+  const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day);
+  const weekKey = weekStart.toISOString().slice(0, 10);
+
+  // Idempotency: bu haftanın ödülü zaten alındıysa tekrar verme
+  const rewardRef = db.collection("users").doc(auth.uid).collection("rewards").doc(`tourney_${weekKey}`);
+  const rewardSnap = await rewardRef.get();
+  if (rewardSnap.exists) {
+    throw new functions.HttpsError("already-exists", "Bu haftanın ödülü zaten alındı.");
+  }
+
+  // Bu haftanın turnuva skorlarını oku ve kullanıcı başına en iyi skoru al
+  const scoresSnap = await db.collection("scores").where("mode", "==", "turnuva").get();
+  const weekScores = scoresSnap.docs
+    .filter((d) => {
+      const date = d.get("date");
+      const millis = typeof date === "string" ? new Date(date).getTime() : 0;
+      return millis >= weekStart.getTime();
+    })
+    .map((d) => ({ uid: d.get("uid") as string, score: Number(d.get("score") ?? 0) }));
+
+  const best = new Map<string, number>();
+  for (const s of weekScores) {
+    const cur = best.get(s.uid);
+    if (cur === undefined || s.score > cur) best.set(s.uid, s.score);
+  }
+  const ranked = [...best.entries()]
+    .map(([uid, score]) => ({ uid, score }))
+    .sort((a, b) => b.score - a.score);
+
+  const idx = ranked.findIndex((r) => r.uid === auth.uid);
+  const PRIZES = [1000, 500, 250];
+  if (idx < 0 || idx >= PRIZES.length) {
+    throw new functions.HttpsError("not-found", "Bu hafta ödül kazanamadınız.");
+  }
+
+  const prize = PRIZES[idx];
+  await rewardRef.set({
+    type: "gems",
+    amount: prize,
+    reason: `weekly_tournament_rank_${idx + 1}`,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { success: true, prize, rank: idx + 1 };
+});
+
 // 5. Hesap silme (Google Play zorunluluğu) — tüm kullanıcı verisi sunucuda silinir
 export const deleteAccount = functions.onCall({ region: "us-central1" }, async (request) => {
   const { auth } = request;

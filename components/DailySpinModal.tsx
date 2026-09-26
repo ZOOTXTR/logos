@@ -31,11 +31,11 @@ const PRIZES: Prize[] = [
 
 const SLICE_ANGLE = (2 * Math.PI) / PRIZES.length;
 
-export function DailySpinModal({ visible, onClose, gems, onAddGems, premium = false }: DailySpinModalProps) {
+export function DailySpinModal({ visible, onClose, onAddGems, premium = false }: DailySpinModalProps) {
   const { theme, language } = useTheme();
   const [canSpin, setCanSpin] = useState(true);
   const [cooldownText, setCooldownText] = useState('');
-  const timerRef = React.useRef<any>(null);
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const spinAnim = useRef(new Animated.Value(0)).current;
   const currentAngle = useRef(0);
@@ -47,7 +47,7 @@ export function DailySpinModal({ visible, onClose, gems, onAddGems, premium = fa
     buttons: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'default' | 'destructive' }>;
   }>({ visible: false, title: '', message: '', buttons: [] });
 
-  const showCustomAlert = (title: string, message: string, buttons?: any[]) => {
+  const showCustomAlert = (title: string, message: string, buttons?: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'default' | 'destructive' }>) => {
     setCustomAlert({
       visible: true,
       title,

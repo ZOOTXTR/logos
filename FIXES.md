@@ -16,4 +16,4 @@ Sürüm politikası: burada yeterli "anlamlı yığın" birikince tek seferde `v
 - [ ] Üretime başvuru (Play Console).
 
 ---
-Son yayınlanan: v1.0.97 (versionCode 97).
+Son yayınlanan: v1.0.98 (versionCode 98).

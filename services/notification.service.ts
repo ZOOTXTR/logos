@@ -2,7 +2,6 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { getFirebaseApp } from '../config/firebase';
 
 // Set default notification handler behaviors
 Notifications.setNotificationHandler({
@@ -15,7 +14,7 @@ Notifications.setNotificationHandler({
 
 export async function registerForPushNotifications(): Promise<string | null> {
   try {
-    const projectId = (Constants.expoConfig?.extra as any)?.eas?.projectId as string | undefined;
+    const projectId = (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId as string | undefined;
     if (!projectId) {
       console.warn('[Notifications] EAS projectId bulunamadı, push token alınamadı.');
       return null;
@@ -58,7 +57,7 @@ class NotificationService {
 
     try {
       await registerForPushNotifications();
-    } catch (_) {}
+    } catch {}
 
     return true;
   }

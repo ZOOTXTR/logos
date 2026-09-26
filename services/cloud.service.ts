@@ -155,7 +155,7 @@ class CloudService {
         await AsyncStorage.setItem('gq_achievements', JSON.stringify(data.unlockedAchievements));
       }
       if (data.stats) {
-        const cloudStats = data.stats as Record<string, any>;
+        const cloudStats = data.stats as Record<string, unknown>;
         const local = await getStats();
         const cats = [...new Set([...local.categoriesWon, ...((cloudStats.categoriesWon as string[]) ?? [])])];
         const cloudDist = (cloudStats.guessDistribution as Record<string, number>) ?? {};

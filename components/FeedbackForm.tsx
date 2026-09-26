@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, TextInput } from 'react-native';
 import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 
 interface FeedbackFormProps {
   email: string;
@@ -9,7 +10,7 @@ interface FeedbackFormProps {
   onEmailChange: (text: string) => void;
   onMessageChange: (text: string) => void;
   characterCount: number;
-  theme: any;
+  theme: Theme;
   language: string;
 }
 

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { Text } from './CustomText';
 import { Svg, Rect, Text as SvgText } from 'react-native-svg';
 import { SPACING } from '../constants/theme';
+import { Theme } from '../constants/themes';
 
 export function GuessDistributionChart({
   distribution,
@@ -10,7 +11,7 @@ export function GuessDistributionChart({
   language = 'tr',
 }: {
   distribution: Record<number, number>;
-  theme: any;
+  theme: Theme;
   language?: string;
 }) {
   // Dağılımdaki tüm anahtarları göster (6'dan fazla tahmin dahil), yoksa 1-6 varsayılanı

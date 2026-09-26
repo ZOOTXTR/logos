@@ -15,7 +15,7 @@ interface CloudSyncModalProps {
 
 export function CloudSyncModal({ visible, onClose }: CloudSyncModalProps) {
   const { theme, language } = useTheme();
-  const { linkedEmail, loading, syncStatus, handleLinkAccount, handlePlayGamesSignIn, handleBackup, handleRestore, handleUnlink } = useCloudSync(visible, onClose);
+  const { linkedEmail, loading, handleLinkAccount, handlePlayGamesSignIn, handleBackup, handleRestore, handleUnlink } = useCloudSync(visible, onClose);
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>

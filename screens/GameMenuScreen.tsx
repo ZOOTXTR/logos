@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Text } from '../components/CustomText';
-import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import type { Href } from 'expo-router';
+import { SPACING } from '../constants/theme';
 import { GameMode, Category, Difficulty } from '../constants/words';
 import { LevelInfo } from '../constants/levels';
 import { ModeSelector } from '../components/ModeSelector';
 import { StoreModal } from '../components/StoreModal';
 import { DailySpinModal } from '../components/DailySpinModal';
-import { HelpModal } from '../components/HelpModal';
 import { GemShower } from '../components/GemShower';
-import { LevelBar } from '../components/LevelBar';
-import { StreakBanner } from '../components/StreakBanner';
+import { TopBar } from '../components/TopBar';
+import { DailyQuestsCard } from '../components/DailyQuestsCard';
+import { TournamentBanner } from '../components/TournamentBanner';
+import { WeeklyLeaderboardCard } from '../components/WeeklyLeaderboardCard';
 import { audioService } from '../services/audio.service';
-import { AuraBackground } from '../components/design/AuraBackground';
 
 import { Theme } from '../constants/themes';
 
@@ -39,8 +38,8 @@ interface GameMenuScreenProps {
 }
 
 export function GameMenuScreen({
-  theme, language, colorBlind,
-  gems, xp, levelInfo, streak, streakBonus,
+  theme, language,
+  gems, xp, levelInfo, streak,
   premium, unlockedCategories, dailyDone,
   showGemShower,
   onStartGame, onAddGems, onUnlockCategory,
@@ -48,91 +47,43 @@ export function GameMenuScreen({
 }: GameMenuScreenProps) {
   const router = useRouter();
   const [showStore, setShowStore] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
   const [showSpin, setShowSpin] = useState(false);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <AuraBackground theme={theme} />
-      <View style={styles.container}>
-        <View style={styles.header}>
-        <Text style={[styles.logo, { color: theme.colors.text }]}>💎 Logos</Text>
-        <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-          <TouchableOpacity
-            style={[styles.backBtn, { backgroundColor: theme.colors.card, borderColor: theme.colors.border, paddingHorizontal: 12, paddingVertical: 6, margin: 0, minHeight: 44, justifyContent: 'center' }]}
-            onPress={() => { audioService.triggerHaptic('light'); setShowHelp(true); }}
-            accessibilityRole="button"
-            accessibilityLabel={language === 'en' ? 'Help' : 'Yardım'}
-          >
-            <Text style={{ color: theme.colors.textSecondary, fontWeight: '700', fontSize: 12 }}>❓ {language === 'en' ? 'Help' : 'Yardım'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.gemPill, { backgroundColor: theme.colors.card, borderColor: theme.colors.gem, minHeight: 44, justifyContent: 'center' }]}
-            onPress={() => setShowStore(true)}
-            accessibilityRole="button"
-            accessibilityLabel={language === 'en' ? `Store, ${gems} gems` : `Mağaza, ${gems} elmas`}
-          >
-            <Text style={[styles.gemPillText, { color: theme.colors.gem }]}>💎 {gems}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <TopBar gems={gems} onOpenStore={() => { audioService.triggerHaptic('light'); setShowStore(true); }} />
 
-      {levelInfo && (
-        <View style={styles.levelBarWrap}>
-          <LevelBar xp={xp} levelInfo={levelInfo} />
-        </View>
-      )}
-
-      <StreakBanner streak={streak} bonusGems={streakBonus} language={language as 'tr' | 'en'} />
-
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: SPACING.md, paddingTop: SPACING.sm, paddingBottom: SPACING.lg, maxWidth: 600, alignSelf: 'center', width: '100%' }}
+      >
         <ModeSelector
           onStart={onStartGame}
           gems={gems}
+          xp={xp}
+          levelInfo={levelInfo}
           streak={streak}
-          levelTitle={levelInfo?.title ?? ''}
-          level={levelInfo?.level ?? 1}
           dailyDone={dailyDone}
           unlockedCategories={unlockedCategories}
           onOpenStore={() => { audioService.triggerHaptic('light'); setShowStore(true); }}
+          onOpenWheel={() => { audioService.triggerHaptic('light'); setShowSpin(true); }}
+          onOpenDuel={() => { audioService.triggerHaptic('light'); router.push('/multiplayer' as Href); }}
         />
 
-        <TouchableOpacity
-          style={[styles.spinBanner, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-          onPress={() => { audioService.triggerHaptic('light'); setShowSpin(true); }}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel={language === 'en' ? 'Lucky Daily Spin' : 'Günlük Şans Çarkı'}
-        >
-          <Text style={styles.spinBannerEmoji}>🎡</Text>
-          <View style={styles.spinBannerTextContainer}>
-            <Text style={[styles.spinBannerTitle, { color: theme.colors.text }]}>
-              {language === 'en' ? 'Lucky Daily Spin' : 'Günlük Şans Çarkı'}
-            </Text>
-            <Text style={[styles.spinBannerDesc, { color: theme.colors.textSecondary }]}>
-              {language === 'en' ? 'Spin once a day to win free gems!' : 'Günde 1 kez döndür, bedava Gem kazan!'}
-            </Text>
-          </View>
-          <Text style={[styles.spinBannerArrow, { color: theme.colors.primaryLight }]}>›</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.spinBanner, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
-          onPress={() => { audioService.triggerHaptic('light'); router.push('/multiplayer' as any); }}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel={language === 'en' ? 'Online Duel' : 'Çevrimiçi Düello'}
-        >
-          <Text style={styles.spinBannerEmoji}>⚔️</Text>
-          <View style={styles.spinBannerTextContainer}>
-            <Text style={[styles.spinBannerTitle, { color: theme.colors.text }]}>
-              {language === 'en' ? 'Online Duel' : 'Çevrimiçi Düello'}
-            </Text>
-            <Text style={[styles.spinBannerDesc, { color: theme.colors.textSecondary }]}>
-              {language === 'en' ? 'Play 1v1 against other players!' : 'Gerçek rakiplere karşı 1v1 oyna!'}
-            </Text>
-          </View>
-          <Text style={[styles.spinBannerArrow, { color: theme.colors.textMuted }]}>›</Text>
-        </TouchableOpacity>
+        <TournamentBanner
+          theme={theme}
+          language={language as 'tr' | 'en'}
+          onStartTournament={() => { audioService.triggerHaptic('light'); onStartGame('turnuva', 'random', 'normal'); }}
+        />
+
+        <WeeklyLeaderboardCard
+          theme={theme}
+          language={language as 'tr' | 'en'}
+          onViewAll={() => router.push('/(tabs)/leaderboard' as Href)}
+        />
+
+        <DailyQuestsCard theme={theme} language={language as 'tr' | 'en'} onClaimGems={onAddGems} />
       </ScrollView>
 
       <StoreModal
@@ -144,7 +95,6 @@ export function GameMenuScreen({
         onPurchasePremium={onUnlockPremium}
         unlockedCategories={unlockedCategories}
         onUnlockCategory={async (cat) => {
-          const spent = true;
           const ok = await onUnlockCategory(cat);
           return ok;
         }}
@@ -156,39 +106,7 @@ export function GameMenuScreen({
         premium={premium}
         onAddGems={(g) => { onAddGems(g); onShowGemShower(true); }}
       />
-      <HelpModal
-        visible={showHelp}
-        onClose={() => setShowHelp(false)}
-      />
       <GemShower active={showGemShower} onComplete={() => onShowGemShower(false)} />
-      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: SPACING.md },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingVertical: SPACING.md,
-  },
-  logo: { fontSize: FONTS.size.xl, fontWeight: '900', color: COLORS.text },
-  levelBarWrap: { marginBottom: SPACING.sm },
-  backBtn: {
-    backgroundColor: COLORS.card, paddingHorizontal: SPACING.sm,
-    paddingVertical: 6, borderRadius: BORDER_RADIUS.full,
-    borderWidth: 1, borderColor: COLORS.border,
-  },
-  gemPill: {
-    backgroundColor: COLORS.card, paddingHorizontal: SPACING.sm,
-    paddingVertical: 6, borderRadius: BORDER_RADIUS.full,
-    borderWidth: 1, borderColor: COLORS.gem,
-  },
-  gemPillText: { color: COLORS.gem, fontWeight: '700', fontSize: FONTS.size.sm },
-  spinBanner: { flexDirection: 'row', alignItems: 'center', padding: SPACING.md, borderRadius: BORDER_RADIUS.lg, borderWidth: 1, marginTop: SPACING.md, gap: SPACING.md },
-  spinBannerEmoji: { fontSize: 32 },
-  spinBannerTextContainer: { flex: 1 },
-  spinBannerTitle: { fontSize: FONTS.size.md, fontWeight: '800' },
-  spinBannerDesc: { fontSize: FONTS.size.xs, marginTop: 2 },
-  spinBannerArrow: { fontSize: 24, fontWeight: '300' },
-});

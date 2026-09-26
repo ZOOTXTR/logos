@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, View, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Alert } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { storageGetJSON, storageSetJSON } from '../services/storage.service';
 import { useTheme } from '../hooks/useTheme';
 import { audioService } from '../services/audio.service';

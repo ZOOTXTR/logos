@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 
 interface FilterChip {
   id: string;
@@ -13,7 +14,7 @@ interface Props {
   filters: FilterChip[];
   active: string;
   onSelect: (id: string) => void;
-  theme: any;
+  theme: Theme;
   language: string;
 }
 

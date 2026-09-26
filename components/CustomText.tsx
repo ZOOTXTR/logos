@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { Text as RNText, TextProps } from 'react-native';
+import { Text as RNText, TextProps, TextStyle } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 
 // Erişilebilirlik: sistem yazı boyutu büyütüldüğünde düzenin bozulmaması için
@@ -14,7 +14,7 @@ export function Text({ style, maxFontSizeMultiplier, allowFontScaling, ...props 
 
   if (!dyslexiaFont) return <RNText style={style} {...scaleProps} {...props} />;
 
-  const dfStyle = { fontFamily: 'monospace', fontWeight: 'normal' };
+  const dfStyle: TextStyle = { fontFamily: 'monospace', fontWeight: 'normal' };
 
-  return <RNText style={[style, dfStyle as any]} {...scaleProps} {...props} />;
+  return <RNText style={[style, dfStyle]} {...scaleProps} {...props} />;
 }

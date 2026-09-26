@@ -1,11 +1,10 @@
-﻿import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+﻿import React, { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from '../components/CustomText';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
-import { LinearGradient } from 'expo-linear-gradient';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { audioService } from '../services/audio.service';
 
 const TUTORIAL_STEPS = [
@@ -32,7 +31,7 @@ const TUTORIAL_STEPS = [
 
 export default function TutorialScreen() {
   const router = useRouter();
-  const { theme, language } = useTheme();
+  const { theme } = useTheme();
   const [step, setStep] = useState(0);
   const [guess, setGuess] = useState('');
   

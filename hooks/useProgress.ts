@@ -9,6 +9,7 @@ import {
 import { submitScore } from '../services/leaderboard.service';
 import { getLevelFromXP, LevelInfo } from '../constants/levels';
 import { getNewAchievements, Achievement, AchievementStats } from '../constants/achievements';
+import { incrementQuestProgress } from '../services/dailyQuests.service';
 
 export function useProgress() {
   const [gems, setGems] = useState(150);
@@ -139,6 +140,14 @@ export function useProgress() {
           ...stats.guessDistribution,
           [opts.guesses]: (stats.guessDistribution[opts.guesses] || 0) + 1,
         },
+        gamesPlayedByDifficulty: {
+          ...stats.gamesPlayedByDifficulty,
+          [opts.difficulty]: (stats.gamesPlayedByDifficulty[opts.difficulty] || 0) + 1,
+        },
+        gamesWonByDifficulty: {
+          ...stats.gamesWonByDifficulty,
+          [opts.difficulty]: (stats.gamesWonByDifficulty[opts.difficulty] || 0) + 1,
+        },
       });
 
       const [updatedStats, currentGems, currentPremium, currentXP, currentUnlocked] = await Promise.all([
@@ -190,23 +199,39 @@ export function useProgress() {
           guesses: opts.guesses,
           timeSeconds: opts.elapsedSeconds,
           xpEarned: opts.xpEarned,
+          difficulty: opts.difficulty,
         };
         await addScore(entry);
         await submitScore(entry);
-      } catch (e) {
+      } catch {
         // bulut skoru başarısız olsa da yerel kayıt tutuldu
+      }
+
+      // Günlük görev ilerlemesi (gerçek kazanma verisiyle)
+      try {
+        await incrementQuestProgress('quest-words');
+        await incrementQuestProgress('quest-win');
+        if (opts.isSpeed) await incrementQuestProgress('quest-blitz');
+      } catch {
+        // görev ilerlemesi kritik değil
       }
     } catch (e) {
       console.error('recordWin failed:', e);
     }
   }, []);
 
-  const recordLoss = useCallback(async () => {
+  const recordLoss = useCallback(async (difficulty: string = 'normal') => {
     try {
       await updateStreak(false);
       setStreak(prev => ({ ...prev, current: 0 }));
       const stats = await getStats();
-      await updateStats({ gamesPlayed: stats.gamesPlayed + 1 });
+      await updateStats({
+        gamesPlayed: stats.gamesPlayed + 1,
+        gamesPlayedByDifficulty: {
+          ...stats.gamesPlayedByDifficulty,
+          [difficulty]: (stats.gamesPlayedByDifficulty[difficulty] || 0) + 1,
+        },
+      });
     } catch (e) {
       console.error('recordLoss failed:', e);
     }

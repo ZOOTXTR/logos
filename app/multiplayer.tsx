@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, StatusBar, ActivityIndicator, Alert } from 'react-native';
 import { Text } from '../components/CustomText';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useMultiplayer } from '../hooks/useMultiplayer';
 import { useTheme } from '../hooks/useTheme';
 import { Keyboard } from '../components/Keyboard';
 import { GameResultOverlay } from '../components/GameResultOverlay';
+import { LetterStatus } from '../constants/words';
 import { TRANSLATIONS } from '../constants/translations';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AuraBackground } from '../components/design/AuraBackground';
 import { WidgetCard } from '../components/design/WidgetCard';
 
 const PLAYER_CELL_SIZE = 40;
@@ -21,7 +20,7 @@ export default function MultiplayerScreen() {
   const t = TRANSLATIONS[language];
   
   const { 
-    duel, error, playerBoard, playerRow, isPlayer1, 
+    duel, error, playerBoard, isPlayer1, 
     startMatchmaking, addLetter, deleteLetter, submitGuess, reset 
   } = useMultiplayer();
 
@@ -70,7 +69,7 @@ export default function MultiplayerScreen() {
   };
 
   const getRevealedLetters = () => {
-    const revealed: Record<string, any> = {};
+    const revealed: Record<string, LetterStatus> = {};
     playerBoard.forEach(row => {
       row.forEach(cell => {
         if (!cell.char) return;
@@ -92,7 +91,6 @@ export default function MultiplayerScreen() {
   if (!duel || duel.status === 'waiting') {
     return (
       <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-        <AuraBackground theme={theme} />
         <View style={styles.centerContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={[styles.searchingText, { color: theme.colors.text }]}>Searching for opponent...</Text>
@@ -110,7 +108,6 @@ export default function MultiplayerScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <AuraBackground theme={theme} />
       <StatusBar barStyle={theme.id === 'light' ? 'dark-content' : 'light-content'} />
       
       <View style={styles.container}>

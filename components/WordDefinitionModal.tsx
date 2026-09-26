@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Modal, View, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator,  } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 import { fetchDefinition, DefinitionItem } from '../services/definition.service';
 import { DefinitionCard } from './DefinitionCard';

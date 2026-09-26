@@ -19,7 +19,7 @@ export interface DuelSession {
 
   targetWord: string;
   winner: string | null;
-  createdAt: any;
+  createdAt: unknown;
 }
 
 const getRandomWord = () => {

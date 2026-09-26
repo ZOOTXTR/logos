@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from './CustomText';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 
 interface HintOptionCardProps {
   emoji: string;
@@ -10,7 +11,7 @@ interface HintOptionCardProps {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  theme?: any;
+  theme?: Theme;
 }
 
 export function HintOptionCard({
@@ -20,7 +21,6 @@ export function HintOptionCard({
   onPress,
   disabled,
   loading,
-  theme,
 }: HintOptionCardProps) {
   return (
     <TouchableOpacity accessibilityRole="button"

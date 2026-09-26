@@ -2,16 +2,17 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 import { DefinitionItem } from '../services/definition.service';
 
 interface DefinitionCardProps {
   index: number;
   item: DefinitionItem;
-  theme: any;
+  theme: Theme;
   language: string;
 }
 
-export function DefinitionCard({ index, item, theme, language }: DefinitionCardProps) {
+export function DefinitionCard({ index, item, theme }: DefinitionCardProps) {
   return (
     <View style={[styles.defCard, { borderBottomColor: theme.colors.border }]}>
       <View style={styles.defHeader}>

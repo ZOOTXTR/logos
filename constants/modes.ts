@@ -7,6 +7,7 @@ export interface GameModeCard {
   route: string;
   badge?: string;
   isPremium?: boolean;
+  category: 'solo' | 'multi';
 }
 
 export function ALL_MODES(t: Record<string, string>, language: string): GameModeCard[] {
@@ -18,6 +19,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       emoji: '🎯',
       gradient: ['#7C3AED', '#4F46E5'],
       route: '/(tabs)',
+      category: 'solo',
     },
     {
       id: 'anagram',
@@ -26,6 +28,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       emoji: '🔀',
       gradient: ['#10B981', '#059669'],
       route: '/anagram',
+      category: 'solo',
     },
     {
       id: 'blitz',
@@ -35,6 +38,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       gradient: ['#F59E0B', '#D97706'],
       route: '/blitz',
       badge: '⚡ XP!',
+      category: 'solo',
     },
     {
       id: 'chain',
@@ -43,6 +47,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       emoji: '⛓️',
       gradient: ['#3B82F6', '#1D4ED8'],
       route: '/chain',
+      category: 'solo',
     },
     {
       id: 'dordle',
@@ -52,6 +57,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       gradient: ['#8B5CF6', '#6D28D9'],
       route: '/dordle',
       badge: language === 'en' ? 'New!' : 'Yeni!',
+      category: 'solo',
     },
     {
       id: 'wordconnect',
@@ -61,6 +67,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       gradient: ['#EC4899', '#BE185D'],
       route: '/wordconnect',
       badge: language === 'en' ? 'New Mode!' : 'Yeni Mod!',
+      category: 'solo',
     },
     {
       id: 'duel',
@@ -70,6 +77,7 @@ export function ALL_MODES(t: Record<string, string>, language: string): GameMode
       gradient: ['#6366F1', '#4F46E5'],
       route: '/duel',
       badge: language === 'en' ? 'VS Mode!' : '1v1 Savaş!',
+      category: 'multi',
     },
   ];
 }

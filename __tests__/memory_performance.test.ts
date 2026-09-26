@@ -1,5 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn().mockResolvedValue(null),
   setItem: jest.fn().mockResolvedValue(undefined),
@@ -41,7 +39,7 @@ import { useWordChain } from '../hooks/useWordChain';
 import { useAnagram } from '../hooks/useAnagram';
 import { audioService } from '../services/audio.service';
 import { rollRandomStickers, STICKERS } from '../constants/stickers';
-import { getRandomWord, getDailyWord } from '../constants/words';
+import { getRandomWord, getDailyWord, Category } from '../constants/words';
 
 describe('Milestone 2 - Memory Optimization & Structural Sharing', () => {
   describe('2D Grid Structural Sharing in useGame', () => {
@@ -165,7 +163,7 @@ describe('Milestone 2 - Memory Optimization & Structural Sharing', () => {
       expect(trWord.length).toBeGreaterThanOrEqual(4);
       expect(trWord.length).toBeLessThanOrEqual(6);
 
-      const enWord = getRandomWord('animals' as any, 'en');
+      const enWord = getRandomWord('animals' as unknown as Category, 'en');
       expect(enWord.length).toBeGreaterThanOrEqual(4);
 
       const daily1 = getDailyWord('tr');

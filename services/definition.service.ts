@@ -13,7 +13,7 @@ export async function fetchDefinition(word: string, lang: string): Promise<Defin
     const data = await response.json();
 
     if (Array.isArray(data) && data.length > 0 && data[0].anlamlarListe) {
-      return data[0].anlamlarListe.map((item: any) => ({
+      return data[0].anlamlarListe.map((item: { anlam: string; ozelliklerListe?: Array<{ tam_adi?: string }> }) => ({
         definition: item.anlam,
         partOfSpeech: item.ozelliklerListe?.[0]?.tam_adi || 'isim',
       }));
@@ -32,8 +32,8 @@ export async function fetchDefinition(word: string, lang: string): Promise<Defin
   const list: DefinitionItem[] = [];
 
   if (Array.isArray(data) && data[0]?.meanings) {
-    data[0].meanings.forEach((meaning: any) => {
-      meaning.definitions.forEach((def: any) => {
+    data[0].meanings.forEach((meaning: { partOfSpeech: string; definitions: Array<{ definition: string; example?: string }> }) => {
+      meaning.definitions.forEach((def: { definition: string; example?: string }) => {
         list.push({
           partOfSpeech: meaning.partOfSpeech,
           definition: def.definition,

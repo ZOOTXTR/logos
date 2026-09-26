@@ -1,5 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn().mockResolvedValue(null),
   setItem: jest.fn().mockResolvedValue(undefined),
@@ -48,17 +46,12 @@ import { useDordle } from '../hooks/useDordle';
 import { useWordChain } from '../hooks/useWordChain';
 import { useAnagram } from '../hooks/useAnagram';
 import {
-  getRandomWord,
-  getDailyWord,
   ALL_WORDS,
   ALL_WORDS_EN,
   WORD_BANK,
-  DIFFICULTY_MAX_GUESSES,
-  createEmptyBoard
 } from '../constants/words';
 import { WORD_BANK_EN } from '../constants/words_en';
-import { getDictionary, isDictionaryReady } from '../services/dictionary.service';
-import { VALIDATION_DICT_TR, VALIDATION_DICT_EN } from '../constants/validation_dictionary';
+import { getDictionary } from '../services/dictionary.service';
 
 describe('Empirical Challenger Suite: Grid State Transformations & Word Set Lookups', () => {
   // =========================================================================
@@ -166,7 +159,6 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
     it('preserves previous evaluated rows and upcoming rows when a valid guess is submitted', () => {
       const { result } = renderHook(() => useGame('normal', 'classic', 'random', 'tr'));
       const target = result.current.targetWord;
-      const targetLen = target.length;
       
       // Submit row 0 guess
       act(() => {
@@ -183,7 +175,6 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
       });
 
       const boardAfterRow0 = result.current.board;
-      const row0Evaluated = boardAfterRow0[0];
 
       // Game is won because we guessed the target
       expect(result.current.gameStatus).toBe('won');
@@ -258,7 +249,7 @@ describe('Empirical Challenger Suite: Grid State Transformations & Word Set Look
       const guesses = pool.slice(0, 4);
 
       if (guesses.length >= 4) {
-        guesses.forEach((guess, idx) => {
+        guesses.forEach((guess) => {
           act(() => {
             guess.split('').forEach(c => result.current.addLetter(c));
           });

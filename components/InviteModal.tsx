@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, View, StyleSheet, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 import { getMyReferralCode, shareReferralLink, claimReferral } from '../services/referral.service';
 import { audioService } from '../services/audio.service';
@@ -14,7 +14,6 @@ interface InviteModalProps {
 
 export function InviteModal({ visible, onClose }: InviteModalProps) {
   const { theme, language } = useTheme();
-  const [referralCode, setReferralCode] = useState('');
   const [myCode, setMyCode] = useState<string | null>(null);
   const [claimCode, setClaimCode] = useState('');
   const [claiming, setClaiming] = useState(false);

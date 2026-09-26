@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, BORDER_RADIUS } from '../constants/theme';
 import { audioService } from '../services/audio.service';
 
 export interface AlertButtonConfig {

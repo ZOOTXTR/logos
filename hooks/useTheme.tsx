@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Theme, THEMES, getThemeById } from '../constants/themes';
-import { storageGet, storageSet, storageSetJSON, storageGetJSON } from '../services/storage.service';
+import { storageGet, storageSet, storageSetJSON } from '../services/storage.service';
 import { audioService } from '../services/audio.service';
 
 interface ThemeContextType {
@@ -26,7 +26,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType>({
   theme: THEMES[0],
   setTheme: () => {},
-  unlockedThemes: ['dark'],
+  unlockedThemes: ['obsidian'],
   unlockTheme: () => {},
   unlockAndSetTheme: () => {},
   colorBlind: false,
@@ -44,8 +44,8 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeId, setThemeId] = useState('dark');
-  const [unlockedThemes, setUnlockedThemes] = useState<string[]>(['dark']);
+  const [themeId, setThemeId] = useState('obsidian');
+  const [unlockedThemes, setUnlockedThemes] = useState<string[]>(['obsidian']);
   const [colorBlind, setColorBlindState] = useState(false);
   const [soundEnabled, setSoundEnabledState] = useState(true);
   const [hapticEnabled, setHapticEnabledState] = useState(true);

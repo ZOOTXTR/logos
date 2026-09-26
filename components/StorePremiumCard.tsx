@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet,  } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Theme } from '../constants/themes';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { TRANSLATIONS } from '../constants/translations';
 
 interface StorePremiumCardProps {
@@ -28,7 +28,7 @@ export function StorePremiumCard({
       <View
         style={[
           styles.premiumActive,
-          { borderColor: theme.colors.accent, backgroundColor: theme.colors.card },
+          { borderColor: '#F59E0B', backgroundColor: theme.colors.card },
         ]}
       >
         <Text style={styles.premiumActiveText}>👑 {t.premiumMember}!</Text>
@@ -41,7 +41,7 @@ export function StorePremiumCard({
       <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>👑 Premium</Text>
       <TouchableOpacity accessibilityRole="button" onPress={onPurchasePremium} activeOpacity={0.8}>
         <LinearGradient
-          colors={[COLORS.accent, '#D97706']}
+          colors={['#F59E0B', '#D97706']}
           style={styles.premiumCard}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -102,6 +102,6 @@ const styles = StyleSheet.create({
   premiumActiveText: {
     fontSize: FONTS.size.lg,
     fontWeight: '700',
-    color: COLORS.accent,
+    color: '#F59E0B',
   },
 });

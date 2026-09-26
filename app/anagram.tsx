@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert, TextInput, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Alert, Platform } from 'react-native';
 import { Text } from '../components/CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -12,7 +12,6 @@ import { HINT_GEM_COST } from '../constants/products';
 import { audioService } from '../services/audio.service';
 import { Confetti } from '../components/Confetti';
 import { GameResultOverlay } from '../components/GameResultOverlay';
-import { TRANSLATIONS } from '../constants/translations';
 import { LoadingView } from '../components/LoadingView';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -29,7 +28,6 @@ export default function AnagramScreen() {
 
 
 
-  const t = TRANSLATIONS[language];
   const categories: Category[] = ['random', 'hayvanlar', 'sehirler', 'yiyecek', 'meslekler', 'doga', 'spor'];
 
   const handleSubmit = async () => {

@@ -3,8 +3,10 @@ import { View } from 'react-native';
 import { Text } from './CustomText';
 import { Svg, Path, Circle, Text as SvgText, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { SPACING, BORDER_RADIUS, FONTS } from '../constants/theme';
+import { Theme } from '../constants/themes';
+import { ScoreEntry } from '../services/storage.service';
 
-export function TimeHistoryChart({ scores, theme, language }: { scores: any[]; theme: any; language: string }) {
+export function TimeHistoryChart({ scores, theme, language }: { scores: ScoreEntry[]; theme: Theme; language: string }) {
   const en = language === 'en';
   // Filter for speed/classic games with valid times, take last 6
   const validScores = scores

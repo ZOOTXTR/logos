@@ -8,13 +8,14 @@ import Animated, {
   interpolate,
   Easing,
 } from 'react-native-reanimated';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 import { Sticker } from '../constants/stickers';
 
 interface StickerFlipCardProps {
   sticker: Sticker;
   isRevealed: boolean;
-  theme: any;
+  theme: Theme;
   language: string;
   onReveal: () => void;
 }

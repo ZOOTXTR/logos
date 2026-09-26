@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -7,11 +7,10 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Text } from './CustomText';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Gem, X, Crown } from 'lucide-react-native';
 
 import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
-import { TRANSLATIONS } from '../constants/translations';
 import { CustomAlert } from './CustomAlert';
 import { StorePackList, CategoryProduct } from './StorePackList';
 import { StoreRestoreButton } from './StoreRestoreButton';
@@ -26,7 +25,7 @@ interface StoreModalProps {
   onPurchase: (productId: string, gems: number) => Promise<void>;
   onPurchasePremium: () => Promise<void>;
   unlockedCategories: string[];
-  onUnlockCategory: (cat: string) => Promise<any>;
+  onUnlockCategory: (cat: string) => Promise<unknown>;
 }
 
 export function StoreModal({
@@ -40,8 +39,8 @@ export function StoreModal({
   onUnlockCategory,
 }: StoreModalProps) {
   const { theme, language } = useTheme();
-  const t = TRANSLATIONS[language];
   const { alert, showAlert, hideAlert } = useCustomAlert();
+  const [tab, setTab] = useState<'elmas' | 'premium'>('elmas');
 
   const {
     prices,
@@ -98,21 +97,48 @@ export function StoreModal({
       <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
         <View style={styles.overlay}>
           <View style={[styles.container, { backgroundColor: theme.colors.surface }]} accessibilityViewIsModal={true}>
-            <LinearGradient
-              colors={[theme.colors.primary, theme.colors.primaryDark]}
-              style={styles.header}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <TouchableOpacity style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Kapat" hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} onPress={onClose}>
-                <Text style={styles.closeX}>✕</Text>
-              </TouchableOpacity>
-              <Text style={styles.storeEmoji}>🏪</Text>
-              <Text style={styles.storeTitle}>{language === 'en' ? 'Shop' : 'Mağaza'}</Text>
-              <View style={styles.gemBadge}>
-                <Text style={styles.gemBadgeText}>💎 {gems}</Text>
+            <View style={[styles.header, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
+              <View style={styles.headerLeft}>
+                <View style={[styles.headerIcon, { backgroundColor: theme.colors.accent + '33', borderColor: theme.colors.border }]}>
+                  <Gem size={16} color={theme.colors.accent} />
+                </View>
+                <View>
+                  <Text style={[styles.storeTitle, { color: theme.colors.text }]}>{language === 'en' ? 'Shop & Premium' : 'Mağaza & Premium'}</Text>
+                  <Text style={[styles.storeSub, { color: theme.colors.textMuted }]}>{language === 'en' ? 'Top up gems or go Premium' : 'Elmas yükle veya Premium\'a geç'}</Text>
+                </View>
               </View>
-            </LinearGradient>
+              <View style={styles.headerRight}>
+                <View style={[styles.gemBadge, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                  <Gem size={12} color={theme.colors.accent} />
+                  <Text style={[styles.gemBadgeText, { color: theme.colors.accent }]}>{gems}</Text>
+                </View>
+                <TouchableOpacity style={[styles.closeBtn, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]} accessibilityRole="button" accessibilityLabel="Kapat" hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} onPress={onClose}>
+                  <X size={16} color={theme.colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={[styles.segmented, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={() => setTab('elmas')}
+                style={[styles.segBtn, tab === 'elmas' && { backgroundColor: theme.colors.accent }]}
+              >
+                <Gem size={14} color={tab === 'elmas' ? '#0B0C10' : theme.colors.textMuted} />
+                <Text style={[styles.segText, { color: tab === 'elmas' ? '#0B0C10' : theme.colors.textMuted }]}>
+                  {language === 'en' ? 'Gem Packs' : 'Elmas Paketleri'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                onPress={() => setTab('premium')}
+                style={[styles.segBtn, tab === 'premium' && { backgroundColor: '#F59E0B' }]}
+              >
+                <Crown size={14} color={tab === 'premium' ? '#0B0C10' : theme.colors.present} />
+                <Text style={[styles.segText, { color: tab === 'premium' ? '#0B0C10' : theme.colors.textMuted }]}>Premium VIP</Text>
+                {isPremium && <View style={[styles.segDot, { backgroundColor: '#22C55E' }]} />}
+              </TouchableOpacity>
+            </View>
 
             <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
               <StorePackList
@@ -125,6 +151,7 @@ export function StoreModal({
                 prices={prices ?? undefined}
                 theme={theme}
                 language={language}
+                tab={tab}
               />
               <StoreRestoreButton
                 onRestore={handleRestore}
@@ -159,41 +186,51 @@ const styles = StyleSheet.create({
     maxHeight: '90%',
   },
   header: {
-    padding: SPACING.lg,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    position: 'relative',
+    borderBottomWidth: 1,
   },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  headerIcon: { width: 32, height: 32, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   closeBtn: {
-    position: 'absolute',
-    top: SPACING.md,
-    right: SPACING.md,
-    padding: SPACING.sm,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
   },
-  closeX: {
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: FONTS.size.lg,
-    fontWeight: '600',
-  },
-  storeEmoji: { fontSize: 36 },
   storeTitle: {
-    fontSize: FONTS.size.xxl,
+    fontSize: FONTS.size.md,
     fontWeight: '800',
     color: COLORS.text,
-    marginTop: 4,
+  },
+  storeSub: {
+    fontSize: FONTS.size.xs,
+    color: COLORS.textMuted,
+    marginTop: 1,
   },
   gemBadge: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
     borderRadius: BORDER_RADIUS.full,
-    marginTop: SPACING.sm,
+    borderWidth: 1,
   },
   gemBadgeText: {
-    color: COLORS.text,
     fontWeight: '700',
-    fontSize: FONTS.size.md,
+    fontSize: FONTS.size.sm,
   },
+  segmented: { flexDirection: 'row', marginHorizontal: SPACING.md, marginTop: SPACING.sm, borderRadius: 14, borderWidth: 1, padding: 4, gap: 4 },
+  segBtn: { flex: 1, height: 32, borderRadius: 10, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 6 },
+  segText: { fontSize: 12, fontWeight: '700' },
+  segDot: { width: 6, height: 6, borderRadius: 3 },
   scroll: { padding: SPACING.md },
 });

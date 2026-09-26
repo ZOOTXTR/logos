@@ -2,13 +2,14 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from './CustomText';
 import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 import { GAME_MODE_INFO, CATEGORY_INFO } from '../constants/words';
 import { ScoreEntry } from '../services/storage.service';
-import { TRANSLATIONS, Language } from '../constants/translations';
+import { TRANSLATIONS } from '../constants/translations';
 
 interface Props {
   score: ScoreEntry;
-  theme: any;
+  theme: Theme;
   language: string;
 }
 

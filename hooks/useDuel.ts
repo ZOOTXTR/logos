@@ -100,13 +100,13 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
         if (rIndex !== currentRow) return row;
         
         const newRow = row.map((_, cIndex) => ({ char: guessedWord[cIndex], status: 'absent' as LetterStatus }));
-        const targetChars = target.split('');
+        const targetChars: (string | null)[] = target.split('');
         
         // Pass 1: Mark corrects
         newRow.forEach((cell, cIndex) => {
           if (cell.char === targetChars[cIndex]) {
             cell.status = 'correct';
-            targetChars[cIndex] = null as any;
+            targetChars[cIndex] = null;
           }
         });
         
@@ -116,7 +116,7 @@ export function useDuel(category: Category = 'random', lang: 'tr' | 'en' = 'tr')
             const matchIndex = targetChars.indexOf(cell.char);
             if (matchIndex !== -1) {
               cell.status = 'present';
-              targetChars[matchIndex] = null as any;
+              targetChars[matchIndex] = null;
             }
           }
         });

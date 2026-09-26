@@ -1,8 +1,6 @@
-import { doc, getDoc, setDoc, collection, query, where, getDocs, increment, serverTimestamp } from 'firebase/firestore';
-import { Share, Platform } from 'react-native';
-import { getFirebaseDb, FIRESTORE_COLLECTIONS, getFirebaseFunctions } from '../config/firebase';
+import { Share } from 'react-native';
+import { getFirebaseFunctions } from '../config/firebase';
 import { getCurrentUser, getUserProfile } from './auth.service';
-import { addGems } from './storage.service';
 import { httpsCallable } from 'firebase/functions';
 
 const REFERRAL_BONUS_GEMS = 50;
@@ -42,9 +40,9 @@ export async function claimReferral(code: string): Promise<{ success: boolean; m
     const claimFn = httpsCallable<{code: string}, {success: boolean, message: string}>(getFirebaseFunctions(), 'claimReferral');
     const result = await claimFn({ code: code.toUpperCase() });
     return result.data;
-  } catch (e: any) {
+  } catch (e) {
     console.warn('Referral claim failed:', e);
-    const msg = e.message || 'Something went wrong. Try again!';
+    const msg = e instanceof Error ? e.message : 'Something went wrong. Try again!';
     return { success: false, message: msg };
   }
 }

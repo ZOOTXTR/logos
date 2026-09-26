@@ -2,7 +2,7 @@
   "expo": {
     "name": "Logos",
     "slug": "logos",
-    "version": "1.0.97",
+    "version": "1.0.98",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.zovtex.logos",
-      "versionCode": 97,
+      "versionCode": 98,
       "targetSdkVersion": 36,
       "googleServicesFile": "./google-services.json",
       "permissions": [

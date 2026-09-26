@@ -2,7 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { Modal, View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { Theme } from '../constants/themes';
 
 export interface ResultButton {
   label: string;
@@ -19,7 +20,7 @@ export interface GameResultOverlayProps {
   gemsAwarded?: number;
   xpAwarded?: number;
   buttons: ResultButton[];
-  theme: any;
+  theme: Theme;
   language: string;
   onClose?: () => void;
 }

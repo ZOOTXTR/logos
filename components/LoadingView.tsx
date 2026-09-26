@@ -2,7 +2,7 @@ import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Text } from './CustomText';
-import { COLORS, FONTS, SPACING } from '../constants/theme';
+import { FONTS, SPACING } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 
 interface LoadingViewProps {

@@ -58,7 +58,7 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
           ? `Your progress is now linked to: ${email}`
           : `İlerlemeniz başarıyla şu hesaba bağlandı: ${email}`
       );
-    } catch (e) {
+    } catch {
       setSyncStatus('error');
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
       } else {
         setSyncStatus('error');
       }
-    } catch (e) {
+    } catch {
       setSyncStatus('error');
     } finally {
       setLoading(false);
@@ -187,7 +187,7 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
       } else {
         setSyncStatus('idle');
       }
-    } catch (e) {
+    } catch {
       setSyncStatus('error');
       Alert.alert(
         language === 'en' ? 'Login Error' : 'Giriş Hatası',

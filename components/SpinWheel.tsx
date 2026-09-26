@@ -2,11 +2,12 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated,  } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
-import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING } from '../constants/theme';
+import { Theme } from '../constants/themes';
 import { SpinWheelCanvas, Prize } from './SpinWheelCanvas';
 
 interface SpinWheelProps {
-  theme: any;
+  theme: Theme;
   language: string;
   prizes: Prize[];
   spinning: boolean;

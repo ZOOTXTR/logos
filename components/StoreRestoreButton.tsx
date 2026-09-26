@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet,  } from 'react-native';
 import { Text } from './CustomText';
 import { Theme } from '../constants/themes';
-import { COLORS, FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
+import { FONTS, SPACING, BORDER_RADIUS } from '../constants/theme';
 
 interface StoreRestoreButtonProps {
   onRestore?: () => void;

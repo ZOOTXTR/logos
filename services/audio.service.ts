@@ -22,6 +22,7 @@ class AudioService {
   private soundEnabled = true;
   private hapticEnabled = true;
   private musicEnabled = true;
+  private volume = 0.7;
   private settingsInitialized = false;
 
   constructor() {
@@ -31,14 +32,16 @@ class AudioService {
   private async loadSettings() {
     if (this.settingsInitialized) return;
     try {
-      const [sound, haptic, music] = await Promise.all([
+      const [sound, haptic, music, vol] = await Promise.all([
         AsyncStorage.getItem('gq_sound_enabled'),
         AsyncStorage.getItem('gq_haptic_enabled'),
         AsyncStorage.getItem('gq_music_enabled'),
+        AsyncStorage.getItem('gq_sound_volume'),
       ]);
       if (sound !== null) this.soundEnabled = sound === 'true';
       if (haptic !== null) this.hapticEnabled = haptic === 'true';
       if (music !== null) this.musicEnabled = music === 'true';
+      if (vol !== null) this.volume = Number(vol);
       this.settingsInitialized = true;
     } catch {
       this.settingsInitialized = true;
@@ -67,6 +70,19 @@ class AudioService {
     AsyncStorage.setItem('gq_music_enabled', String(enabled)).catch(() => {});
   }
 
+  // Global sound volume (0..1), applied to all pooled sfx instances.
+  setVolume(vol: number) {
+    this.volume = Math.max(0, Math.min(1, vol));
+    AsyncStorage.setItem('gq_sound_volume', String(this.volume)).catch(() => {});
+    Object.values(this.soundPool).forEach((s) => {
+      s?.setVolumeAsync(this.volume).catch(() => {});
+    });
+  }
+
+  getVolume(): number {
+    return this.volume;
+  }
+
   // Preload sound instances into the pool for instant low-latency playback
   async preloadSounds() {
     try {
@@ -74,7 +90,7 @@ class AudioService {
       await Promise.all(
         types.map(async (type) => {
           if (!this.soundPool[type]) {
-            const { sound } = await Audio.Sound.createAsync(SOUNDS[type], { volume: 0.7 });
+            const { sound } = await Audio.Sound.createAsync(SOUNDS[type], { volume: this.volume });
             this.soundPool[type] = sound;
           }
         })
@@ -141,7 +157,7 @@ class AudioService {
       if (!sound) {
         const result = await Audio.Sound.createAsync(
           SOUNDS[type],
-          { shouldPlay: true, volume: 0.7 }
+          { shouldPlay: true, volume: this.volume }
         );
         sound = result.sound;
         this.soundPool[type] = sound;
@@ -172,7 +188,7 @@ class AudioService {
           await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           break;
       }
-    } catch (e) {
+    } catch {
       // Haptics not supported in simulator / web, fail silently
     }
   }

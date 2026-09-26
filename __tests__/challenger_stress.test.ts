@@ -1,9 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { renderHook, act } from '@testing-library/react-native';
 import { useGame } from '../hooks/useGame';
 import { useDordle } from '../hooks/useDordle';
 import { useWordChain } from '../hooks/useWordChain';
-import { useAnagram } from '../hooks/useAnagram';
 import { audioService } from '../services/audio.service';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({

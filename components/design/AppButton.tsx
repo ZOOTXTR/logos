@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, ActivityIndicator } from 'react-native';
 import { Text } from '../CustomText';
-import { FONTS, BORDER_RADIUS } from '../../constants/theme';
+import { BORDER_RADIUS } from '../../constants/theme';
 import { Theme } from '../../constants/themes';
 
 interface AppButtonProps {
@@ -26,19 +26,19 @@ export function AppButton({
   const bg = {
     primary: theme.colors.primary,
     accent: theme.colors.accent,
-    dark: '#2A241C',
+    dark: theme.colors.card,
     outline: 'transparent',
   }[variant];
   const fg = {
-    primary: theme.id === 'light' ? '#FBF7EE' : '#FFF8EC',
-    accent: '#FFF8EC',
-    dark: '#F3E9D2',
-    outline: theme.colors.primaryLight,
+    primary: '#FFFFFF',
+    accent: '#1C1405',
+    dark: theme.colors.text,
+    outline: theme.colors.primary,
   }[variant];
   const borderColor = {
-    primary: theme.colors.primaryDark,
-    accent: theme.colors.primaryDark,
-    dark: '#171310',
+    primary: theme.colors.primary,
+    accent: theme.colors.accent,
+    dark: theme.colors.border,
     outline: theme.colors.primary,
   }[variant];
 
@@ -53,7 +53,6 @@ export function AppButton({
         styles.base,
         { height: HEIGHTS[size], backgroundColor: bg, borderColor },
         variant === 'outline' && { borderWidth: 1.5 },
-        variant === 'primary' && { shadowColor: '#000', shadowOpacity: 0.25, shadowOffset: { width: 0, height: 4 }, shadowRadius: 6, elevation: 4 },
         disabled && { opacity: 0.45 },
         style,
       ]}
@@ -61,7 +60,7 @@ export function AppButton({
       {loading ? (
         <ActivityIndicator color={fg} />
       ) : (
-        <Text style={[styles.label, { color: fg, fontSize: size === 'sm' ? 12 : 14 }]}>
+        <Text style={[styles.label, { color: fg, fontSize: size === 'sm' ? 13 : 15 }]}>
           {icon ? `${icon}  ` : ''}{label}
         </Text>
       )}
@@ -73,13 +72,11 @@ const styles = StyleSheet.create({
   base: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.lg,
     paddingHorizontal: 20,
     flexDirection: 'row',
   },
   label: {
-    fontFamily: FONTS.extrabold,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
+    fontWeight: '800',
   },
 });
