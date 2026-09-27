@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Constants from 'expo-constants';
 import {
   View,
   Text,
@@ -68,7 +69,14 @@ const VolumeSlider: React.FC<{ value: number; onChange: (v: number) => void }> =
     <View style={styles.sliderTrack} onLayout={(e) => { width.current = Math.max(1, e.nativeEvent.layout.width); }}>
       <View style={[styles.sliderFill, { width: `${value}%` }]} />
       <View style={[styles.sliderThumb, { left: `${value}%` }]} />
-      <Pressable style={StyleSheet.absoluteFill} onPress={(e) => setFromX(e.nativeEvent.locationX)} onTouchMove={(e) => setFromX(e.nativeEvent.locationX)} />
+      <Pressable
+        accessibilityRole="adjustable"
+        accessibilityLabel="Ses seviyesi"
+        accessibilityValue={{ min: 0, max: 100, now: value }}
+        style={StyleSheet.absoluteFill}
+        onPress={(e) => setFromX(e.nativeEvent.locationX)}
+        onTouchMove={(e) => setFromX(e.nativeEvent.locationX)}
+      />
     </View>
   );
 };
@@ -212,7 +220,7 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.rowSub}>{soundEnabled ? 'Oyun sesleri ve ipuçları açık' : 'Tüm ses efektleri kapalı'}</Text>
               </View>
             </View>
-            <Switch value={soundEnabled} onChange={handleToggleSound} />
+            <Switch value={soundEnabled} onChange={handleToggleSound} label="Ses efektleri" />
           </View>
 
           <View style={styles.divider} />
@@ -248,7 +256,7 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.rowSub}>Dokunsal geri bildirim</Text>
               </View>
             </View>
-            <Switch value={vibrationEnabled} onChange={() => { const v = !vibrationEnabled; setVibrationEnabled(v); haptics.setEnabled(v); audioService.setHapticEnabled(v); sounds.playClick(); }} />
+            <Switch value={vibrationEnabled} onChange={() => { const v = !vibrationEnabled; setVibrationEnabled(v); haptics.setEnabled(v); audioService.setHapticEnabled(v); sounds.playClick(); }} label="Titreşim" />
           </View>
         </View>
       </View>
@@ -290,7 +298,7 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.rowSub}>Açılan ipucu harfleri sonraki tahminde zorunlu</Text>
               </View>
             </View>
-            <Switch value={hardMode} onChange={() => { const v = !hardMode; setHardMode(v); storageSet('gq_hard_mode', v ? 'true' : 'false').catch(() => {}); sounds.playClick(); }} />
+            <Switch value={hardMode} onChange={() => { const v = !hardMode; setHardMode(v); storageSet('gq_hard_mode', v ? 'true' : 'false').catch(() => {}); sounds.playClick(); }} label="Zor mod" />
           </View>
           <View style={styles.divider} />
           <View style={styles.row}>
@@ -447,7 +455,7 @@ export const SettingsScreen: React.FC = () => {
       <View style={[styles.card, { padding: 16 }]}>
         <View style={styles.infoRow}>
           <Text style={styles.appTitle}>Logos Bulmaca</Text>
-          <Text style={styles.appVer}>v1.0.99 (Play Store)</Text>
+          <Text style={styles.appVer}>v{Constants.expoConfig?.version ?? '2.0.1'} (Play Store)</Text>
         </View>
         <Text style={styles.appDesc}>Minimal, sakin ve odaklanmış Türkçe kelime bulmaca deneyimi. Çevrimdışı tam erişim, sentezlenmiş sesler ve haftalık turnuvalar.</Text>
         <Pressable onPress={handleDeleteAccount} style={styles.deleteBtn}>
@@ -459,8 +467,8 @@ export const SettingsScreen: React.FC = () => {
   );
 };
 
-const Switch: React.FC<{ value: boolean; onChange: () => void }> = ({ value, onChange }) => (
-  <Pressable onPress={onChange} style={[styles.switch, { backgroundColor: value ? C.primary : C.border }]}>
+const Switch: React.FC<{ value: boolean; onChange: () => void; label?: string }> = ({ value, onChange, label }) => (
+  <Pressable accessibilityRole="switch" accessibilityLabel={label} accessibilityState={{ checked: value }} onPress={onChange} style={[styles.switch, { backgroundColor: value ? C.primary : C.border }]}>
     <View style={[styles.switchThumb, { transform: [{ translateX: value ? 20 : 0 }] }]} />
   </Pressable>
 );

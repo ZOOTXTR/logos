@@ -1,8 +1,5 @@
-What's new (v2.0.0)
+What's new (v2.0.1)
 
-- Refreshed modern interface with smooth animations
-- Weekly tournament and real leaderboard
-- Profile: avatar & frame store, achievement badges
-- Daily fortune wheel and daily quests
-- Real gem packs and Premium membership
-- Bug fixes and performance improvements
+- Accessibility improvements: screen reader labels and button roles
+- Stability and bug fixes
+- Performance improvements

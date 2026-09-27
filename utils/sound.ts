@@ -28,7 +28,7 @@ class SoundManager {
         shouldDuckAndroid: true
       });
       this.isConfigured = true;
-    } catch (e) {
+    } catch {
       // Audio setup fallback
     }
   }
@@ -51,7 +51,7 @@ class SoundManager {
   /**
    * Synthesize or play tone safely using Audio.Sound or silent cue
    */
-  private async playTone(frequency: number, duration: number, type: 'sine' | 'triangle' | 'square' = 'sine') {
+  private async playTone(frequency: number, duration: number, _type: 'sine' | 'triangle' | 'square' = 'sine') {
     if (!this.enabled || this.volume <= 0) return;
     // In React Native / Expo without bundled asset files, Audio tones can be played
     // via base64 wav data URI or bundled sound files.

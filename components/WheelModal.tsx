@@ -71,7 +71,7 @@ export const WheelModal: React.FC<WheelModalProps> = ({ isOpen, onClose, onRewar
     <Modal visible={isOpen} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <Pressable onPress={() => { sounds.playClick(); onClose(); }} style={styles.closeBtn}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Kapat" onPress={() => { sounds.playClick(); onClose(); }} style={styles.closeBtn}>
             <X size={16} color="#A1A1AA" />
           </Pressable>
 

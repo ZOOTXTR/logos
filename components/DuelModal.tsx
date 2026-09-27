@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
-import { X, Swords, Bot, User, Zap, Gem } from 'lucide-react-native';
+import { X, Swords, Bot, User, Gem } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { sounds } from '../utils/sound';
 import { haptics } from '../utils/haptics';
@@ -14,7 +14,6 @@ interface DuelModalProps {
 export const DuelModal: React.FC<DuelModalProps> = ({ isOpen, onClose, onStartDuel }) => {
   const { activeTheme } = useTheme();
   const [selectedBet, setSelectedBet] = useState(50);
-  const [botLevel, setBotLevel] = useState<'normal' | 'hard'>('normal');
 
   const bets = [25, 50, 100, 250];
 
@@ -32,6 +31,8 @@ export const DuelModal: React.FC<DuelModalProps> = ({ isOpen, onClose, onStartDu
             </View>
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Kapat"
               onPress={() => {
                 sounds.playClick();
                 haptics.buttonTap();

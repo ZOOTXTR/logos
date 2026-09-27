@@ -214,7 +214,7 @@ export const GameArena: React.FC<GameArenaProps> = ({
     <View style={{ flex: 1 }}>
       {/* Üst bar */}
       <View style={styles.topBar}>
-        <Pressable accessibilityRole="button" onPress={onBack} style={[styles.iconBtn, { backgroundColor: c.card, borderColor: c.border }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel={language === 'en' ? 'Back' : 'Geri'} onPress={onBack} style={[styles.iconBtn, { backgroundColor: c.card, borderColor: c.border }]}>
           <ArrowLeft size={18} color={c.text} />
         </Pressable>
         <View style={styles.pills}>

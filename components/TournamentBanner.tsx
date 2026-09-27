@@ -118,7 +118,7 @@ export function TournamentBanner({ language = 'tr', onStartTournament }: Tournam
                 <Trophy size={16} color={C.amber} />
                 <Text style={styles.modalTitle}>{en ? 'Weekly Grand Tournament' : 'Haftalık Büyük Turnuva'}</Text>
               </View>
-              <Pressable onPress={() => { sounds.playClick(); setIsDetailsOpen(false); }} style={styles.closeBtn}>
+              <Pressable accessibilityRole="button" accessibilityLabel={en ? 'Close' : 'Kapat'} onPress={() => { sounds.playClick(); setIsDetailsOpen(false); }} style={styles.closeBtn}>
                 <X size={14} color={C.muted} />
               </Pressable>
             </View>

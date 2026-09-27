@@ -172,7 +172,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
   };
 
   const distribution = stats.distribution || { 1: 4, 2: 18, 3: 84, 4: 68, 5: 42, 6: 22 };
-  const maxVal = Math.max(...Object.values(distribution), 1);
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   const currentAvatarId = stats.selectedAvatar || 'avatar-default';
@@ -254,7 +253,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
       {/* 1. Profile Header Card */}
       <View style={styles.headerCard}>
         <View style={styles.headerTop}>
-          <Pressable onPress={openCustomizer} style={styles.avatarWrap}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Avatarı özelleştir" onPress={openCustomizer} style={styles.avatarWrap}>
             <FramedAvatar frame={activeFrame} size={56}>
               {activeAvatar.emoji === 'KY' ? (
                 <Text style={styles.avatarInitials}>KY</Text>
@@ -527,7 +526,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
                   <Text style={styles.balanceText}>{stats.gems}</Text>
                   <Plus size={10} color={C.accent} />
                 </Pressable>
-                <Pressable onPress={() => { sounds.playClick(); setIsCustomizerOpen(false); }} style={styles.closeBtn}>
+                <Pressable accessibilityRole="button" accessibilityLabel="Kapat" onPress={() => { sounds.playClick(); setIsCustomizerOpen(false); }} style={styles.closeBtn}>
                   <X size={14} color={C.muted} />
                 </Pressable>
               </View>

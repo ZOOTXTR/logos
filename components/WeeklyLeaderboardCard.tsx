@@ -135,7 +135,7 @@ export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, ra
                 <Trophy size={16} color={C.amber} />
                 <Text style={styles.modalTitle}>{en ? 'Weekly Leaderboard' : 'Haftalık Liderlik Tablosu'}</Text>
               </View>
-              <Pressable onPress={() => { sounds.playClick(); setIsOpen(false); }} style={styles.closeBtn}>
+              <Pressable accessibilityRole="button" accessibilityLabel={en ? 'Close' : 'Kapat'} onPress={() => { sounds.playClick(); setIsOpen(false); }} style={styles.closeBtn}>
                 <X size={14} color={C.muted} />
               </Pressable>
             </View>

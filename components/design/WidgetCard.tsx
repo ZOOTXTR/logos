@@ -11,11 +11,12 @@ interface WidgetCardProps {
   disabled?: boolean;
   variant?: 'primary' | 'surface' | 'glass';
   span?: 1 | 2 | 'auto'; // 1 = square, 2 = wide rectangle, auto = content height
+  accessibilityLabel?: string;
 }
 
 // Temiz, düz kart: yarı saydam "cam" ve 3B alt kenar yerine düz zemin +
 // ince kenarlık. Tüm ekranlarda tutarlı görünüm sağlar.
-export function WidgetCard({ children, onPress, style, theme, disabled, variant = 'surface', span = 'auto' }: WidgetCardProps) {
+export function WidgetCard({ children, onPress, style, theme, disabled, variant = 'surface', span = 'auto', accessibilityLabel }: WidgetCardProps) {
   let bg = theme.colors.card;
   let border = theme.colors.border;
 
@@ -41,7 +42,9 @@ export function WidgetCard({ children, onPress, style, theme, disabled, variant 
       ]}
     >
       <Pressable
-        accessibilityRole="button"
+        accessibilityRole={onPress ? 'button' : undefined}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ disabled: !!disabled }}
         onPress={onPress}
         disabled={disabled}
         style={styles.pressable}
