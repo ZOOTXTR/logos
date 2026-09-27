@@ -14,19 +14,30 @@ const REQUIRED_ENV_KEYS = [
   'EXPO_PUBLIC_FIREBASE_APP_ID',
 ] as const;
 
-const missingKeys = REQUIRED_ENV_KEYS.filter((k) => !process.env[k]);
+// NOT: `process.env[k]` gibi dinamik erişim babel tarafından inline EDİLMEZ (yalnız statik
+// `process.env.EXPO_PUBLIC_X` inline edilir). Bu yüzden değerleri statik olarak okuyoruz.
+const ENV_VALUES = {
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+};
+
+const missingKeys = REQUIRED_ENV_KEYS.filter((k) => !ENV_VALUES[k as keyof typeof ENV_VALUES]);
 if (missingKeys.length > 0) {
   // Sessiz bozulma yerine net hata: .env doldurulmalı ve build'e dahil edilmeli.
   throw new Error(`Firebase yapılandırması eksik: ${missingKeys.join(', ')}. .env dosyasını doldurun.`);
 }
 
 const FIREBASE_CONFIG = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY as string,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN as string,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID as string,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET as string,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID as string,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID as string,
+  apiKey: ENV_VALUES.apiKey as string,
+  authDomain: ENV_VALUES.authDomain as string,
+  projectId: ENV_VALUES.projectId as string,
+  storageBucket: ENV_VALUES.storageBucket as string,
+  messagingSenderId: ENV_VALUES.messagingSenderId as string,
+  appId: ENV_VALUES.appId as string,
 };
 
 let app: FirebaseApp | undefined;

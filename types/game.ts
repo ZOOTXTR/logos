@@ -39,6 +39,12 @@ export interface PlayerStats {
   gamesWon: number;
   winRate: number;
   distribution: { [attempts: number]: number };
+  perfectGames?: number;
+  speedModeWins?: number;
+  expertModeWins?: number;
+  dailyChallengesCompleted?: number;
+  gamesPlayedByDifficulty?: Record<string, number>;
+  gamesWonByDifficulty?: Record<string, number>;
   isPremium?: boolean;
   dailyExtraGemsClaimed?: boolean;
   selectedAvatar?: string;

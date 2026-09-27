@@ -1,6 +1,6 @@
 import { getFirebaseDb, FIRESTORE_COLLECTIONS } from '../config/firebase';
 import { collection, doc, query, where, limit, getDocs, setDoc, updateDoc, onSnapshot, serverTimestamp, runTransaction } from 'firebase/firestore';
-import { ALL_WORDS } from '../constants/words';
+import { getRandomWord as pickWord5 } from '../constants/words';
 
 export type DuelStatus = 'waiting' | 'playing' | 'finished';
 
@@ -22,10 +22,8 @@ export interface DuelSession {
   createdAt: unknown;
 }
 
-const getRandomWord = () => {
-  const words = ALL_WORDS;
-  return words[Math.floor(Math.random() * words.length)];
-};
+// 5 harfli filtrelenmiş havuzdan kelime seç (tahta 5 sütunlu; ALL_WORDS filtresizdi).
+const getRandomWord = () => pickWord5('random', 'tr');
 
 export const duelService = {
   async findOrCreateMatch(userId: string, userName: string): Promise<string> {

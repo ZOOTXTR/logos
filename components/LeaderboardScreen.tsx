@@ -60,16 +60,22 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) =
   const second = leaders[1] ?? LEADERS[1];
   const third = leaders[2] ?? LEADERS[2];
 
+  const byDiff = (key: string) => {
+    const played = stats.gamesPlayedByDifficulty?.[key] ?? 0;
+    const won = stats.gamesWonByDifficulty?.[key] ?? 0;
+    return { played, won, winRate: played > 0 ? Math.round((won / played) * 100) : 0 };
+  };
   const difficultyData = [
-    { id: 'kolay', label: 'Kolay', letters: '4 Harf', winRate: 92, played: 50, won: 46, color: C.green, bgLight: 'rgba(34,197,94,0.15)' },
-    { id: 'normal', label: 'Normal', letters: '5 Harf', winRate: stats.winRate || 78, played: stats.gamesPlayed || 150, won: stats.gamesWon || 117, color: C.primary, bgLight: 'rgba(124,92,255,0.15)' },
-    { id: 'zor', label: 'Zor', letters: '6 Harf', winRate: 68, played: 90, won: 61, color: C.amber, bgLight: 'rgba(245,158,11,0.15)' },
-    { id: 'uzman', label: 'Uzman', letters: '7 Harf', winRate: 54, played: 52, won: 28, color: C.accent, bgLight: 'rgba(56,189,248,0.15)' },
+    { id: 'kolay', label: 'Kolay', letters: '4 Harf', ...byDiff('easy'), color: C.green, bgLight: 'rgba(34,197,94,0.15)' },
+    { id: 'normal', label: 'Normal', letters: '5 Harf', ...byDiff('normal'), color: C.primary, bgLight: 'rgba(124,92,255,0.15)' },
+    { id: 'zor', label: 'Zor', letters: '6 Harf', ...byDiff('hard'), color: C.amber, bgLight: 'rgba(245,158,11,0.15)' },
+    { id: 'uzman', label: 'Uzman', letters: '7 Harf', ...byDiff('expert'), color: C.accent, bgLight: 'rgba(56,189,248,0.15)' },
   ];
 
   const totalPlayed = difficultyData.reduce((a, d) => a + d.played, 0);
   const totalWon = difficultyData.reduce((a, d) => a + d.won, 0);
-  const overallWinPct = Math.round((totalWon / totalPlayed) * 100);
+  const overallWinPct = totalPlayed > 0 ? Math.round((totalWon / totalPlayed) * 100) : 0;
+  const bestDiff = difficultyData.filter(d => d.played > 0).sort((a, b) => b.winRate - a.winRate)[0];
 
   const periods: { id: 'gunluk' | 'haftalik' | 'tum'; label: string }[] = [
     { id: 'gunluk', label: 'Günlük' },
@@ -101,15 +107,15 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) =
       {/* Player rank capsule */}
       <View style={styles.rankCapsule}>
         <View style={styles.rankCapsuleLeft}>
-          <View style={styles.rankCircle}><Text style={styles.rankCircleText}>#42</Text></View>
+            <View style={styles.rankCircle}><Text style={styles.rankCircleText}>—</Text></View>
           <View>
-            <Text style={styles.rankName}>Sen (Kerem Yılmaz)</Text>
+            <Text style={styles.rankName}>Sen</Text>
             <Text style={styles.rankSub}>Seviye {stats.level} • {stats.gems} Gem</Text>
           </View>
         </View>
         <View style={styles.rankDelta}>
           <ChevronUp size={14} color={C.green} />
-          <Text style={styles.rankDeltaText}>+4 Sıra</Text>
+          <Text style={styles.rankDeltaText}>Seviye {stats.level}</Text>
         </View>
       </View>
 
@@ -138,7 +144,7 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) =
           </View>
           <View style={styles.microCol}>
             <Text style={styles.microLabel}>En İyi Oran</Text>
-            <Text style={[styles.microValue, { color: C.primary }]}>%92 (4 Harf)</Text>
+            <Text style={[styles.microValue, { color: C.primary }]}>{bestDiff ? `%${bestDiff.winRate} (${bestDiff.letters})` : '—'}</Text>
           </View>
         </View>
 

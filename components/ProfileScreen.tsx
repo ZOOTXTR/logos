@@ -245,8 +245,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
     { value: `%${stats.winRate}`, color: C.green, label: 'Kazanma' },
     { value: `${stats.streak}`, color: C.text, label: 'Güncel Seri', flame: true },
     { value: `${stats.bestStreak}`, color: C.amber, label: 'En İyi Seri' },
-    { value: '42sn', color: C.text, label: 'Ort. Süre' },
-    { value: '18', color: C.primary, label: 'Kusursuz' },
+    { value: `${stats.perfectGames ?? 0}`, color: C.primary, label: 'Kusursuz' },
+    { value: `${stats.dailyChallengesCompleted ?? 0}`, color: C.text, label: 'Günlük' },
   ];
 
   return (
@@ -318,7 +318,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
             <ShieldCheck size={14} color={C.green} />
             <Text style={styles.verifiedText}>Doğrulanmış Kelime Ustası</Text>
           </View>
-          <Text style={styles.footerMuted}>Kayıt: Nisan 2024</Text>
+          <Text style={styles.footerMuted}>Katılım: Devam Ediyor</Text>
         </View>
       </View>
 
@@ -416,21 +416,31 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
             <BarChart2 size={16} color={C.primary} />
             <Text style={styles.histTitle}>Tahmin Dağılımı</Text>
           </View>
-          <Text style={styles.footerMuted}>En sık: 3. Hak</Text>
+          {/* En sık: X. Hak (mode) */}
+          <Text style={styles.footerMuted}>
+            En sık: 
+            {(() => {
+              if (!distribution || Object.keys(distribution).length === 0) return 'Veri yok';
+              const entries = Object.entries(distribution).map(([k, v]) => ({ attempt: Number(k), count: v }));
+              if (entries.length === 0) return 'Veri yok';
+              const maxEntry = entries.reduce((a, b) => (a.count > b.count ? a : b));
+              return `${maxEntry.attempt}. Hak`;
+            })()}
+          </Text>
         </View>
         {[1, 2, 3, 4, 5, 6].map((attempt) => {
           const count = distribution[attempt] || 0;
+          const maxVal = Math.max(...Object.values(distribution).filter(v => v !== undefined), 0);
           const pct = maxVal > 0 ? Math.round((count / maxVal) * 100) : 0;
-          const isHighest = attempt === 3;
           return (
             <View key={attempt} style={styles.histRow}>
-              <Text style={[styles.histAttempt, isHighest && { color: C.primary }]}>{attempt}</Text>
+              <Text style={styles.histAttempt}>{attempt}</Text>
               <View style={styles.histTrack}>
-                <View style={[styles.histFill, { width: `${Math.max(10, pct)}%`, backgroundColor: isHighest ? C.primary : C.border }]}>
-                  <Text style={[styles.histCount, isHighest ? { color: '#fff' } : { color: C.text2 }]}>{count}</Text>
+                <View style={[styles.histFill, { width: `${Math.max(10, pct)}%`, backgroundColor: C.primary }]}>
+                  <Text style={styles.histCount}>{count}</Text>
                 </View>
               </View>
-              <Text style={styles.histPct}>%{Math.round((count / 240) * 100)}</Text>
+              <Text style={styles.histPct}>%{pct}</Text>
             </View>
           );
         })}

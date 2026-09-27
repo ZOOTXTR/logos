@@ -1,7 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Modal, View, Text, Pressable, StyleSheet, Animated, Easing } from 'react-native';
 import { X, Gem } from 'lucide-react-native';
 import { sounds } from '../utils/sound';
+import { storageGet, storageSet } from '../services/storage.service';
+
+const SPIN_KEY = 'gq_last_wheel_spin';
+const todayStr = () => new Date().toISOString().slice(0, 10);
 
 interface WheelModalProps {
   isOpen: boolean;
@@ -18,13 +22,23 @@ const SLICE_DEG = 360 / PRIZES.length;
 export const WheelModal: React.FC<WheelModalProps> = ({ isOpen, onClose, onReward }) => {
   const [spinning, setSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<number | null>(null);
+  const [canSpin, setCanSpin] = useState(true);
   const spin = useRef(new Animated.Value(0)).current;
   const currentDeg = useRef(0);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let alive = true;
+    storageGet(SPIN_KEY)
+      .then((v) => { if (alive) setCanSpin(v !== todayStr()); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [isOpen]);
 
   const rotate = spin.interpolate({ inputRange: [0, 360], outputRange: ['0deg', '360deg'] });
 
   const handleSpin = () => {
-    if (spinning) return;
+    if (spinning || !canSpin) return;
     sounds.playClick();
     setSpinning(true);
     setWonPrize(null);
@@ -46,6 +60,8 @@ export const WheelModal: React.FC<WheelModalProps> = ({ isOpen, onClose, onRewar
       setSpinning(false);
       const prize = PRIZES[prizeIndex];
       setWonPrize(prize);
+      setCanSpin(false);
+      storageSet(SPIN_KEY, todayStr()).catch(() => {});
       sounds.playVictory();
       onReward(prize);
     });
@@ -95,8 +111,8 @@ export const WheelModal: React.FC<WheelModalProps> = ({ isOpen, onClose, onRewar
             </View>
           )}
 
-          <Pressable disabled={spinning} onPress={handleSpin} style={[styles.spinBtn, spinning && styles.spinBtnDisabled]}>
-            <Text style={styles.spinBtnText}>{spinning ? 'Çark Dönüyor...' : 'Ücretsiz Çevir'}</Text>
+          <Pressable disabled={spinning || !canSpin} onPress={handleSpin} style={[styles.spinBtn, (spinning || !canSpin) && styles.spinBtnDisabled]}>
+            <Text style={styles.spinBtnText}>{spinning ? 'Çark Dönüyor...' : canSpin ? 'Ücretsiz Çevir' : 'Yarın tekrar gel'}</Text>
           </Pressable>
         </View>
       </View>

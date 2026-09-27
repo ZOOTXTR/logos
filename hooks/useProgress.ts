@@ -80,9 +80,11 @@ export function useProgress() {
 
   const unlockPremium = useCallback(async () => {
     try {
+      // Zaten premium ise 500 gem bonusunu TEKRAR verme (restore ile gem üretimini önler).
+      const already = await isPremium();
       await setPremium(true);
       setPremiumState(true);
-      await addGems(500);
+      if (!already) await addGems(500);
     } catch (e) {
       console.error('unlockPremium failed:', e);
     }

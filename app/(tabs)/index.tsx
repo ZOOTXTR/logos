@@ -75,7 +75,7 @@ export default function IndexTab() {
       </ScrollView>
 
       <WheelModal isOpen={isWheelOpen} onClose={() => setIsWheelOpen(false)} onReward={(g) => updateStats({ gems: stats.gems + g })} />
-      <DuelModal isOpen={isDuelOpen} onClose={() => setIsDuelOpen(false)} onStartDuel={() => { setIsDuelOpen(false); onStart('classic', 'random', 'normal'); }} />
+      <DuelModal isOpen={isDuelOpen} onClose={() => setIsDuelOpen(false)} onStartDuel={() => { setIsDuelOpen(false); router.push('/duel'); }} />
       <StoreModalGq
         visible={isStoreOpen}
         onClose={() => setIsStoreOpen(false)}
@@ -84,7 +84,12 @@ export default function IndexTab() {
         onPurchase={async (_: string, g: number) => { await updateStats({ gems: stats.gems + g }); }}
         onPurchasePremium={async () => { await updateStats({ isPremium: true }); }}
         unlockedCategories={progress.unlockedCategories}
-        onUnlockCategory={async (cat: string) => { await progress.unlockCategory(cat); return true; }}
+        onUnlockCategory={async (cat: string) => {
+          const paid = await progress.spendGems(100);
+          if (!paid) return false;
+          await progress.unlockCategory(cat);
+          return true;
+        }}
       />
     </SafeAreaView>
   );

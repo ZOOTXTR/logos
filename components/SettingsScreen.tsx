@@ -36,8 +36,10 @@ import {
 import { ThemeSelector } from './ThemeSelector';
 import { sounds } from '../utils/sound';
 import { haptics } from '../utils/haptics';
+import { audioService } from '../services/audio.service';
+import { cloudService } from '../services/cloud.service';
 import { deleteAccount } from '../services/firebase';
-import { storageGetJSON, storageSetJSON, storageRemove } from '../services/storage.service';
+import { storageGet, storageGetJSON, storageSet, storageSetJSON, storageRemove } from '../services/storage.service';
 
 const C = {
   card: '#17181D',
@@ -78,6 +80,10 @@ export const SettingsScreen: React.FC = () => {
   const [hardMode, setHardMode] = useState(false);
   const [activeTestSound, setActiveTestSound] = useState<string | null>(null);
 
+  useEffect(() => {
+    storageGet('gq_hard_mode').then((v) => setHardMode(v === 'true')).catch(() => {});
+  }, []);
+
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState<FeedbackType>('bug');
   const [feedbackSubject, setFeedbackSubject] = useState('');
@@ -115,8 +121,11 @@ export const SettingsScreen: React.FC = () => {
     storageRemove(FEEDBACK_DRAFT_KEY);
   };
 
-  const handleSubmitFeedback = () => {
+  const handleSubmitFeedback = async () => {
     if (!feedbackMessage.trim()) return;
+    const full = feedbackSubject.trim() ? `${feedbackSubject.trim()}: ${feedbackMessage.trim()}` : feedbackMessage.trim();
+    const ok = await cloudService.submitFeedback(feedbackEmail.trim(), full, 5);
+    if (!ok) return;
     sounds.playGemEarned(); haptics.winGame();
     setFeedbackSubmitted(true);
     storageRemove(FEEDBACK_DRAFT_KEY);
@@ -127,6 +136,7 @@ export const SettingsScreen: React.FC = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
     sounds.setEnabled(next);
+    audioService.setSoundEnabled(next); // oyun içi sesle senkronla
     if (next) sounds.playClick();
   };
 
@@ -134,7 +144,8 @@ export const SettingsScreen: React.FC = () => {
     const clamped = Math.max(0, Math.min(100, v));
     setVolume(clamped);
     sounds.setVolume(clamped / 100);
-    if (clamped > 0 && !soundEnabled) { setSoundEnabled(true); sounds.setEnabled(true); }
+    audioService.setVolume(clamped / 100); // oyun içi sesle senkronla
+    if (clamped > 0 && !soundEnabled) { setSoundEnabled(true); sounds.setEnabled(true); audioService.setSoundEnabled(true); }
     sounds.playKey();
   }, [soundEnabled]);
 
@@ -147,7 +158,11 @@ export const SettingsScreen: React.FC = () => {
   const handleDeleteAccount = () => {
     Alert.alert('Hesabı Sil', 'Tüm kayıtlı oyun verileriniz ve elmaslarınız silinecektir. Onaylıyor musunuz?', [
       { text: 'Vazgeç', style: 'cancel' },
-      { text: 'Sil', style: 'destructive', onPress: async () => { await deleteAccount(); Alert.alert('Hesap Silindi', 'Oturum başarıyla sıfırlandı.'); } },
+      { text: 'Sil', style: 'destructive', onPress: async () => {
+        const ok = await deleteAccount();
+        if (ok) Alert.alert('Hesap Silindi', 'Oturum başarıyla sıfırlandı.');
+        else Alert.alert('Hata', 'Hesap silinemedi. Lütfen tekrar deneyin.');
+      } },
     ]);
   };
 
@@ -233,7 +248,7 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.rowSub}>Dokunsal geri bildirim</Text>
               </View>
             </View>
-            <Switch value={vibrationEnabled} onChange={() => { const v = !vibrationEnabled; setVibrationEnabled(v); haptics.setEnabled(v); sounds.playClick(); }} />
+            <Switch value={vibrationEnabled} onChange={() => { const v = !vibrationEnabled; setVibrationEnabled(v); haptics.setEnabled(v); audioService.setHapticEnabled(v); sounds.playClick(); }} />
           </View>
         </View>
       </View>
@@ -275,7 +290,7 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.rowSub}>Açılan ipucu harfleri sonraki tahminde zorunlu</Text>
               </View>
             </View>
-            <Switch value={hardMode} onChange={() => { setHardMode(!hardMode); sounds.playClick(); }} />
+            <Switch value={hardMode} onChange={() => { const v = !hardMode; setHardMode(v); storageSet('gq_hard_mode', v ? 'true' : 'false').catch(() => {}); sounds.playClick(); }} />
           </View>
           <View style={styles.divider} />
           <View style={styles.row}>

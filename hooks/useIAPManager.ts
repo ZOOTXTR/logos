@@ -56,6 +56,8 @@ export function useIAPManager({
 }) {
   const [prices, setPrices] = useState<Record<string, string> | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  // Aynı satın alımın iki kez işlenmesini (çift hak/gem) önler.
+  const processedTokensRef = useRef<Set<string>>(new Set());
 
   const onPurchaseRef = useRef(onPurchase);
   onPurchaseRef.current = onPurchase;
@@ -101,6 +103,8 @@ export function useIAPManager({
 
     const handlePurchase = async (purchase: Purchase) => {
       try {
+        const dedupeKey = purchase.purchaseToken || `${purchase.productId}:${purchase.transactionId}`;
+        if (dedupeKey && processedTokensRef.current.has(dedupeKey)) return; // zaten işlendi
         const isGem = GEM_PACKAGES.some(p => p.id === purchase.productId);
         if (!purchase.isAcknowledgedAndroid) {
           
@@ -132,6 +136,7 @@ export function useIAPManager({
             await onPurchasePremiumRef.current();
           }
           await finishTransaction({ purchase, isConsumable: isGem });
+          if (dedupeKey) processedTokensRef.current.add(dedupeKey);
           showAlertRef.current(
             '✅',
             languageRef.current === 'en' ? 'Purchase successful!' : 'Satın alma başarılı!'
@@ -223,6 +228,8 @@ export function useIAPManager({
         if (purchase.productId === PRODUCT_IDS.PREMIUM_MONTHLY) {
           if (!(await verifyReceipt(purchase, true))) continue;
           await onPurchasePremiumRef.current();
+          // Abonelik makbuzunu onayla (aksi halde tekrar tekrar geri yüklenir).
+          try { await finishTransaction({ purchase, isConsumable: false }); } catch { /* yoksay */ }
           restored++;
         }
       }

@@ -76,6 +76,10 @@ function AnimatedCellComponent({ letter, colIndex, rowIndex, currentRow, cellSiz
   useEffect(() => {
     if (isEvaluated) {
       flipVal.value = withDelay(colIndex * 150, withTiming(1, { duration: 400 }));
+    } else {
+      // Hücre yeniden kullanıldığında (yeni oyun/satır) flip'i sıfırla; aksi halde
+      // boş hücreler eski "değerlendirilmiş" rengiyle kalır.
+      flipVal.value = 0;
     }
   }, [isEvaluated]);
 

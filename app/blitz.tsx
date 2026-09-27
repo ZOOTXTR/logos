@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '../components/CustomText';
@@ -20,8 +20,24 @@ export default function BlitzScreen() {
   const { theme, language } = useTheme();
   const game = useBlitz('random', language as 'tr' | 'en');
   const progress = useProgress();
+  const recordedRef = useRef(false);
 
-
+  // Oturum bitince sonucu ilerlemeye (istatistik, görev, liderlik) kaydet.
+  useEffect(() => {
+    if (game.status === 'playing') { recordedRef.current = false; return; }
+    if (game.status === 'ended' && !recordedRef.current) {
+      recordedRef.current = true;
+      if (game.wordsSolved > 0) {
+        progress.recordWin({
+          guesses: 1, mode: 'speed', difficulty: 'normal', category: 'random',
+          isSpeed: true, isExpert: false, isPerfect: false, isDaily: false,
+          elapsedSeconds: 60, xpEarned: game.score,
+        });
+      } else {
+        progress.recordLoss('normal');
+      }
+    }
+  }, [game.status]);
 
   const handleKey = (key: string) => {
     if (game.status !== 'playing') return;
@@ -29,13 +45,12 @@ export default function BlitzScreen() {
     game.addLetter(key);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const result = game.submitGuess();
     if (result === 'correct') {
       audioService.play('win');
       audioService.triggerHaptic('success');
-      await progress.earnXP(game.streak >= 3 ? 60 : 30);
-    } else {
+    } else if (result === 'wrong' || result === 'short') {
       audioService.triggerHaptic('warning');
     }
   };

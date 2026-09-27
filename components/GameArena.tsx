@@ -11,8 +11,11 @@ import { GameBoard } from './GameBoard';
 import { Keyboard } from './Keyboard';
 import { GuessHistory } from './GuessHistory';
 import { audioService } from '../services/audio.service';
-import { submitScore } from '../services/firebase';
 import { fetchDefinition } from '../services/definition.service';
+import { storageGet, storageSet } from '../services/storage.service';
+
+const FREE_GEMS_KEY = 'gq_last_free_gems';
+const todayKey = () => new Date().toISOString().slice(0, 10);
 import { GameMode, CategoryId, DifficultyId, PlayerStats } from '../types/game';
 import {
   GameMode as GQMode, Category as GQCategory, Difficulty as GQDifficulty,
@@ -28,6 +31,20 @@ interface GameArenaProps {
   onBack: () => void;
   onOpenWheel?: () => void;
   onOpenStore?: () => void;
+  onRecordWin?: (opts: {
+    guesses: number;
+    mode: string;
+    difficulty: string;
+    category: string;
+    isSpeed: boolean;
+    isExpert: boolean;
+    isPerfect: boolean;
+    isDaily: boolean;
+    elapsedSeconds: number;
+    xpEarned: number;
+    gemsEarned?: number;
+  }) => void;
+  onRecordLoss?: (difficulty: string) => void;
 }
 
 const MODE_MAP: Record<GameMode, GQMode> = { klasik: 'classic', hizli: 'speed', gunluk: 'daily', turnuva: 'turnuva' };
@@ -47,7 +64,7 @@ const MILESTONE_REWARD = 50;
 type RewardRow = { label: string; amount: number; kind: 'gem' | 'xp'; color: string; icon?: 'flame' | 'zap' | 'crown' };
 
 export const GameArena: React.FC<GameArenaProps> = ({
-  mode, category, difficulty, stats, onUpdateStats, onBack, onOpenWheel, onOpenStore,
+  mode, category, difficulty, stats, onUpdateStats, onBack, onOpenWheel, onOpenStore, onRecordWin, onRecordLoss,
 }) => {
   const { theme, language } = useTheme();
   const c = theme.colors;
@@ -55,7 +72,13 @@ export const GameArena: React.FC<GameArenaProps> = ({
   const gqMode = MODE_MAP[mode];
   const gqCat = CAT_MAP[category];
   const gqDiff = DIFF_MAP[difficulty];
-  const game = useGame(gqDiff, gqMode, gqCat, language);
+
+  const [hardMode, setHardMode] = useState(false);
+  useEffect(() => {
+    storageGet('gq_hard_mode').then((v) => setHardMode(v === 'true')).catch(() => {});
+  }, []);
+
+  const game = useGame(gqDiff, gqMode, gqCat, language, hardMode);
 
   const [ended, setEnded] = useState(false);
   const [shakeToken, setShakeToken] = useState(0);
@@ -67,6 +90,15 @@ export const GameArena: React.FC<GameArenaProps> = ({
   const [rewardTotal, setRewardTotal] = useState(0);
   const [claimed, setClaimed] = useState(false);
   const [lowGems, setLowGems] = useState<{ feature: string; needed: number } | null>(null);
+  const [freeGemsAvailable, setFreeGemsAvailable] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    storageGet(FREE_GEMS_KEY)
+      .then((v) => { if (alive) setFreeGemsAvailable(v !== todayKey()); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
   const [localStreak, setLocalStreak] = useState(0);
   const [milestone, setMilestone] = useState<number | null>(null);
   const [secondChanceUsed, setSecondChanceUsed] = useState(false);
@@ -125,19 +157,17 @@ export const GameArena: React.FC<GameArenaProps> = ({
         const totalGems = base + tourBonus + streakBonus + speedBonus;
         setReward(rows);
         setRewardTotal(totalGems);
-        onUpdateStats({
-          gamesWon: stats.gamesWon + 1,
-          gamesPlayed: stats.gamesPlayed + 1,
-          gems: stats.gems + totalGems,
-          distribution: { ...stats.distribution, [g]: (stats.distribution[g] || 0) + 1 },
+        onRecordWin?.({
+          guesses: g, mode: gqMode, difficulty: gqDiff, category: gqCat,
+          isSpeed, isExpert: gqDiff === 'expert', isPerfect: g === 1, isDaily,
+          elapsedSeconds: elapsed, xpEarned: base, gemsEarned: totalGems,
         });
-        submitScore(50, mode);
         const nextStreak = localStreak + 1;
         setLocalStreak(nextStreak);
         if (nextStreak % 5 === 0) setMilestone(nextStreak);
       } else {
         setLocalStreak(0);
-        onUpdateStats({ gamesPlayed: stats.gamesPlayed + 1 });
+        onRecordLoss?.(gqDiff);
       }
     }
   }, [game.gameStatus]);
@@ -170,7 +200,8 @@ export const GameArena: React.FC<GameArenaProps> = ({
     if (secondChanceUsed) return;
     if (!spend(SECOND_CHANCE_COST, language === 'en' ? 'Second Chance' : 'Son Şans')) return;
     setSecondChanceUsed(true);
-    restart();
+    setEnded(false);
+    game.revive(); // aynı kelimeye +1 hak (yeni kelime değil)
   };
 
   const claimMilestone = () => {
@@ -357,10 +388,18 @@ export const GameArena: React.FC<GameArenaProps> = ({
               {'  '}({language === 'en' ? 'balance' : 'bakiye'}: {stats.gems})
             </Text>
 
-            <Pressable onPress={() => { onUpdateStats({ gems: stats.gems + 100 }); audioService.triggerHaptic('gemReward'); setLowGems(null); }} style={[styles.optBtn, { backgroundColor: c.gem }]}>
-              <Gift size={14} color="#0B0C10" />
-              <Text style={styles.optBtnTextDark}>{language === 'en' ? 'Free +100 💎' : '🎁 Ücretsiz +100 💎 Al'}</Text>
-            </Pressable>
+            {freeGemsAvailable && (
+              <Pressable onPress={() => {
+                setFreeGemsAvailable(false);
+                storageSet(FREE_GEMS_KEY, todayKey()).catch(() => {});
+                onUpdateStats({ gems: stats.gems + 100 });
+                audioService.triggerHaptic('gemReward');
+                setLowGems(null);
+              }} style={[styles.optBtn, { backgroundColor: c.gem }]}>
+                <Gift size={14} color="#0B0C10" />
+                <Text style={styles.optBtnTextDark}>{language === 'en' ? 'Free +100 💎' : '🎁 Ücretsiz +100 💎 Al'}</Text>
+              </Pressable>
+            )}
             <Pressable onPress={() => { setLowGems(null); onOpenStore?.(); }} style={styles.optBtnWrap}>
               <LinearGradient colors={[c.gem, c.primary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.optBtnGradient}>
                 <Gem size={14} color="#fff" />

@@ -6,7 +6,7 @@ import {
   createEmptyBoard, getRandomWord, getDailyWord,
   ALL_WORDS, ALL_WORDS_EN,
 } from '../constants/words';
-import { getDictionary, isDictionaryReady } from '../services/dictionary.service';
+import { getDictionary, isDictionaryReady, preloadDictionaries } from '../services/dictionary.service';
 
 export interface GameState {
   board: Board;
@@ -58,6 +58,8 @@ export function useGame(
 
   useEffect(() => {
     if (isDictionaryReady()) { setDictionaryReady(true); return; }
+    // Sözlüğü yükle (yoksa submitGuess 'not_ready' döner ve oyun oynanamaz).
+    preloadDictionaries().catch(() => {});
     const check = setInterval(() => {
       if (isDictionaryReady()) { setDictionaryReady(true); clearInterval(check); }
     }, 200);
@@ -250,8 +252,32 @@ export function useGame(
     }
     if (unknownPositions.length === 0) return null;
     const pos = unknownPositions[Math.floor(Math.random() * unknownPositions.length)];
-    setState(prev => ({ ...prev, hintsUsed: prev.hintsUsed + 1, revealedCells: { ...prev.revealedCells, [pos]: target[pos] } }));
+    // İpucu harfini mevcut satıra YERLEŞTİR (kalıcı olsun; sadece görsel overlay olmasın).
+    setState(prev => {
+      const newBoard = [...prev.board];
+      const newRow = [...newBoard[prev.currentRow]];
+      newRow[pos] = { char: target[pos], status: 'tbd' };
+      newBoard[prev.currentRow] = newRow;
+      return {
+        ...prev,
+        board: newBoard,
+        currentCol: Math.max(prev.currentCol, pos + 1),
+        hintsUsed: prev.hintsUsed + 1,
+        revealedCells: { ...prev.revealedCells, [pos]: target[pos] },
+      };
+    });
     return lang === 'en' ? `Letter ${pos + 1}: ${target[pos]}` : `${pos + 1}. harf: ${target[pos]}`;
+  }, []);
+
+  // İkinci şans: kaybedilen elde AYNI kelimeye +1 satır ekle ve oyuna devam et.
+  const revive = useCallback(() => {
+    setState(prev => {
+      if (prev.gameStatus === 'playing') return prev;
+      const newBoard = [...prev.board, ...createEmptyBoard(1, prev.targetWord.length)];
+      return { ...prev, board: newBoard, currentRow: prev.board.length, currentCol: 0, gameStatus: 'playing' };
+    });
+    endTimeRef.current = 0;
+    setResetToken(t => t + 1);
   }, []);
 
   const useSweeper = useCallback((): string[] => {
@@ -357,6 +383,7 @@ export function useGame(
     useFiftyFifty,
     shuffleRow,
     revealFirstLetter,
+    revive,
     addTime,
   }), [state, addLetter, deleteLetter, submitGuess, resetGame, useHint, useSweeper, useFiftyFifty, shuffleRow, revealFirstLetter, addTime]);
 }

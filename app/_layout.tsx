@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet, View } from 'react-native';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ensureAnonymousAuth } from '../services/firebase';
+import { initAuth } from '../services/auth.service';
 import { storageGet } from '../services/storage.service';
 
 function RootStack() {
@@ -15,6 +16,8 @@ function RootStack() {
   useEffect(() => {
     // Authenticate anonymously in the background via Firebase
     ensureAnonymousAuth();
+    // app-level currentUser'ı da kur (multiplayer/liderlik/referral buna bağlı)
+    initAuth().catch(() => {});
     // First-launch onboarding gate
     storageGet('gq_onboarded').then((v) => {
       if (v !== 'true') router.replace('/onboarding');
