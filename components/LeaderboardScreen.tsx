@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, Pressable } from 'react-native';
 import { Text } from './CustomText';
 import { Trophy, Flame, ChevronUp, BarChart3, TrendingUp } from 'lucide-react-native';
 import { PlayerStats } from '../types/game';
 import { sounds } from '../utils/sound';
+import { getWeeklyLeaderboard } from '../services/leaderboard.service';
 
 interface LeaderboardScreenProps {
   stats: PlayerStats;
@@ -34,6 +35,30 @@ const LEADERS = [
 
 export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) => {
   const [period, setPeriod] = useState<'gunluk' | 'haftalik' | 'tum'>('gunluk');
+  const [leaders, setLeaders] = useState(LEADERS);
+
+  useEffect(() => {
+    let cancelled = false;
+    getWeeklyLeaderboard(50)
+      .then((entries) => {
+        if (cancelled || !entries || entries.length === 0) return;
+        const medals = ['👑', '🥈', '🥉', '⚡', '📚', '🎯', '🧩', '🏹', '✨', '🧠'];
+        setLeaders(entries.map((e, i) => ({
+          rank: i + 1,
+          name: e.displayName || 'Oyuncu',
+          title: 'Oyuncu',
+          score: e.score,
+          streak: 0,
+          avatar: medals[i] || '🎮',
+        })));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const first = leaders[0] ?? LEADERS[0];
+  const second = leaders[1] ?? LEADERS[1];
+  const third = leaders[2] ?? LEADERS[2];
 
   const difficultyData = [
     { id: 'kolay', label: 'Kolay', letters: '4 Harf', winRate: 92, played: 50, won: 46, color: C.green, bgLight: 'rgba(34,197,94,0.15)' },
@@ -159,27 +184,27 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) =
       <View style={styles.podiumRow}>
         <View style={[styles.podiumCard, styles.podium2]}>
           <Text style={styles.podiumEmoji}>🥈</Text>
-          <Text style={styles.podiumName} numberOfLines={1}>Burak</Text>
-          <Text style={styles.podiumScore}>3,410</Text>
+          <Text style={styles.podiumName} numberOfLines={1}>{second.name.split(' ')[0]}</Text>
+          <Text style={styles.podiumScore}>{second.score.toLocaleString()}</Text>
           <Text style={styles.podiumRankLabel}>2. Sıra</Text>
         </View>
         <View style={[styles.podiumCard, styles.podium1]}>
           <View style={styles.podiumCrown}><Text style={{ fontSize: 14 }}>👑</Text></View>
-          <Text style={styles.podiumName} numberOfLines={1}>Zeynep</Text>
-          <Text style={[styles.podiumScore, { color: C.amber }]}>3,840 XP</Text>
+          <Text style={styles.podiumName} numberOfLines={1}>{first.name.split(' ')[0]}</Text>
+          <Text style={[styles.podiumScore, { color: C.amber }]}>{first.score.toLocaleString()} XP</Text>
           <Text style={[styles.podiumRankLabel, { color: C.amber }]}>1. Şampiyon</Text>
         </View>
         <View style={[styles.podiumCard, styles.podium3]}>
           <Text style={styles.podiumEmoji}>🥉</Text>
-          <Text style={styles.podiumName} numberOfLines={1}>Ayşe</Text>
-          <Text style={styles.podiumScore}>2,980</Text>
+          <Text style={styles.podiumName} numberOfLines={1}>{third.name.split(' ')[0]}</Text>
+          <Text style={styles.podiumScore}>{third.score.toLocaleString()}</Text>
           <Text style={styles.podiumRankLabel}>3. Sıra</Text>
         </View>
       </View>
 
       {/* Ranked list */}
       <View style={{ gap: 8 }}>
-        {LEADERS.slice(3).map((item) => (
+        {leaders.slice(3).map((item) => (
           <View key={item.rank} style={styles.listRow}>
             <View style={styles.listLeft}>
               <Text style={styles.listRank}>{item.rank}</Text>

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "478040450778",
+    "project_id": "logos-game-c82f3",
+    "storage_bucket": "logos-game-c82f3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:478040450778:android:459cdfc88b574ba2b867e3",
+        "android_client_info": {
+          "package_name": "com.zovtex.logos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "478040450778-81ic3fm5ugqv7deqm6snoa9pvhgt2h8h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmf7WSoMKjo0jV0EgT0r9SaOmKwJyWcW0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "478040450778-81ic3fm5ugqv7deqm6snoa9pvhgt2h8h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

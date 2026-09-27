@@ -99,8 +99,7 @@ export const FRAME_CATALOG: FrameItem[] = [
   { id: 'frame-cosmic-purple', name: 'Kozmik Galaksi', description: 'Yıldız tozu ve mor nebula aurası.', cost: 180, rarity: 'Efsanevi', color: '#A855F7', glow: 'rgba(168,85,247,0.7)' },
 ];
 
-const PLAYER_NAME = 'Kerem Yılmaz';
-const PLAYER_HANDLE = '@keremyilmaz';
+const DEFAULT_PLAYER_NAME = 'Oyuncu';
 
 const glowStyle = (frame: FrameItem): ViewStyle => ({
   borderColor: frame.color,
@@ -143,9 +142,12 @@ interface ProfileScreenProps {
   stats: PlayerStats;
   onOpenStore?: () => void;
   onUpdateStats: (newStats: Partial<PlayerStats>) => void;
+  displayName?: string;
 }
 
-export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore, onUpdateStats }) => {
+export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore, onUpdateStats, displayName }) => {
+  const playerName = (displayName && displayName.trim()) || DEFAULT_PLAYER_NAME;
+  const playerHandle = '@' + playerName.toLowerCase().replace(/[^a-z0-9]+/gi, '').slice(0, 16) || '@oyuncu';
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [customizerTab, setCustomizerTab] = useState<'avatars' | 'frames'>('avatars');
@@ -267,7 +269,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
 
           <View style={styles.headerInfo}>
             <View style={styles.nameRow}>
-              <Text style={styles.userName} numberOfLines={1}>{PLAYER_NAME}</Text>
+              <Text style={styles.userName} numberOfLines={1}>{playerName}</Text>
               {stats.isPremium ? (
                 <View style={styles.premiumPill}>
                   <Crown size={10} color={C.amber} fill={C.amber} />
@@ -279,7 +281,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
                 </Pressable>
               )}
             </View>
-            <Text style={styles.handle}>{PLAYER_HANDLE}</Text>
+            <Text style={styles.handle}>{playerHandle}</Text>
             <View style={styles.chipsRow}>
               <View style={styles.chip}>
                 <Text style={styles.chipPrimary}>Seviye {stats.level}</Text>

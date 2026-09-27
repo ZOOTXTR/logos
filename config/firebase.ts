@@ -5,13 +5,28 @@ import { getFunctions, Functions } from 'firebase/functions';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const REQUIRED_ENV_KEYS = [
+  'EXPO_PUBLIC_FIREBASE_API_KEY',
+  'EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN',
+  'EXPO_PUBLIC_FIREBASE_PROJECT_ID',
+  'EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET',
+  'EXPO_PUBLIC_FIREBASE_SENDER_ID',
+  'EXPO_PUBLIC_FIREBASE_APP_ID',
+] as const;
+
+const missingKeys = REQUIRED_ENV_KEYS.filter((k) => !process.env[k]);
+if (missingKeys.length > 0) {
+  // Sessiz bozulma yerine net hata: .env doldurulmalı ve build'e dahil edilmeli.
+  throw new Error(`Firebase yapılandırması eksik: ${missingKeys.join(', ')}. .env dosyasını doldurun.`);
+}
+
 const FIREBASE_CONFIG = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? 'YOUR_API_KEY',
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? 'YOUR_PROJECT.firebaseapp.com',
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? 'YOUR_PROJECT_ID',
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID ?? '000000000000',
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? '1:000000000000:web:xxxxxxxxxxxxxx',
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY as string,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN as string,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID as string,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET as string,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID as string,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID as string,
 };
 
 let app: FirebaseApp | undefined;

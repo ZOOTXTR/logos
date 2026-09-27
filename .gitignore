@@ -13,3 +13,6 @@ yarn-error.*
 *.key
 *.mobileprovision
 *.orig.*
+*.keystore
+/ios
+/android

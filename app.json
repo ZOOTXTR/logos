@@ -77,7 +77,9 @@
         }
       ],
       "./plugins/withAndroidXCore.js",
-      "./plugins/withReleaseSigning.js"
+      "./plugins/withReleaseSigning.js",
+      "./plugins/withIAPStoreFlavor.js",
+      "./plugins/withGradleJvmArgs.js"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Pressable, StyleSheet, Modal, ScrollView } from 'react-native';
 import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Medal, ChevronRight, Trophy, Clock, X } from 'lucide-react-native';
 import { sounds } from '../utils/sound';
+import { getWeeklyLeaderboard } from '../services/leaderboard.service';
 
 interface WeeklyLeaderboardCardProps {
   theme?: unknown;
@@ -57,8 +58,30 @@ const rankBg = (rank: number) => {
 
 export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, rank = 14 }: WeeklyLeaderboardCardProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [leaders, setLeaders] = useState<LeaderUser[]>(WEEKLY_LEADERS);
   const en = language === 'en';
-  const top3 = WEEKLY_LEADERS.slice(0, 3);
+  const top3 = leaders.slice(0, 3);
+
+  useEffect(() => {
+    let cancelled = false;
+    getWeeklyLeaderboard(10)
+      .then((entries) => {
+        if (cancelled || !entries || entries.length === 0) return;
+        const medals = ['👑', '🥈', '🥉', '⚡', '📚', '🎯', '🧩', '🏹', '✨', '🧠'];
+        const mapped: LeaderUser[] = entries.map((e, i) => ({
+          rank: i + 1,
+          name: e.displayName || 'Oyuncu',
+          title: 'Oyuncu',
+          score: e.score,
+          streak: 0,
+          avatar: medals[i] || '🎮',
+          league: e.score >= 3000 ? 'Efsane Lig' : e.score >= 2000 ? 'Zümrüt Lig' : e.score >= 1200 ? 'Altın Lig' : 'Gümüş Lig',
+        }));
+        setLeaders(mapped);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <View style={styles.card}>
@@ -137,7 +160,7 @@ export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, ra
             </View>
 
             <ScrollView style={styles.list} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
-              {WEEKLY_LEADERS.map((user) => (
+              {leaders.map((user) => (
                 <View key={user.rank} style={[styles.listRow, rankBg(user.rank)]}>
                   <View style={styles.listLeft}>
                     <Text style={styles.listRank}>{user.rank <= 3 ? (user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉') : `#${user.rank}`}</Text>
