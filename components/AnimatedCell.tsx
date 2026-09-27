@@ -1,0 +1,194 @@
+import React, { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Text } from './CustomText';
+import { Gem } from 'lucide-react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+  interpolate,
+} from 'react-native-reanimated';
+import { Letter, LetterStatus } from '../constants/words';
+import { BORDER_RADIUS } from '../constants/theme';
+
+import { Theme } from '../constants/themes';
+import { useTheme } from '../hooks/useTheme';
+
+const COLORBLIND_COLORS = {
+  correct: { bg: '#0072B2', border: '#0072B2' },
+  present: { bg: '#E69F00', border: '#E69F00' },
+};
+
+interface AnimatedCellProps {
+  letter: Letter;
+  colIndex: number;
+  rowIndex: number;
+  currentRow: number;
+  cellSize: number;
+  cellFontSize: number;
+  colorBlind: boolean;
+  dyslexiaFont: boolean;
+  theme: Theme;
+  revealedChar?: string;
+}
+
+function getLetterBg(status: LetterStatus | undefined, colorBlind: boolean, theme: Theme): string {
+  switch (status) {
+    case 'correct': return colorBlind ? COLORBLIND_COLORS.correct.bg : theme.colors.correct;
+    case 'present': return colorBlind ? COLORBLIND_COLORS.present.bg : theme.colors.present;
+    case 'absent': return theme.colors.absent;
+    case 'tbd': return theme.colors.surfaceLight;
+    case 'empty': return theme.colors.empty;
+    default: return theme.colors.empty;
+  }
+}
+
+function getLetterBorder(status: LetterStatus | undefined, theme: Theme): string {
+  switch (status) {
+    case 'correct': return theme.colors.correct;
+    case 'present': return theme.colors.present;
+    case 'absent': return theme.colors.absent;
+    case 'tbd': return theme.colors.primaryLight;
+    default: return theme.colors.border;
+  }
+}
+
+function AnimatedCellComponent({ letter, colIndex, rowIndex, currentRow, cellSize, cellFontSize, colorBlind, dyslexiaFont, theme, revealedChar }: AnimatedCellProps) {
+  const { language } = useTheme();
+  const flipVal = useSharedValue(0);
+  const scaleVal = useSharedValue(1);
+
+  const isEvaluated = rowIndex < currentRow || (rowIndex === currentRow && (letter.status === 'correct' || letter.status === 'present' || letter.status === 'absent'));
+  const isTyping = rowIndex === currentRow && letter.status === 'tbd';
+  const showRevealed = !letter.char && !!revealedChar;
+
+  const a11ySuffix = !letter.char
+    ? ''
+    : isEvaluated
+      ? letter.status === 'correct'
+        ? (language === 'en' ? ', correct' : ', doğru')
+        : letter.status === 'present'
+          ? (language === 'en' ? ', present' : ', mevcut')
+          : (language === 'en' ? ', absent' : ', yok')
+      : '';
+
+  useEffect(() => {
+    if (isEvaluated) {
+      flipVal.value = withDelay(colIndex * 150, withTiming(1, { duration: 400 }));
+    }
+  }, [isEvaluated]);
+
+  useEffect(() => {
+    if (isTyping) {
+      scaleVal.value = withTiming(1.08, { duration: 80 });
+      const timer = setTimeout(() => { scaleVal.value = withTiming(1, { duration: 100 }); }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [isTyping, letter.char]);
+
+  // Renkler JS thread'inde hesaplanır: worklet içinden worklet olmayan fonksiyon
+  // çağırmak release build'de "Object is not a function" ile çöker.
+  const evaluatedBg = getLetterBg(letter.status, colorBlind, theme);
+  const evaluatedBorder = getLetterBorder(letter.status, theme);
+  const emptyBg = showRevealed ? theme.colors.primary + '26' : theme.colors.empty;
+  const emptyBorder = showRevealed ? theme.colors.primaryLight : theme.colors.border;
+
+  const containerStyle = useAnimatedStyle(() => {
+    const rotateY = interpolate(flipVal.value, [0, 1], [0, 180]);
+    const bg = flipVal.value >= 0.5 ? evaluatedBg : emptyBg;
+    const border = flipVal.value >= 0.5 ? evaluatedBorder : emptyBorder;
+    return {
+      transform: [{ rotateY: `${rotateY}deg` }, { scale: scaleVal.value }],
+      backgroundColor: bg,
+      borderColor: border,
+    };
+  });
+
+  const contentStyle = useAnimatedStyle(() => ({
+    transform: [{ rotateY: flipVal.value >= 0.5 ? '180deg' : '0deg' }],
+    opacity: flipVal.value < 0.5 ? 1 : flipVal.value > 0.5 ? 1 : 0,
+  }));
+
+  return (
+    <Animated.View
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={
+        letter.char
+          ? `${letter.char}${a11ySuffix}`
+          : (language === 'en' ? 'empty' : 'boş')
+      }
+      style={[
+        styles.cell,
+        { width: cellSize, height: cellSize * 1.15 },
+        containerStyle,
+      ]}
+    >
+      <Animated.View style={[styles.contentContainer, contentStyle]}>
+        <Text style={[
+          styles.letter,
+          { fontSize: cellFontSize, color: showRevealed ? theme.colors.primaryLight : theme.colors.text },
+          dyslexiaFont && { fontFamily: 'monospace' },
+        ]}>
+          {letter.char || (showRevealed ? revealedChar : '')}
+        </Text>
+        {colorBlind && isEvaluated && (
+          <View style={styles.indicatorContainer}>
+            <Text style={styles.indicatorText}>
+              {letter.status === 'correct' ? '✓' : letter.status === 'present' ? '●' : '✗'}
+            </Text>
+          </View>
+        )}
+      </Animated.View>
+      {showRevealed && (
+        <View style={styles.boosterBadge}>
+          <Gem size={8} color="#0B0C10" fill="#0B0C10" />
+        </View>
+      )}
+    </Animated.View>
+  );
+}
+
+export const AnimatedCell = React.memo(AnimatedCellComponent);
+
+const styles = StyleSheet.create({
+  cell: {
+    borderRadius: BORDER_RADIUS.sm,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  contentContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  letter: {
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  indicatorContainer: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+  },
+  indicatorText: {
+    fontSize: 8,
+    fontWeight: '900',
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  boosterBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: 15,
+    height: 15,
+    borderRadius: 8,
+    backgroundColor: '#F59E0B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#0B0C10',
+  },
+});
