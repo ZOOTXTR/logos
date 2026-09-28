@@ -2,7 +2,7 @@
   "expo": {
     "name": "Logos",
     "slug": "logos",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.zovtex.logos",
-      "versionCode": 101,
+      "versionCode": 102,
       "targetSdkVersion": 36,
       "googleServicesFile": "./google-services.json",
       "permissions": [
@@ -48,7 +48,7 @@
       "fallbackToCacheTimeout": 0,
       "enabled": true
     },
-    "runtimeVersion": "2.0.1",
+    "runtimeVersion": "2.0.2",
     "extra": {
       "eas": {
         "projectId": "fd9e4ebe-4289-4e29-924b-1b5dda68c2ed"
@@ -64,6 +64,7 @@
       "expo-secure-store",
       "@react-native-firebase/app",
       "@react-native-firebase/crashlytics",
+      "@react-native-firebase/app-check",
       [
         "expo-build-properties",
         {

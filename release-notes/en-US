@@ -1,5 +1,6 @@
-What's new (v2.0.1)
+What's new (v2.0.2)
 
-- Accessibility improvements: screen reader labels and button roles
-- Stability and bug fixes
-- Performance improvements
+- Security: Google Play Integrity / Firebase App Check protection against tampered clients
+- Feedback submission now reports errors
+- Settings: Daily notifications toggle
+- Stability and performance improvements

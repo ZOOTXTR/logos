@@ -7,6 +7,7 @@ import { StyleSheet, View } from 'react-native';
 import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ensureAnonymousAuth } from '../services/firebase';
 import { initAuth } from '../services/auth.service';
+import { initAppCheck } from '../services/appCheck.service';
 import { storageGet } from '../services/storage.service';
 
 function RootStack() {
@@ -16,6 +17,7 @@ function RootStack() {
   useEffect(() => {
     // Authenticate anonymously in the background via Firebase
     ensureAnonymousAuth();
+    initAppCheck();
     // app-level currentUser'ı da kur (multiplayer/liderlik/referral buna bağlı)
     initAuth().catch(() => {});
     // First-launch onboarding gate

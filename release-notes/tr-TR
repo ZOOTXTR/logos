@@ -1,5 +1,6 @@
-Yenilikler (v2.0.1)
+Yenilikler (v2.0.2)
 
-- Erişilebilirlik iyileştirmeleri: ekran okuyucu etiketleri ve buton rolleri
-- Kararlılık ve hata düzeltmeleri
-- Performans iyileştirmeleri
+- Güvenlik: Google Play Integrity / Firebase App Check koruması (sahte istemcilere karşı)
+- Geri bildirim gönderiminde hata durumu artık bildiriliyor
+- Ayarlar: Günlük Bildirim anahtarı
+- Kararlılık ve performans iyileştirmeleri
