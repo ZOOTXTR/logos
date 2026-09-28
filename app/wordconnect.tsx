@@ -69,6 +69,8 @@ export default function WordConnectScreen() {
     });
   };
 
+  // Dokunuş tekerlek View'ına (parent) aittir; harf butonları dokunmaz (pointerEvents) olduğundan
+  // locationX/Y tekerleğe göre tutarlıdır → hem tekil dokunuş hem harften harfe sürükleme çalışır.
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -84,7 +86,7 @@ export default function WordConnectScreen() {
         const now = Date.now();
         const dx = Math.abs(locationX - lastTouchUpdateRef.current.x);
         const dy = Math.abs(locationY - lastTouchUpdateRef.current.y);
-        // Throttle coordinate re-renders to ~60 FPS (16ms) or significant spatial delta (> 2px)
+        // ~60 FPS throttle
         if (now - lastTouchUpdateRef.current.time > 32 && (dx > 4 || dy > 4)) {
           lastTouchUpdateRef.current = { time: now, x: locationX, y: locationY };
           setTouchCoords({ x: locationX, y: locationY });
@@ -92,7 +94,7 @@ export default function WordConnectScreen() {
         checkTouchCollisionRef.current(locationX, locationY);
       },
       onPanResponderRelease: () => {
-        // Otomatik gönderme yok; kullanıcı Onayla butonunu kullanır (eksik tahmin engellenir)
+        // Otomatik gönderme yok; kullanıcı Onayla butonunu kullanır.
         setTouchCoords(null);
       },
       onPanResponderTerminate: () => {
@@ -101,12 +103,6 @@ export default function WordConnectScreen() {
       },
     })
   ).current;
-
-  const handleLetterSelect = (idx: number) => {
-    audioService.triggerHaptic('light');
-    audioService.play('click');
-    game.selectLetter(idx);
-  };
 
   const handleClear = () => {
     audioService.triggerHaptic('light');
@@ -237,7 +233,7 @@ export default function WordConnectScreen() {
 
         {/* Letter Wheel Area */}
         <View style={styles.wheelSection}>
-          <View 
+          <View
             style={[styles.wheelContainer, { borderColor: theme.colors.border }]}
             {...panResponder.panHandlers}
           >
@@ -290,8 +286,9 @@ export default function WordConnectScreen() {
               const coords = getLetterCoords(idx, game.letters.length);
               const isSelected = game.selectedIndices.includes(idx);
               return (
-                <TouchableOpacity accessibilityRole="button"
+                <View
                   key={idx}
+                  pointerEvents="none"
                   style={[
                     styles.letterBtn,
                     {
@@ -302,13 +299,11 @@ export default function WordConnectScreen() {
                       borderColor: isSelected ? 'transparent' : theme.colors.border,
                     }
                   ]}
-                  onPress={() => handleLetterSelect(idx)}
-                  activeOpacity={0.8}
                 >
                   <Text style={[styles.letterText, { color: theme.colors.text }]}>
                     {letter}
                   </Text>
-                </TouchableOpacity>
+                </View>
               );
             })}
           </View>

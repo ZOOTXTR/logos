@@ -18,6 +18,7 @@ import {
   Globe,
   Shield,
   Sparkles,
+  Bell,
   Gem,
   ArrowUpCircle,
   XCircle,
@@ -41,6 +42,7 @@ import { audioService } from '../services/audio.service';
 import { cloudService } from '../services/cloud.service';
 import { deleteAccount } from '../services/firebase';
 import { storageGet, storageGetJSON, storageSet, storageSetJSON, storageRemove } from '../services/storage.service';
+import { notificationService } from '../services/notification.service';
 
 const C = {
   card: '#17181D',
@@ -86,10 +88,12 @@ export const SettingsScreen: React.FC = () => {
   const [volume, setVolume] = useState(Math.round(sounds.volume * 100));
   const [vibrationEnabled, setVibrationEnabled] = useState(haptics.enabled);
   const [hardMode, setHardMode] = useState(false);
+  const [notifEnabled, setNotifEnabled] = useState(false);
   const [activeTestSound, setActiveTestSound] = useState<string | null>(null);
 
   useEffect(() => {
     storageGet('gq_hard_mode').then((v) => setHardMode(v === 'true')).catch(() => {});
+    storageGet('gq_notif_enabled').then((v) => setNotifEnabled(v === 'true')).catch(() => {});
   }, []);
 
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -133,11 +137,36 @@ export const SettingsScreen: React.FC = () => {
     if (!feedbackMessage.trim()) return;
     const full = feedbackSubject.trim() ? `${feedbackSubject.trim()}: ${feedbackMessage.trim()}` : feedbackMessage.trim();
     const ok = await cloudService.submitFeedback(feedbackEmail.trim(), full, 5);
-    if (!ok) return;
+    if (!ok) {
+      Alert.alert(
+        'Gönderilemedi',
+        'Geri bildiriminiz gönderilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.'
+      );
+      return;
+    }
     sounds.playGemEarned(); haptics.winGame();
     setFeedbackSubmitted(true);
     storageRemove(FEEDBACK_DRAFT_KEY);
     setDraftSavedTime(null);
+  };
+
+  const handleToggleNotifications = async () => {
+    const next = !notifEnabled;
+    if (next) {
+      const granted = await notificationService.registerForPushNotificationsAsync();
+      if (!granted) {
+        Alert.alert('Bildirim İzni Gerekli', 'Günlük bildirimleri açmak için bildirim izni vermelisiniz.');
+        return;
+      }
+      await notificationService.scheduleDailyNotifications('tr');
+      setNotifEnabled(true);
+      await storageSet('gq_notif_enabled', 'true');
+    } else {
+      await notificationService.cancelDailyNotifications();
+      setNotifEnabled(false);
+      await storageSet('gq_notif_enabled', 'false');
+    }
+    sounds.playClick();
   };
 
   const handleToggleSound = () => {
@@ -257,6 +286,19 @@ export const SettingsScreen: React.FC = () => {
               </View>
             </View>
             <Switch value={vibrationEnabled} onChange={() => { const v = !vibrationEnabled; setVibrationEnabled(v); haptics.setEnabled(v); audioService.setHapticEnabled(v); sounds.playClick(); }} label="Titreşim" />
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.row}>
+            <View style={styles.rowLeft}>
+              <Bell size={16} color={C.accent} />
+              <View>
+                <Text style={styles.rowLabel}>Günlük Bildirim</Text>
+                <Text style={styles.rowSub}>Günün kelimesi ve seri hatırlatıcısı</Text>
+              </View>
+            </View>
+            <Switch value={notifEnabled} onChange={handleToggleNotifications} label="Günlük Bildirim" />
           </View>
         </View>
       </View>
