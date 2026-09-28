@@ -5,39 +5,15 @@ import { getFunctions, Functions } from 'firebase/functions';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const REQUIRED_ENV_KEYS = [
-  'EXPO_PUBLIC_FIREBASE_API_KEY',
-  'EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN',
-  'EXPO_PUBLIC_FIREBASE_PROJECT_ID',
-  'EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'EXPO_PUBLIC_FIREBASE_SENDER_ID',
-  'EXPO_PUBLIC_FIREBASE_APP_ID',
-] as const;
-
-// NOT: `process.env[k]` gibi dinamik erişim babel tarafından inline EDİLMEZ (yalnız statik
-// `process.env.EXPO_PUBLIC_X` inline edilir). Bu yüzden değerleri statik olarak okuyoruz.
-const ENV_VALUES = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-};
-
-const missingKeys = REQUIRED_ENV_KEYS.filter((k) => !ENV_VALUES[k as keyof typeof ENV_VALUES]);
-if (missingKeys.length > 0) {
-  // Sessiz bozulma yerine net hata: .env doldurulmalı ve build'e dahil edilmeli.
-  throw new Error(`Firebase yapılandırması eksik: ${missingKeys.join(', ')}. .env dosyasını doldurun.`);
-}
-
-const FIREBASE_CONFIG = {
-  apiKey: ENV_VALUES.apiKey as string,
-  authDomain: ENV_VALUES.authDomain as string,
-  projectId: ENV_VALUES.projectId as string,
-  storageBucket: ENV_VALUES.storageBucket as string,
-  messagingSenderId: ENV_VALUES.messagingSenderId as string,
-  appId: ENV_VALUES.appId as string,
+// Firebase web config'i gizli DEĞİLDİR (güvenlik Firestore kurallarıyla sağlanır).
+// `.env` değerleri build'de inline edilemezse (yerel/CI gradle), sabit değerlere düşer.
+export const FIREBASE_CONFIG = {
+  apiKey: (process.env.EXPO_PUBLIC_FIREBASE_API_KEY || 'AIzaSyDG37mUb7pfLfRE7dV9ipyYKZc81e1tlX8') as string,
+  authDomain: (process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || 'logos-game-c82f3.firebaseapp.com') as string,
+  projectId: (process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || 'logos-game-c82f3') as string,
+  storageBucket: (process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || 'logos-game-c82f3.firebasestorage.app') as string,
+  messagingSenderId: (process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID || '478040450778') as string,
+  appId: (process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '1:478040450778:web:09650c30352e0430b867e3') as string,
 };
 
 let app: FirebaseApp | undefined;
