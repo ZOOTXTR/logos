@@ -12,6 +12,17 @@ export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 let currentUser: User | null = null;
 let authListeners: Array<(user: User | null) => void> = [];
 
+// Auth hazır olana kadar bekleyen tüketiciler (ör. Firestore okumaları).
+let resolveAuthReady: (() => void) | null = null;
+const authReadyPromise = new Promise<void>((res) => { resolveAuthReady = res; });
+
+export function whenAuthReady(timeoutMs = 6000): Promise<void> {
+  return Promise.race([
+    authReadyPromise,
+    new Promise<void>((res) => setTimeout(res, timeoutMs)),
+  ]);
+}
+
 export function onAuthStateChanged(callback: (user: User | null) => void) {
   authListeners.push(callback);
   return () => { authListeners = authListeners.filter(l => l !== callback); };
@@ -20,7 +31,7 @@ export function onAuthStateChanged(callback: (user: User | null) => void) {
 function notifyListeners(user: User | null) {
   currentUser = user;
   // Hata raporlamada yalnızca anonim uid bağlanır (PII gönderilmez).
-  if (user) setUserContext(user.uid); else clearUserContext();
+  if (user) { setUserContext(user.uid); resolveAuthReady?.(); } else clearUserContext();
   authListeners.forEach(l => l(user));
 }
 

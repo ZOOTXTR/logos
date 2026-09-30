@@ -2,7 +2,7 @@ import { httpsCallable } from 'firebase/functions';
 import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { getFirebaseDb, getFirebaseFunctions, FIRESTORE_COLLECTIONS } from '../config/firebase';
 import { ScoreEntry, storageGet } from './storage.service';
-import { getCurrentUser, isSignedIn } from './auth.service';
+import { getCurrentUser, isSignedIn, whenAuthReady } from './auth.service';
 
 export interface LeaderboardEntry {
   id: string;
@@ -59,6 +59,7 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
 
 export async function getGlobalLeaderboard(limitCount: number = 50): Promise<LeaderboardEntry[]> {
   try {
+    await whenAuthReady();
     const db = getFirebaseDb();
     const q = query(
       collection(db, FIRESTORE_COLLECTIONS.SCORES),
@@ -102,6 +103,7 @@ function toMillis(date: unknown): number {
 // Haftalık liderlik: bu haftanın başından (Pazartesi 00:00) itibaren skorlar.
 export async function getWeeklyLeaderboard(limitCount: number = 50): Promise<LeaderboardEntry[]> {
   try {
+    await whenAuthReady();
     const db = getFirebaseDb();
     const q = query(collection(db, FIRESTORE_COLLECTIONS.SCORES), orderBy('score', 'desc'), limit(200));
     const snapshot = await getDocs(q);
@@ -135,6 +137,7 @@ export async function getMyBestScores(): Promise<LeaderboardEntry[]> {
     const user = getCurrentUser();
     if (!user) return [];
 
+    await whenAuthReady();
     const db = getFirebaseDb();
     const q = query(
       collection(db, FIRESTORE_COLLECTIONS.SCORES),

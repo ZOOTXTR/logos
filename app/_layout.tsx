@@ -15,14 +15,13 @@ function RootStack() {
   const router = useRouter();
 
   useEffect(() => {
-    // App Check'i ÖNCE kur (native sağlayıcı + JS SDK köprüsü), sonra auth/Firestore
-    // çağrıları yap — aksi halde enforcement istekleri token'sız kalabilir.
-    initAppCheck().finally(() => {
-      // Authenticate anonymously in the background via Firebase
-      ensureAnonymousAuth();
-      // app-level currentUser'ı da kur (multiplayer/liderlik/referral buna bağlı)
-      initAuth().catch(() => {});
-    });
+    // App Check'i başlat (paralel) ancak auth'u BEKLETME: Firestore okumaları auth'a
+    // bağlıdır, bu yüzden auth en erken başlamalı. Okumalar zaten whenAuthReady() ile bekler.
+    initAppCheck();
+    // Authenticate anonymously in the background via Firebase
+    ensureAnonymousAuth();
+    // app-level currentUser'ı da kur (multiplayer/liderlik/referral buna bağlı)
+    initAuth().catch(() => {});
     // First-launch onboarding gate
     storageGet('gq_onboarded').then((v) => {
       if (v !== 'true') router.replace('/onboarding');
