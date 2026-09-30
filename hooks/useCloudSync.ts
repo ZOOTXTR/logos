@@ -3,7 +3,7 @@ import { Alert, Platform } from 'react-native';
 import { storageGet, storageSet, storageRemove } from '../services/storage.service';
 import { useTheme } from '../hooks/useTheme';
 import { cloudService } from '../services/cloud.service';
-import { linkEmail } from '../services/auth.service';
+import { registerWithEmail, signInWithEmail, EmailAuthError } from '../services/auth.service';
 import { audioService } from '../services/audio.service';
 
 export function useCloudSync(visible: boolean, onClose: () => void) {
@@ -23,41 +23,84 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
     }
   }, [visible]);
 
-  const handleLinkAccount = async (email: string, password: string) => {
+  const persistAccount = async (email: string) => {
+    await storageSet('gq_user_email', email);
+    setLinkedEmail(email);
+    // Ad yoksa e-postanın yerel kısmını varsayılan oyuncu adı yap
+    const existingName = await storageGet('gq_user_name');
+    if (!existingName) {
+      const local = (email.split('@')[0] || 'Oyuncu').slice(0, 20);
+      if (local) await storageSet('gq_user_name', local);
+    }
+  };
+
+  const emailErrorText = (err?: EmailAuthError): string => {
+    const tr: Record<EmailAuthError, string> = {
+      'email-in-use': 'Bu e-posta zaten kayıtlı. "Giriş Yap"ı dene.',
+      'weak-password': 'Şifre en az 6 karakter olmalı.',
+      'invalid-email': 'Geçerli bir e-posta gir.',
+      'wrong-credentials': 'E-posta veya şifre hatalı.',
+      unknown: 'Bağlanamadı. Tekrar dene.',
+    };
+    const en: Record<EmailAuthError, string> = {
+      'email-in-use': 'This email is already registered. Try "Sign in".',
+      'weak-password': 'Password must be at least 6 characters.',
+      'invalid-email': 'Please enter a valid email.',
+      'wrong-credentials': 'Wrong email or password.',
+      unknown: 'Could not connect. Try again.',
+    };
+    return (language === 'en' ? en : tr)[err ?? 'unknown'];
+  };
+
+  const handleRegister = async (email: string, password: string) => {
     if (!email.includes('@') || email.length < 5) {
-      Alert.alert(
-        language === 'en' ? 'Invalid Email' : 'Geçersiz E-posta',
-        language === 'en' ? 'Please enter a valid email address!' : 'Lütfen geçerli bir e-posta adresi girin!'
-      );
+      Alert.alert(language === 'en' ? 'Invalid Email' : 'Geçersiz E-posta', language === 'en' ? 'Please enter a valid email address!' : 'Lütfen geçerli bir e-posta adresi girin!');
       return;
     }
-
+    if (password.length < 6) {
+      Alert.alert(language === 'en' ? 'Weak Password' : 'Zayıf Şifre', language === 'en' ? 'Password must be at least 6 characters.' : 'Şifre en az 6 karakter olmalı.');
+      return;
+    }
     setLoading(true);
     setSyncStatus('idle');
     audioService.triggerHaptic('medium');
-
     try {
-      const ok = await linkEmail(email, password);
+      const res = await registerWithEmail(email, password);
       if (!mountedRef.current) return;
-      if (!ok) {
+      if (!res.ok) {
         setSyncStatus('error');
-        Alert.alert(
-          language === 'en' ? 'Link Failed' : 'Bağlama Başarısız',
-          language === 'en'
-            ? 'Could not link this e-mail. Check the address and password.'
-            : 'Bu e-posta bağlanamadı. Adres ve parolayı kontrol edin.'
-        );
+        Alert.alert(language === 'en' ? 'Registration Failed' : 'Kayıt Başarısız', emailErrorText(res.error));
         return;
       }
-      await storageSet('gq_user_email', email);
-      setLinkedEmail(email);
+      await persistAccount(email);
       setSyncStatus('success');
-      Alert.alert(
-        language === 'en' ? 'Account Linked ✓' : 'Hesap Bağlandı ✓',
-        language === 'en'
-          ? `Your progress is now linked to: ${email}`
-          : `İlerlemeniz başarıyla şu hesaba bağlandı: ${email}`
-      );
+      Alert.alert(language === 'en' ? 'Account Created ✓' : 'Hesap Oluşturuldu ✓', language === 'en' ? `You are signed up as: ${email}` : `Şu hesapla kaydoldunuz: ${email}`);
+    } catch {
+      setSyncStatus('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignIn = async (email: string, password: string) => {
+    if (!email.includes('@') || email.length < 5) {
+      Alert.alert(language === 'en' ? 'Invalid Email' : 'Geçersiz E-posta', language === 'en' ? 'Please enter a valid email address!' : 'Lütfen geçerli bir e-posta adresi girin!');
+      return;
+    }
+    setLoading(true);
+    setSyncStatus('idle');
+    audioService.triggerHaptic('medium');
+    try {
+      const res = await signInWithEmail(email, password);
+      if (!mountedRef.current) return;
+      if (!res.ok) {
+        setSyncStatus('error');
+        Alert.alert(language === 'en' ? 'Sign-in Failed' : 'Giriş Başarısız', emailErrorText(res.error));
+        return;
+      }
+      await persistAccount(email);
+      setSyncStatus('success');
+      Alert.alert(language === 'en' ? 'Signed In ✓' : 'Giriş Yapıldı ✓', language === 'en' ? `Signed in as: ${email}` : `Şu hesapla giriş yapıldı: ${email}`);
     } catch {
       setSyncStatus('error');
     } finally {
@@ -202,7 +245,8 @@ export function useCloudSync(visible: boolean, onClose: () => void) {
     linkedEmail,
     loading,
     syncStatus,
-    handleLinkAccount,
+    handleRegister,
+    handleSignIn,
     handlePlayGamesSignIn,
     handleBackup,
     handleRestore,

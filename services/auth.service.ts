@@ -88,42 +88,63 @@ function generateReferralCode(uid: string): string {
   return uid.slice(0, 8).toUpperCase();
 }
 
-export async function linkEmail(email: string, password: string): Promise<boolean> {
+export type EmailAuthError =
+  | 'email-in-use'
+  | 'weak-password'
+  | 'invalid-email'
+  | 'wrong-credentials'
+  | 'unknown';
+
+export interface EmailAuthResult {
+  ok: boolean;
+  error?: EmailAuthError;
+}
+
+function mapEmailError(e: unknown): EmailAuthError {
+  const code = (e as { code?: string })?.code;
+  if (code === 'auth/email-already-in-use') return 'email-in-use';
+  if (code === 'auth/weak-password') return 'weak-password';
+  if (code === 'auth/invalid-email') return 'invalid-email';
+  if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/user-not-found') {
+    return 'wrong-credentials';
+  }
+  return 'unknown';
+}
+
+// Yeni hesap: anonim oturum varsa onu bağlar (uid + yerel ilerleme korunur).
+export async function registerWithEmail(email: string, password: string): Promise<EmailAuthResult> {
   const auth = getFirebaseAuth();
   try {
     const user = auth.currentUser;
-    if (user && !user.isAnonymous) {
-      // Zaten kalıcı bir hesap: yalnızca giriş yap
-      await signInWithEmailAndPassword(auth, email, password);
-      notifyListeners(auth.currentUser);
-      return true;
-    }
-    if (user) {
-      // Anonim kullanıcıya e-posta kimliğini BAĞLA (uid, XP ve ilerleme korunur)
+    if (user && user.isAnonymous) {
       const credential = EmailAuthProvider.credential(email, password);
       const linked = await linkWithCredential(user, credential);
       await storageSet(AUTH_UID_KEY, linked.user.uid);
+      await createUserProfile(linked.user);
       notifyListeners(linked.user);
-      return true;
+      return { ok: true };
     }
     const created = await createUserWithEmailAndPassword(auth, email, password);
     await createUserProfile(created.user);
     await storageSet(AUTH_UID_KEY, created.user.uid);
     notifyListeners(created.user);
-    return true;
-  } catch (e: unknown) {
-    const code = (e as { code?: string })?.code;
-    // E-posta zaten bir hesaba bağlıysa mevcut hesaba giriş yap
-    if (code === 'auth/email-already-in-use') {
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        notifyListeners(auth.currentUser);
-        return true;
-      } catch {
-        return false;
-      }
-    }
-    return false;
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: mapEmailError(e) };
+  }
+}
+
+// Mevcut hesaba giriş (anonim oturumu değiştirir → bulut ilerlemesi kullanıcıya ait).
+export async function signInWithEmail(email: string, password: string): Promise<EmailAuthResult> {
+  const auth = getFirebaseAuth();
+  try {
+    const res = await signInWithEmailAndPassword(auth, email, password);
+    await createUserProfile(res.user);
+    await storageSet(AUTH_UID_KEY, res.user.uid);
+    notifyListeners(res.user);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: mapEmailError(e) };
   }
 }
 

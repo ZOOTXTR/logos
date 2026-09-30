@@ -35,10 +35,20 @@ export async function signInWithGoogleFirebase(): Promise<SocialSignInResult> {
     const credential = GoogleAuthProvider.credential(idToken);
     const auth = getFirebaseAuth();
     const user = auth.currentUser;
-    if (user && user.isAnonymous) {
-      await linkWithCredential(user, credential);
-    } else {
-      await signInWithCredential(auth, credential);
+    try {
+      if (user && user.isAnonymous) {
+        await linkWithCredential(user, credential);
+      } else {
+        await signInWithCredential(auth, credential);
+      }
+    } catch (e) {
+      // Google hesabı zaten başka bir Firebase kullanıcısına bağlıysa → o hesaba GİRİŞ yap.
+      const code = (e as { code?: string })?.code;
+      if (code === 'auth/credential-already-in-use' || code === 'auth/email-already-in-use') {
+        await signInWithCredential(auth, credential);
+      } else {
+        throw e;
+      }
     }
     return {
       ok: true,

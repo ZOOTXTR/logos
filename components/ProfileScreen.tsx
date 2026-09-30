@@ -143,11 +143,14 @@ interface ProfileScreenProps {
   onOpenStore?: () => void;
   onUpdateStats: (newStats: Partial<PlayerStats>) => void;
   displayName?: string;
+  isSignedIn?: boolean;
+  onOpenAccount?: () => void;
 }
 
-export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore, onUpdateStats, displayName }) => {
+export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore, onUpdateStats, displayName, isSignedIn, onOpenAccount }) => {
   const playerName = (displayName && displayName.trim()) || DEFAULT_PLAYER_NAME;
   const playerHandle = '@' + playerName.toLowerCase().replace(/[^a-z0-9]+/gi, '').slice(0, 16) || '@oyuncu';
+  const playerInitials = (playerName.trim().split(/\s+/).map((w) => w[0]).join('').slice(0, 2) || 'OY').toUpperCase();
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [customizerTab, setCustomizerTab] = useState<'avatars' | 'frames'>('avatars');
@@ -250,13 +253,25 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Hesap / giriş çağrısı (giriş yapılmadıysa) */}
+      {!isSignedIn && (
+        <Pressable onPress={onOpenAccount} style={styles.loginBanner}>
+          <View style={styles.loginIcon}><UserPlus size={20} color="#fff" /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.loginTitle}>Giriş Yap / Hesap Oluştur</Text>
+            <Text style={styles.loginSub}>Sıralamaya gir ve ilerlemeni buluta yedekle</Text>
+          </View>
+          <ChevronRight size={18} color="#fff" />
+        </Pressable>
+      )}
+
       {/* 1. Profile Header Card */}
       <View style={styles.headerCard}>
         <View style={styles.headerTop}>
           <Pressable accessibilityRole="button" accessibilityLabel="Avatarı özelleştir" onPress={openCustomizer} style={styles.avatarWrap}>
             <FramedAvatar frame={activeFrame} size={56}>
               {activeAvatar.emoji === 'KY' ? (
-                <Text style={styles.avatarInitials}>KY</Text>
+                <Text style={styles.avatarInitials}>{playerInitials}</Text>
               ) : (
                 <Text style={styles.avatarEmoji}>{activeAvatar.emoji}</Text>
               )}
@@ -317,7 +332,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ stats, onOpenStore
             <ShieldCheck size={14} color={C.green} />
             <Text style={styles.verifiedText}>Doğrulanmış Kelime Ustası</Text>
           </View>
-          <Text style={styles.footerMuted}>Katılım: Devam Ediyor</Text>
+          <Pressable onPress={() => { sounds.playClick(); onOpenAccount?.(); }} style={styles.manageLink}>
+            <Text style={styles.manageLinkText}>{isSignedIn ? 'Hesabı Yönet' : 'Giriş Yap'}</Text>
+            <ChevronRight size={12} color={C.accent} />
+          </Pressable>
         </View>
       </View>
 
@@ -747,6 +765,12 @@ const LockedAnalytics: React.FC<{ onOpenStore?: () => void }> = ({ onOpenStore }
 
 const styles = StyleSheet.create({
   container: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 28, gap: 12 },
+  loginBanner: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.primary, borderRadius: 16, padding: 14 },
+  loginIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  loginTitle: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  loginSub: { fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 1 },
+  manageLink: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  manageLinkText: { fontSize: 11, fontWeight: '700', color: C.accent },
   headerCard: { backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 18, padding: 16, gap: 12 },
   headerTop: { flexDirection: 'row', gap: 14 },
   avatarWrap: { position: 'relative' },

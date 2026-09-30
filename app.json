@@ -2,7 +2,7 @@
   "expo": {
     "name": "Logos",
     "slug": "logos",
-    "version": "2.0.8",
+    "version": "2.0.9",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.zovtex.logos",
-      "versionCode": 108,
+      "versionCode": 109,
       "targetSdkVersion": 36,
       "googleServicesFile": "./google-services.json",
       "permissions": [
@@ -48,8 +48,9 @@
       "fallbackToCacheTimeout": 0,
       "enabled": true
     },
-    "runtimeVersion": "2.0.8",
+    "runtimeVersion": "2.0.9",
     "extra": {
+      "playGamesAppId": "",
       "eas": {
         "projectId": "fd9e4ebe-4289-4e29-924b-1b5dda68c2ed"
       },
@@ -84,7 +85,8 @@
       "./plugins/withReleaseSigning.js",
       "./plugins/withIAPStoreFlavor.js",
       "./plugins/withGradleJvmArgs.js",
-      "./plugins/withPlayBillingVersion.js"
+      "./plugins/withPlayBillingVersion.js",
+      "./plugins/withPlayGamesAppId.js"
     ],
     "experiments": {
       "typedRoutes": true
