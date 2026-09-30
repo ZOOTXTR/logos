@@ -1,6 +1,6 @@
 {
   "name": "logos",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -8,6 +8,7 @@
     "@react-native-firebase/app": "^21.14.0",
     "@react-native-firebase/app-check": "^21.14.0",
     "@react-native-firebase/crashlytics": "^21.14.0",
+    "@react-native-google-signin/google-signin": "^16.1.5",
     "@react-native/gradle-plugin": "^0.77.0",
     "expo": "~52.0.46",
     "expo-av": "~15.0.2",

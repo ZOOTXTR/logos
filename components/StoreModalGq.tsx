@@ -45,6 +45,7 @@ export function StoreModal({
   const {
     prices,
     purchasing,
+    iapError,
     handleBuyGems,
     handlePremium,
     handleRestore,
@@ -141,6 +142,15 @@ export function StoreModal({
             </View>
 
             <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+              {iapError && (
+                <View style={[styles.billingNotice, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+                  <Text style={[styles.billingNoticeText, { color: theme.colors.textMuted }]}>
+                    {language === 'en'
+                      ? 'Google Play billing is unavailable right now. Please try again later.'
+                      : 'Google Play ödeme şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.'}
+                  </Text>
+                </View>
+              )}
               <StorePackList
                 isPremium={isPremium}
                 unlockedCategories={unlockedCategories}
@@ -152,6 +162,7 @@ export function StoreModal({
                 theme={theme}
                 language={language}
                 tab={tab}
+                billingDisabled={Boolean(iapError)}
               />
               <StoreRestoreButton
                 onRestore={handleRestore}
@@ -233,4 +244,6 @@ const styles = StyleSheet.create({
   segText: { fontSize: 12, fontWeight: '700' },
   segDot: { width: 6, height: 6, borderRadius: 3 },
   scroll: { padding: SPACING.md },
+  billingNotice: { borderWidth: 1, borderRadius: 12, padding: SPACING.sm, marginBottom: SPACING.sm },
+  billingNoticeText: { fontSize: FONTS.size.xs, textAlign: 'center' },
 });

@@ -1,5 +1,6 @@
-Yenilikler (v2.0.3)
+Yenilikler (v2.0.4)
 
-- Güvenlik: App Check artık zorunlu (enforced) — Firestore/Auth/Functions doğrulanmış istemci ister
-- Bulut özellikleri (liderlik, bulut kayıt, geri bildirim) App Check köprüsüyle uyumlu
-- Kararlılık ve performans iyileştirmeleri
+- Satın alma (IAP) düzeltmesi: gem paketleri ve Premium artık Google Play ödeme ekranını açıyor
+- Hesap: e-posta ve Google ile giriş; ilerlemeni buluta yedekle
+- Sıralama: artık yalnızca giriş yapanlar listeleniyor; oturum açmayanlara "Giriş yap" çağrısı gösteriliyor
+- Oyuncu adı: sıralamada görünen adı seç (uygunsuz kelime filtresiyle)

@@ -33,6 +33,7 @@ interface StorePackListProps {
   theme: Theme;
   language: 'tr' | 'en';
   tab: 'elmas' | 'premium';
+  billingDisabled?: boolean;
 }
 
 export function StorePackList({
@@ -46,6 +47,7 @@ export function StorePackList({
   theme,
   language,
   tab,
+  billingDisabled,
 }: StorePackListProps) {
   const t = TRANSLATIONS[language];
 
@@ -58,6 +60,7 @@ export function StorePackList({
           price={prices?.[PRODUCT_IDS.PREMIUM_MONTHLY]}
           theme={theme}
           language={language}
+          disabled={billingDisabled}
         />
       ) : (
         <>
@@ -107,6 +110,7 @@ export function StorePackList({
                 price={prices?.[pkg.id]}
                 theme={theme}
                 language={language}
+                disabled={billingDisabled}
               />
             ))}
           </View>

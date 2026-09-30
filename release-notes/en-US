@@ -1,5 +1,6 @@
-What's new (v2.0.3)
+What's new (v2.0.4)
 
-- Security: App Check is now enforced — Firestore/Auth/Functions require a verified client
-- Cloud features (leaderboard, cloud save, feedback) aligned with the App Check bridge
-- Stability and performance improvements
+- IAP fix: gem packs and Premium now open the Google Play payment sheet
+- Account: sign in with email or Google; back up your progress
+- Leaderboard: only signed-in players are listed; anonymous users see a sign-in prompt
+- Player name: choose the name shown on the leaderboard (with profanity filter)

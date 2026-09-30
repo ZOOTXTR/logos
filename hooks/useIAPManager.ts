@@ -58,6 +58,10 @@ export function useIAPManager({
   const [purchasing, setPurchasing] = useState<string | null>(null);
   // Aynı satın alımın iki kez işlenmesini (çift hak/gem) önler.
   const processedTokensRef = useRef<Set<string>>(new Set());
+  // Android abonelikte requestSubscription için base plan offerToken'ı şarttır.
+  const premiumOfferTokenRef = useRef<string | null>(null);
+  // Ödeme başlatılamadıysa (billing kapalı/ürün yok) UI'a bildirmek için.
+  const [iapError, setIapError] = useState<string | null>(null);
 
   const onPurchaseRef = useRef(onPurchase);
   onPurchaseRef.current = onPurchase;
@@ -82,6 +86,12 @@ export function useIAPManager({
           getProducts({ skus: gemIds }),
           getSubscriptions({ skus: [PRODUCT_IDS.PREMIUM_MONTHLY] }),
         ]);
+        // Premium base plan offerToken'ını sakla (Android requestSubscription için şart).
+        const sub = (subscriptionResults || [])[0] as
+          | { subscriptionOfferDetails?: Array<{ offerToken?: string }> }
+          | undefined;
+        const offerToken = sub?.subscriptionOfferDetails?.[0]?.offerToken;
+        if (offerToken) premiumOfferTokenRef.current = offerToken;
         if (!cancelled) {
           setPrices(
             [...(productResults || []), ...(subscriptionResults || [])].reduce<Record<string, string>>(
@@ -93,9 +103,11 @@ export function useIAPManager({
               {}
             )
           );
+          setIapError(null);
         }
-      } catch {
-        // IAP not available
+      } catch (e) {
+        console.warn('IAP init failed:', e);
+        if (!cancelled) setIapError('unavailable');
       }
     };
 
@@ -151,7 +163,8 @@ export function useIAPManager({
     };
 
     const purchaseSub = purchaseUpdatedListener(handlePurchase);
-    const errorSub = purchaseErrorListener(() => {
+    const errorSub = purchaseErrorListener((err) => {
+      console.warn('IAP purchase error:', err);
       setPurchasing(null);
     });
 
@@ -171,8 +184,10 @@ export function useIAPManager({
     }
     setPurchasing(pkg.id);
     try {
-      await requestPurchase({ sku: pkg.id });
-    } catch {
+      // Android: requestPurchase `skus` (dizi) bekler; `sku` fırlatır.
+      await requestPurchase({ skus: [pkg.id] });
+    } catch (e) {
+      console.warn('IAP requestPurchase failed:', e);
       showAlertRef.current(
         '❌',
         languageRef.current === 'en' ? 'Purchase cancelled or failed.' : 'Satın alma iptal edildi veya başarısız oldu.'
@@ -189,8 +204,20 @@ export function useIAPManager({
     }
     setPurchasing('premium');
     try {
-      await requestSubscription({ sku: PRODUCT_IDS.PREMIUM_MONTHLY });
-    } catch {
+      // Android: requestSubscription `subscriptionOffers` (sku + offerToken) bekler.
+      const offerToken = premiumOfferTokenRef.current;
+      if (!offerToken) {
+        showAlertRef.current(
+          '❌',
+          languageRef.current === 'en' ? 'Premium is not available right now.' : 'Premium şu an kullanılamıyor. Lütfen tekrar deneyin.'
+        );
+        return;
+      }
+      await requestSubscription({
+        subscriptionOffers: [{ sku: PRODUCT_IDS.PREMIUM_MONTHLY, offerToken }],
+      });
+    } catch (e) {
+      console.warn('IAP requestSubscription failed:', e);
       showAlertRef.current(
         '❌',
         languageRef.current === 'en' ? 'Premium purchase cancelled or failed.' : 'Premium satın alma iptal edildi veya başarısız oldu.'
@@ -250,6 +277,7 @@ export function useIAPManager({
   return {
     prices,
     purchasing,
+    iapError,
     handleBuyGems,
     handlePremium,
     handleRestore,

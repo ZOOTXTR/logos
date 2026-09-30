@@ -12,6 +12,7 @@ interface StorePremiumCardProps {
   theme: Theme;
   language: 'tr' | 'en';
   price?: string;
+  disabled?: boolean;
 }
 
 export function StorePremiumCard({
@@ -20,6 +21,7 @@ export function StorePremiumCard({
   theme,
   language,
   price,
+  disabled,
 }: StorePremiumCardProps) {
   const t = TRANSLATIONS[language];
 
@@ -39,7 +41,7 @@ export function StorePremiumCard({
   return (
     <View style={styles.section}>
       <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>👑 Premium</Text>
-      <TouchableOpacity accessibilityRole="button" onPress={onPurchasePremium} activeOpacity={0.8}>
+      <TouchableOpacity accessibilityRole="button" onPress={onPurchasePremium} activeOpacity={0.8} disabled={disabled} style={disabled ? { opacity: 0.6 } : undefined}>
         <LinearGradient
           colors={['#F59E0B', '#D97706']}
           style={styles.premiumCard}

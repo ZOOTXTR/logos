@@ -1,8 +1,8 @@
 import { httpsCallable } from 'firebase/functions';
 import { collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { getFirebaseDb, getFirebaseFunctions, FIRESTORE_COLLECTIONS } from '../config/firebase';
-import { ScoreEntry } from './storage.service';
-import { getCurrentUser } from './auth.service';
+import { ScoreEntry, storageGet } from './storage.service';
+import { getCurrentUser, isSignedIn } from './auth.service';
 
 export interface LeaderboardEntry {
   id: string;
@@ -19,6 +19,13 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
     const user = getCurrentUser();
     if (!user) return false;
 
+    // Anonim kullanıcı sıralamaya giremez (giriş gerekir).
+    if (!isSignedIn()) return false;
+
+    // Kullanıcının seçtiği görünen ad (yoksa sunucu anonim adı üretir).
+    const storedName = await storageGet('gq_user_name');
+    const displayName = (storedName && storedName.trim()) || `Player_${user.uid.slice(0, 6)}`;
+
     // Skor sunucuda hesaplanır ve doğrulanır (Firestore kuralları istemci yazımına kapalıdır).
     const submitFn = httpsCallable<
       {
@@ -28,6 +35,7 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
         mode: string;
         category: string;
         playerName: string;
+        displayName: string;
       },
       { success: boolean; score: number }
     >(getFirebaseFunctions(), 'submitScore');
@@ -38,7 +46,8 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
       xpEarned: entry.xpEarned,
       mode: entry.mode,
       category: entry.category,
-      playerName: `Player_${user.uid.slice(0, 6)}`,
+      playerName: displayName,
+      displayName,
     });
 
     return true;

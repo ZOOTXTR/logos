@@ -157,6 +157,19 @@ export function getCurrentUser(): User | null {
   return currentUser;
 }
 
+// Gerçek oturum (anonim DEĞİL): e-posta/Google/Play Games bağlanmış mı?
+// Sıralamaya girmek için gereklidir.
+export function isSignedIn(): boolean {
+  const u = currentUser ?? (getFirebaseAuth().currentUser as User | null);
+  return Boolean(u && !u.isAnonymous);
+}
+
+export function getAuthProviderId(): string | null {
+  const u = currentUser ?? (getFirebaseAuth().currentUser as User | null);
+  if (!u) return null;
+  return u.providerData[0]?.providerId ?? (u.isAnonymous ? 'anonymous' : null);
+}
+
 export async function getUserProfile(uid: string) {
   try {
     const db = getFirebaseDb();

@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { AccountSection } from './AccountSection';
 import {
   Volume2,
   Volume1,
@@ -477,7 +478,10 @@ export const SettingsScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* 6. Uygulama */}
+      {/* 6. Hesap & Sıralama */}
+      <AccountSection />
+
+      {/* 7. Uygulama */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Uygulama &amp; Çevrimdışı Mod</Text>
         <View style={styles.card}>

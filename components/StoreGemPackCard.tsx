@@ -12,6 +12,7 @@ interface StoreGemPackCardProps {
   theme: Theme;
   language: 'tr' | 'en';
   price?: string;
+  disabled?: boolean;
 }
 
 export function StoreGemPackCard({
@@ -21,6 +22,7 @@ export function StoreGemPackCard({
   theme,
   language,
   price,
+  disabled,
 }: StoreGemPackCardProps) {
   const displayPrice = price ?? pkg.price;
   return (
@@ -29,10 +31,11 @@ export function StoreGemPackCard({
         styles.gemCard,
         { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
         pkg.popular && styles.popularCard,
+        disabled && styles.disabledCard,
       ]}
       onPress={() => onPurchase(pkg)}
       activeOpacity={0.8}
-      disabled={isPurchasing}
+      disabled={isPurchasing || disabled}
       accessibilityLabel={pkg.gems ? `Buy ${pkg.gems} gems for ${displayPrice}` : 'Purchase item'}
     >
       {pkg.popular && (
@@ -72,6 +75,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.gem,
     borderWidth: 2,
   },
+  disabledCard: { opacity: 0.6 },
   popularBadge: {
     position: 'absolute',
     top: -10,

@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, StyleSheet, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Text } from './CustomText';
-import { Trophy, Flame, ChevronUp, BarChart3, TrendingUp } from 'lucide-react-native';
+import { Trophy, Flame, ChevronUp, BarChart3, TrendingUp, LogIn } from 'lucide-react-native';
 import { PlayerStats } from '../types/game';
 import { sounds } from '../utils/sound';
 import { getWeeklyLeaderboard } from '../services/leaderboard.service';
+import { isSignedIn, onAuthStateChanged } from '../services/auth.service';
+import { useTheme } from '../hooks/useTheme';
 
 interface LeaderboardScreenProps {
   stats: PlayerStats;
+}
+
+interface LeaderEntry {
+  rank: number;
+  name: string;
+  title: string;
+  score: number;
+  streak: number;
+  avatar: string;
 }
 
 const C = {
@@ -23,19 +35,17 @@ const C = {
   muted: '#71717A',
 };
 
-const LEADERS = [
-  { rank: 1, name: 'Zeynep Kaya', title: 'Kelime Şampiyonu', score: 3840, streak: 34, avatar: '👑' },
-  { rank: 2, name: 'Burak Demir', title: 'Büyük Usta', score: 3410, streak: 28, avatar: '🥈' },
-  { rank: 3, name: 'Ayşe Yıldız', title: 'Zihin Ustası', score: 2980, streak: 21, avatar: '🥉' },
-  { rank: 4, name: 'Emre Çelik', title: 'Hızlı Çözücü', score: 2650, streak: 19, avatar: '⚡' },
-  { rank: 5, name: 'Deniz Aydın', title: 'Sözlük Kurdu', score: 2420, streak: 15, avatar: '📚' },
-  { rank: 6, name: 'Mert Aksoy', title: 'Harf Avcısı', score: 2190, streak: 12, avatar: '🎯' },
-  { rank: 7, name: 'Gülşah Öztürk', title: 'Kelimebaz', score: 1980, streak: 10, avatar: '🧩' },
-];
-
 export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) => {
+  const router = useRouter();
+  const { language } = useTheme();
   const [period, setPeriod] = useState<'gunluk' | 'haftalik' | 'tum'>('gunluk');
-  const [leaders, setLeaders] = useState(LEADERS);
+  const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
+  const [signedIn, setSignedIn] = useState<boolean>(isSignedIn());
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(() => setSignedIn(isSignedIn()));
+    return () => { unsub(); };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,9 +66,10 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) =
     return () => { cancelled = true; };
   }, []);
 
-  const first = leaders[0] ?? LEADERS[0];
-  const second = leaders[1] ?? LEADERS[1];
-  const third = leaders[2] ?? LEADERS[2];
+  const hasLeaders = leaders.length > 0;
+  const first = leaders[0];
+  const second = leaders[1];
+  const third = leaders[2];
 
   const byDiff = (key: string) => {
     const played = stats.gamesPlayedByDifficulty?.[key] ?? 0;
@@ -104,20 +115,42 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) =
         ))}
       </View>
 
-      {/* Player rank capsule */}
-      <View style={styles.rankCapsule}>
-        <View style={styles.rankCapsuleLeft}>
-            <View style={styles.rankCircle}><Text style={styles.rankCircleText}>—</Text></View>
-          <View>
-            <Text style={styles.rankName}>Sen</Text>
-            <Text style={styles.rankSub}>Seviye {stats.level} • {stats.gems} Gem</Text>
+      {/* Giriş yapmayan kullanıcı için CTA */}
+      {!signedIn && (
+        <View style={styles.signInCard}>
+          <View style={styles.signInIcon}><LogIn size={18} color={C.primary} /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.signInTitle}>
+              {language === 'en' ? 'Sign in to join the leaderboard' : 'Sıralamaya girmek için oturum açın'}
+            </Text>
+            <Text style={styles.signInSub}>
+              {language === 'en'
+                ? 'Create an account to appear on the leaderboard and back up your progress.'
+                : 'Hesap oluştur; sıralamada görün ve ilerlemeni buluta yedekle.'}
+            </Text>
+          </View>
+          <Pressable style={styles.signInBtn} onPress={() => { sounds.playClick(); router.push('/(tabs)/settings'); }}>
+            <Text style={styles.signInBtnText}>{language === 'en' ? 'Sign in' : 'Giriş yap'}</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {/* Player rank capsule (yalnızca giriş yapan) */}
+      {signedIn && (
+        <View style={styles.rankCapsule}>
+          <View style={styles.rankCapsuleLeft}>
+              <View style={styles.rankCircle}><Text style={styles.rankCircleText}>—</Text></View>
+            <View>
+              <Text style={styles.rankName}>Sen</Text>
+              <Text style={styles.rankSub}>Seviye {stats.level} • {stats.gems} Gem</Text>
+            </View>
+          </View>
+          <View style={styles.rankDelta}>
+            <ChevronUp size={14} color={C.green} />
+            <Text style={styles.rankDeltaText}>Seviye {stats.level}</Text>
           </View>
         </View>
-        <View style={styles.rankDelta}>
-          <ChevronUp size={14} color={C.green} />
-          <Text style={styles.rankDeltaText}>Seviye {stats.level}</Text>
-        </View>
-      </View>
+      )}
 
       {/* Başarı & Zorluk Dağılımı */}
       <View style={styles.analyticsCard}>
@@ -186,50 +219,61 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ stats }) =
         </View>
       </View>
 
-      {/* Podium */}
-      <View style={styles.podiumRow}>
-        <View style={[styles.podiumCard, styles.podium2]}>
-          <Text style={styles.podiumEmoji}>🥈</Text>
-          <Text style={styles.podiumName} numberOfLines={1}>{second.name.split(' ')[0]}</Text>
-          <Text style={styles.podiumScore}>{second.score.toLocaleString()}</Text>
-          <Text style={styles.podiumRankLabel}>2. Sıra</Text>
-        </View>
-        <View style={[styles.podiumCard, styles.podium1]}>
-          <View style={styles.podiumCrown}><Text style={{ fontSize: 14 }}>👑</Text></View>
-          <Text style={styles.podiumName} numberOfLines={1}>{first.name.split(' ')[0]}</Text>
-          <Text style={[styles.podiumScore, { color: C.amber }]}>{first.score.toLocaleString()} XP</Text>
-          <Text style={[styles.podiumRankLabel, { color: C.amber }]}>1. Şampiyon</Text>
-        </View>
-        <View style={[styles.podiumCard, styles.podium3]}>
-          <Text style={styles.podiumEmoji}>🥉</Text>
-          <Text style={styles.podiumName} numberOfLines={1}>{third.name.split(' ')[0]}</Text>
-          <Text style={styles.podiumScore}>{third.score.toLocaleString()}</Text>
-          <Text style={styles.podiumRankLabel}>3. Sıra</Text>
-        </View>
-      </View>
-
-      {/* Ranked list */}
-      <View style={{ gap: 8 }}>
-        {leaders.slice(3).map((item) => (
-          <View key={item.rank} style={styles.listRow}>
-            <View style={styles.listLeft}>
-              <Text style={styles.listRank}>{item.rank}</Text>
-              <Text style={styles.listAvatar}>{item.avatar}</Text>
-              <View>
-                <Text style={styles.listName}>{item.name}</Text>
-                <Text style={styles.listTitle}>{item.title}</Text>
-              </View>
+      {hasLeaders ? (
+        <>
+          {/* Podium */}
+          <View style={styles.podiumRow}>
+            <View style={[styles.podiumCard, styles.podium2]}>
+              <Text style={styles.podiumEmoji}>🥈</Text>
+              <Text style={styles.podiumName} numberOfLines={1}>{(second?.name ?? '—').split(' ')[0]}</Text>
+              <Text style={styles.podiumScore}>{(second?.score ?? 0).toLocaleString()}</Text>
+              <Text style={styles.podiumRankLabel}>2. Sıra</Text>
             </View>
-            <View style={styles.listRight}>
-              <View style={styles.listStreak}>
-                <Flame size={12} color={C.amber} />
-                <Text style={styles.listStreakText}>{item.streak}</Text>
-              </View>
-              <Text style={styles.listScore}>{item.score}</Text>
+            <View style={[styles.podiumCard, styles.podium1]}>
+              <View style={styles.podiumCrown}><Text style={{ fontSize: 14 }}>👑</Text></View>
+              <Text style={styles.podiumName} numberOfLines={1}>{(first?.name ?? '—').split(' ')[0]}</Text>
+              <Text style={[styles.podiumScore, { color: C.amber }]}>{(first?.score ?? 0).toLocaleString()} XP</Text>
+              <Text style={[styles.podiumRankLabel, { color: C.amber }]}>1. Şampiyon</Text>
+            </View>
+            <View style={[styles.podiumCard, styles.podium3]}>
+              <Text style={styles.podiumEmoji}>🥉</Text>
+              <Text style={styles.podiumName} numberOfLines={1}>{(third?.name ?? '—').split(' ')[0]}</Text>
+              <Text style={styles.podiumScore}>{(third?.score ?? 0).toLocaleString()}</Text>
+              <Text style={styles.podiumRankLabel}>3. Sıra</Text>
             </View>
           </View>
-        ))}
-      </View>
+
+          {/* Ranked list */}
+          <View style={{ gap: 8 }}>
+            {leaders.slice(3).map((item) => (
+              <View key={item.rank} style={styles.listRow}>
+                <View style={styles.listLeft}>
+                  <Text style={styles.listRank}>{item.rank}</Text>
+                  <Text style={styles.listAvatar}>{item.avatar}</Text>
+                  <View>
+                    <Text style={styles.listName}>{item.name}</Text>
+                    <Text style={styles.listTitle}>{item.title}</Text>
+                  </View>
+                </View>
+                <View style={styles.listRight}>
+                  <View style={styles.listStreak}>
+                    <Flame size={12} color={C.amber} />
+                    <Text style={styles.listStreakText}>{item.streak}</Text>
+                  </View>
+                  <Text style={styles.listScore}>{item.score}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </>
+      ) : (
+        <View style={styles.emptyCard}>
+          <Trophy size={22} color={C.muted} />
+          <Text style={styles.emptyText}>
+            {language === 'en' ? 'No scores yet. Be the first!' : 'Henüz skor yok. İlk sen ol!'}
+          </Text>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -296,4 +340,12 @@ const styles = StyleSheet.create({
   listStreak: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   listStreakText: { fontSize: 11, color: C.amber },
   listScore: { fontSize: 12, fontWeight: '700', color: C.text },
+  signInCard: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.card, borderWidth: 1, borderColor: 'rgba(124,92,255,0.4)', borderRadius: 18, padding: 14 },
+  signInIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(124,92,255,0.2)', borderWidth: 1, borderColor: C.primary, alignItems: 'center', justifyContent: 'center' },
+  signInTitle: { fontSize: 13, fontWeight: '700', color: C.text },
+  signInSub: { fontSize: 11, color: C.text2, marginTop: 2 },
+  signInBtn: { backgroundColor: C.primary, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  signInBtnText: { color: C.text, fontWeight: '700', fontSize: 12 },
+  emptyCard: { alignItems: 'center', gap: 8, backgroundColor: C.card, borderWidth: 1, borderColor: C.border, borderRadius: 18, padding: 24 },
+  emptyText: { fontSize: 12, color: C.muted, textAlign: 'center' },
 });
