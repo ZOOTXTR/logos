@@ -1,8 +1,8 @@
-import { signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, EmailAuthProvider, linkWithCredential } from 'firebase/auth';
+import { signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, User, EmailAuthProvider, linkWithCredential, onAuthStateChanged as firebaseOnAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { getFirebaseAuth, getFirebaseDb, getFirebaseFunctions, FIRESTORE_COLLECTIONS } from '../config/firebase';
-import { storageGet, storageSet, storageRemove } from './storage.service';
+import { storageSet, storageRemove } from './storage.service';
 import { setUserContext, clearUserContext } from './error-reporting.service';
 
 const AUTH_UID_KEY = 'gq_auth_uid';
@@ -38,19 +38,19 @@ function notifyListeners(user: User | null) {
 export async function initAuth(): Promise<User | null> {
   try {
     const auth = getFirebaseAuth();
-    const savedUid = await storageGet(AUTH_UID_KEY);
 
-    if (savedUid) {
-      try {
-        const result = await signInAnonymously(auth);
-        await createUserProfile(result.user);
-        notifyListeners(result.user);
-        return result.user;
-      } catch {
-        await storageRemove(AUTH_UID_KEY);
-      }
+    // 1) Persist edilmiş oturumu bekle. Varsa onu KULLAN (e-posta/Google girişini koru).
+    //    (Eskiden her açılışta signInAnonymously çağrılıp kalıcı oturum eziliyordu.)
+    const existing = await new Promise<User | null>((resolve) => {
+      const unsub = firebaseOnAuthStateChanged(auth, (u) => { unsub(); resolve(u); });
+    });
+    if (existing) {
+      await createUserProfile(existing);
+      notifyListeners(existing);
+      return existing;
     }
 
+    // 2) Oturum yoksa anonim oluştur.
     const result = await signInAnonymously(auth);
     await storageSet(AUTH_UID_KEY, result.user.uid);
     await createUserProfile(result.user);
