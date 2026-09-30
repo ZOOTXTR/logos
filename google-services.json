@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "478040450778-ngc2q818f9a3nlcnbmlj67to4dd6b68g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zovtex.logos",
+            "certificate_hash": "5aa849adde0463cd316329b8334d824f0463a8c6"
+          }
+        },
+        {
+          "client_id": "478040450778-tek1mqsp7jlhpul19jj9ptt8a9enb3q2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zovtex.logos",
+            "certificate_hash": "ecf3901b70668362061903a8a269de88838361ea"
+          }
+        },
+        {
           "client_id": "478040450778-81ic3fm5ugqv7deqm6snoa9pvhgt2h8h.apps.googleusercontent.com",
           "client_type": 3
         }
