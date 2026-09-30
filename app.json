@@ -2,7 +2,7 @@
   "expo": {
     "name": "Logos",
     "slug": "logos",
-    "version": "2.0.6",
+    "version": "2.0.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.zovtex.logos",
-      "versionCode": 106,
+      "versionCode": 107,
       "targetSdkVersion": 36,
       "googleServicesFile": "./google-services.json",
       "permissions": [
@@ -48,7 +48,7 @@
       "fallbackToCacheTimeout": 0,
       "enabled": true
     },
-    "runtimeVersion": "2.0.6",
+    "runtimeVersion": "2.0.7",
     "extra": {
       "eas": {
         "projectId": "fd9e4ebe-4289-4e29-924b-1b5dda68c2ed"
