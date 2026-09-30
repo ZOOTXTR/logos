@@ -34,7 +34,6 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
         xpEarned: number;
         mode: string;
         category: string;
-        playerName: string;
         displayName: string;
       },
       { success: boolean; score: number }
@@ -46,7 +45,6 @@ export async function submitScore(entry: ScoreEntry): Promise<boolean> {
       xpEarned: entry.xpEarned,
       mode: entry.mode,
       category: entry.category,
-      playerName: displayName,
       displayName,
     });
 
@@ -162,6 +160,21 @@ export async function getMyBestScores(): Promise<LeaderboardEntry[]> {
   } catch (e) {
     console.warn('Failed to get my scores:', e);
     return [];
+  }
+}
+
+// Giriş yapan kullanıcının haftalık sıralaması/puanı (yoksa null).
+export async function getMyWeeklyStanding(): Promise<{ rank: number; points: number } | null> {
+  try {
+    if (!isSignedIn()) return null;
+    const user = getCurrentUser();
+    if (!user) return null;
+    const entries = await getWeeklyLeaderboard(200);
+    const idx = entries.findIndex((e) => e.uid === user.uid);
+    if (idx === -1) return null;
+    return { rank: idx + 1, points: entries[idx].score };
+  } catch {
+    return null;
   }
 }
 

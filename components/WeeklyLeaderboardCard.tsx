@@ -4,7 +4,7 @@ import { Text } from './CustomText';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Medal, ChevronRight, Trophy, Clock, X } from 'lucide-react-native';
 import { sounds } from '../utils/sound';
-import { getWeeklyLeaderboard } from '../services/leaderboard.service';
+import { getWeeklyLeaderboard, getMyWeeklyStanding } from '../services/leaderboard.service';
 import { isSignedIn, onAuthStateChanged } from '../services/auth.service';
 import { storageGet } from '../services/storage.service';
 
@@ -12,8 +12,6 @@ interface WeeklyLeaderboardCardProps {
   theme?: unknown;
   language?: 'tr' | 'en';
   onViewAll?: () => void;
-  weeklyPoints?: number;
-  rank?: number;
 }
 
 const C = {
@@ -45,11 +43,12 @@ const rankBg = (rank: number) => {
   return { backgroundColor: C.surface, borderColor: C.border };
 };
 
-export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, rank = 14 }: WeeklyLeaderboardCardProps) {
+export function WeeklyLeaderboardCard({ language = 'tr' }: WeeklyLeaderboardCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [leaders, setLeaders] = useState<LeaderUser[]>([]);
   const [signedIn, setSignedIn] = useState<boolean>(isSignedIn());
   const [myName, setMyName] = useState<string>('');
+  const [standing, setStanding] = useState<{ rank: number; points: number } | null>(null);
   const en = language === 'en';
   const top3 = leaders.slice(0, 3);
   const hasLeaders = leaders.length > 0;
@@ -78,6 +77,9 @@ export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, ra
         setLeaders(mapped);
       })
       .catch(() => {});
+    if (isSignedIn()) {
+      getMyWeeklyStanding().then((s) => { if (!cancelled) setStanding(s); }).catch(() => {});
+    }
     return () => { cancelled = true; };
   }, []);
 
@@ -99,17 +101,17 @@ export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, ra
         </Pressable>
       </View>
 
-      {/* User standing (yalnızca giriş yapan) */}
-      {signedIn && (
+      {/* User standing (yalnızca giriş yapan ve sıralamada olan) */}
+      {signedIn && standing && (
         <View style={styles.standing}>
           <View style={styles.standingLeft}>
-            <View style={styles.rankCircle}><Text style={styles.rankCircleText}>#{rank}</Text></View>
+            <View style={styles.rankCircle}><Text style={styles.rankCircleText}>#{standing.rank}</Text></View>
             <View>
               <Text style={styles.standingTitle}>{en ? 'Your Ranking' : 'Senin Sıralaman'}</Text>
-              <Text style={styles.standingSub}>💎 {en ? 'Emerald League' : 'Zümrüt Lig'} • {en ? '530 pts to Top 10' : "İlk 10'a 530 Puan"}</Text>
+              <Text style={styles.standingSub}>💎 {en ? 'Weekly leaderboard' : 'Haftalık liderlik'}</Text>
             </View>
           </View>
-          <Text style={styles.standingPts}>{weeklyPoints.toLocaleString()} XP</Text>
+          <Text style={styles.standingPts}>{standing.points.toLocaleString()} XP</Text>
         </View>
       )}
 
@@ -154,16 +156,16 @@ export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, ra
               <View style={styles.resetPill}><Text style={styles.resetPillText}>3g 14s 22d</Text></View>
             </LinearGradient>
 
-            {signedIn && (
+            {signedIn && standing && (
               <View style={styles.userCapsule}>
                 <View style={styles.userCapsuleLeft}>
-                  <View style={styles.userCapsuleRank}><Text style={styles.userCapsuleRankText}>#{rank}</Text></View>
+                  <View style={styles.userCapsuleRank}><Text style={styles.userCapsuleRankText}>#{standing.rank}</Text></View>
                   <View>
                     <Text style={styles.userCapsuleName}>{myName ? `${myName} (${en ? 'You' : 'Sen'})` : (en ? 'You' : 'Sen')}</Text>
-                    <Text style={styles.userCapsuleSub}>💎 {en ? 'Emerald League' : 'Zümrüt Lig'} • {en ? '530 XP to Top 10' : "İlk 10'a 530 XP kaldı"}</Text>
+                    <Text style={styles.userCapsuleSub}>💎 {en ? 'Weekly leaderboard' : 'Haftalık liderlik'}</Text>
                   </View>
                 </View>
-                <Text style={styles.userCapsulePts}>{weeklyPoints.toLocaleString()} XP</Text>
+                <Text style={styles.userCapsulePts}>{standing.points.toLocaleString()} XP</Text>
               </View>
             )}
 

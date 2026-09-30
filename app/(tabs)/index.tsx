@@ -59,8 +59,6 @@ export default function IndexTab() {
               <WeeklyLeaderboardCard
                 theme={theme}
                 language={language}
-                weeklyPoints={Math.max(2150, stats.gamesWon * 90 + stats.streak * 45)}
-                rank={14}
                 onViewAll={() => router.push('/(tabs)/leaderboard')}
               />
             </View>
