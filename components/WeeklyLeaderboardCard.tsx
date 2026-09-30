@@ -5,6 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Medal, ChevronRight, Trophy, Clock, X } from 'lucide-react-native';
 import { sounds } from '../utils/sound';
 import { getWeeklyLeaderboard } from '../services/leaderboard.service';
+import { isSignedIn, onAuthStateChanged } from '../services/auth.service';
+import { storageGet } from '../services/storage.service';
 
 interface WeeklyLeaderboardCardProps {
   theme?: unknown;
@@ -36,19 +38,6 @@ interface LeaderUser {
   league: string;
 }
 
-const WEEKLY_LEADERS: LeaderUser[] = [
-  { rank: 1, name: 'Zeynep Kaya', title: 'Kelime Şampiyonu', score: 3840, streak: 34, avatar: '👑', league: 'Efsane Lig' },
-  { rank: 2, name: 'Burak Demir', title: 'Büyük Usta', score: 3410, streak: 28, avatar: '🥈', league: 'Efsane Lig' },
-  { rank: 3, name: 'Ayşe Yıldız', title: 'Zihin Ustası', score: 2980, streak: 21, avatar: '🥉', league: 'Zümrüt Lig' },
-  { rank: 4, name: 'Emre Çelik', title: 'Hızlı Çözücü', score: 2650, streak: 19, avatar: '⚡', league: 'Zümrüt Lig' },
-  { rank: 5, name: 'Deniz Aydın', title: 'Sözlük Kurdu', score: 2420, streak: 15, avatar: '📚', league: 'Zümrüt Lig' },
-  { rank: 6, name: 'Mert Aksoy', title: 'Harf Avcısı', score: 2190, streak: 12, avatar: '🎯', league: 'Altın Lig' },
-  { rank: 7, name: 'Gülşah Öztürk', title: 'Kelimebaz', score: 1980, streak: 10, avatar: '🧩', league: 'Altın Lig' },
-  { rank: 8, name: 'Canberk Polat', title: 'Taktik Dehası', score: 1820, streak: 8, avatar: '🏹', league: 'Altın Lig' },
-  { rank: 9, name: 'Selin Doğan', title: 'Anagram Ustası', score: 1690, streak: 7, avatar: '✨', league: 'Gümüş Lig' },
-  { rank: 10, name: 'Barış Koç', title: 'Hızlı Zihin', score: 1540, streak: 6, avatar: '🧠', league: 'Gümüş Lig' },
-];
-
 const rankBg = (rank: number) => {
   if (rank === 1) return { backgroundColor: 'rgba(245,158,11,0.15)', borderColor: 'rgba(245,158,11,0.5)' };
   if (rank === 2) return { backgroundColor: 'rgba(161,161,170,0.1)', borderColor: 'rgba(161,161,170,0.4)' };
@@ -58,9 +47,18 @@ const rankBg = (rank: number) => {
 
 export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, rank = 14 }: WeeklyLeaderboardCardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [leaders, setLeaders] = useState<LeaderUser[]>(WEEKLY_LEADERS);
+  const [leaders, setLeaders] = useState<LeaderUser[]>([]);
+  const [signedIn, setSignedIn] = useState<boolean>(isSignedIn());
+  const [myName, setMyName] = useState<string>('');
   const en = language === 'en';
   const top3 = leaders.slice(0, 3);
+  const hasLeaders = leaders.length > 0;
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(() => setSignedIn(isSignedIn()));
+    storageGet('gq_user_name').then((v) => { if (v) setMyName(v); }).catch(() => {});
+    return () => { unsub(); };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,31 +99,39 @@ export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, ra
         </Pressable>
       </View>
 
-      {/* User standing */}
-      <View style={styles.standing}>
-        <View style={styles.standingLeft}>
-          <View style={styles.rankCircle}><Text style={styles.rankCircleText}>#{rank}</Text></View>
-          <View>
-            <Text style={styles.standingTitle}>{en ? 'Your Ranking' : 'Senin Sıralaman'}</Text>
-            <Text style={styles.standingSub}>💎 {en ? 'Emerald League' : 'Zümrüt Lig'} • {en ? '530 pts to Top 10' : "İlk 10'a 530 Puan"}</Text>
-          </View>
-        </View>
-        <Text style={styles.standingPts}>{weeklyPoints.toLocaleString()} XP</Text>
-      </View>
-
-      {/* Podium */}
-      <View style={styles.podium}>
-        {top3.map((leader, i) => (
-          <Pressable key={leader.rank} onPress={() => { sounds.playClick(); setIsOpen(true); }} style={[styles.podiumItem, i === 0 ? { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.5)' } : { backgroundColor: C.surface, borderColor: C.border }]}>
-            <View style={styles.podiumTop}>
-              <Text style={styles.podiumEmoji}>{i === 0 ? '👑' : i === 1 ? '🥈' : '🥉'}</Text>
-              <Text style={styles.podiumRank}>{leader.rank}. {en ? 'Rank' : 'Sıra'}</Text>
+      {/* User standing (yalnızca giriş yapan) */}
+      {signedIn && (
+        <View style={styles.standing}>
+          <View style={styles.standingLeft}>
+            <View style={styles.rankCircle}><Text style={styles.rankCircleText}>#{rank}</Text></View>
+            <View>
+              <Text style={styles.standingTitle}>{en ? 'Your Ranking' : 'Senin Sıralaman'}</Text>
+              <Text style={styles.standingSub}>💎 {en ? 'Emerald League' : 'Zümrüt Lig'} • {en ? '530 pts to Top 10' : "İlk 10'a 530 Puan"}</Text>
             </View>
-            <Text style={styles.podiumName} numberOfLines={1}>{leader.name.split(' ')[0]}</Text>
-            <Text style={styles.podiumScore}>{leader.score} XP</Text>
-          </Pressable>
-        ))}
-      </View>
+          </View>
+          <Text style={styles.standingPts}>{weeklyPoints.toLocaleString()} XP</Text>
+        </View>
+      )}
+
+      {hasLeaders ? (
+        <View style={styles.podium}>
+          {top3.map((leader, i) => (
+            <Pressable key={leader.rank} onPress={() => { sounds.playClick(); setIsOpen(true); }} style={[styles.podiumItem, i === 0 ? { backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.5)' } : { backgroundColor: C.surface, borderColor: C.border }]}>
+              <View style={styles.podiumTop}>
+                <Text style={styles.podiumEmoji}>{i === 0 ? '👑' : i === 1 ? '🥈' : '🥉'}</Text>
+                <Text style={styles.podiumRank}>{leader.rank}. {en ? 'Rank' : 'Sıra'}</Text>
+              </View>
+              <Text style={styles.podiumName} numberOfLines={1}>{leader.name.split(' ')[0]}</Text>
+              <Text style={styles.podiumScore}>{leader.score} XP</Text>
+            </Pressable>
+          ))}
+        </View>
+      ) : (
+        <View style={styles.emptyBox}>
+          <Trophy size={20} color={C.muted} />
+          <Text style={styles.emptyText}>{en ? 'No scores yet. Be the first!' : 'Henüz skor yok. İlk sen ol!'}</Text>
+        </View>
+      )}
 
       <Modal visible={isOpen} transparent animationType="fade" onRequestClose={() => setIsOpen(false)}>
         <View style={styles.modalOverlay}>
@@ -148,32 +154,41 @@ export function WeeklyLeaderboardCard({ language = 'tr', weeklyPoints = 2150, ra
               <View style={styles.resetPill}><Text style={styles.resetPillText}>3g 14s 22d</Text></View>
             </LinearGradient>
 
-            <View style={styles.userCapsule}>
-              <View style={styles.userCapsuleLeft}>
-                <View style={styles.userCapsuleRank}><Text style={styles.userCapsuleRankText}>#{rank}</Text></View>
-                <View>
-                  <Text style={styles.userCapsuleName}>{en ? 'Kerem Yılmaz (You)' : 'Kerem Yılmaz (Sen)'}</Text>
-                  <Text style={styles.userCapsuleSub}>💎 {en ? 'Emerald League' : 'Zümrüt Lig'} • {en ? '530 XP to Top 10' : "İlk 10'a 530 XP kaldı"}</Text>
-                </View>
-              </View>
-              <Text style={styles.userCapsulePts}>{weeklyPoints.toLocaleString()} XP</Text>
-            </View>
-
-            <ScrollView style={styles.list} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
-              {leaders.map((user) => (
-                <View key={user.rank} style={[styles.listRow, rankBg(user.rank)]}>
-                  <View style={styles.listLeft}>
-                    <Text style={styles.listRank}>{user.rank <= 3 ? (user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉') : `#${user.rank}`}</Text>
-                    <Text style={styles.listAvatar}>{user.avatar}</Text>
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text style={styles.listName} numberOfLines={1}>{user.name}</Text>
-                      <Text style={styles.listMeta} numberOfLines={1}>{user.league} • {user.streak} {en ? 'streak' : 'seri'}</Text>
-                    </View>
+            {signedIn && (
+              <View style={styles.userCapsule}>
+                <View style={styles.userCapsuleLeft}>
+                  <View style={styles.userCapsuleRank}><Text style={styles.userCapsuleRankText}>#{rank}</Text></View>
+                  <View>
+                    <Text style={styles.userCapsuleName}>{myName ? `${myName} (${en ? 'You' : 'Sen'})` : (en ? 'You' : 'Sen')}</Text>
+                    <Text style={styles.userCapsuleSub}>💎 {en ? 'Emerald League' : 'Zümrüt Lig'} • {en ? '530 XP to Top 10' : "İlk 10'a 530 XP kaldı"}</Text>
                   </View>
-                  <Text style={styles.listScore}>{user.score.toLocaleString()} XP</Text>
                 </View>
-              ))}
-            </ScrollView>
+                <Text style={styles.userCapsulePts}>{weeklyPoints.toLocaleString()} XP</Text>
+              </View>
+            )}
+
+            {hasLeaders ? (
+              <ScrollView style={styles.list} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
+                {leaders.map((user) => (
+                  <View key={user.rank} style={[styles.listRow, rankBg(user.rank)]}>
+                    <View style={styles.listLeft}>
+                      <Text style={styles.listRank}>{user.rank <= 3 ? (user.rank === 1 ? '🥇' : user.rank === 2 ? '🥈' : '🥉') : `#${user.rank}`}</Text>
+                      <Text style={styles.listAvatar}>{user.avatar}</Text>
+                      <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={styles.listName} numberOfLines={1}>{user.name}</Text>
+                        <Text style={styles.listMeta} numberOfLines={1}>{user.league} • {user.streak} {en ? 'streak' : 'seri'}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.listScore}>{user.score.toLocaleString()} XP</Text>
+                  </View>
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.modalEmpty}>
+                <Trophy size={22} color={C.muted} />
+                <Text style={styles.emptyText}>{en ? 'No scores yet. Be the first!' : 'Henüz skor yok. İlk sen ol!'}</Text>
+              </View>
+            )}
 
             <View style={styles.modalFooter}>
               <Pressable onPress={() => { sounds.playClick(); setIsOpen(false); }} style={styles.modalCtaWrap}>
@@ -244,4 +259,7 @@ const styles = StyleSheet.create({
   modalCtaWrap: { borderRadius: 14, overflow: 'hidden' },
   modalCta: { height: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   modalCtaText: { fontSize: 12, fontWeight: '800', color: '#000' },
+  emptyBox: { alignItems: 'center', gap: 8, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 14, padding: 18 },
+  modalEmpty: { alignItems: 'center', gap: 8, padding: 24 },
+  emptyText: { fontSize: 12, color: C.muted, textAlign: 'center' },
 });
