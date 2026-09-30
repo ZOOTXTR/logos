@@ -1,6 +1,5 @@
-Yenilikler (v2.0.2)
+Yenilikler (v2.0.3)
 
-- Güvenlik: Google Play Integrity / Firebase App Check koruması (sahte istemcilere karşı)
-- Geri bildirim gönderiminde hata durumu artık bildiriliyor
-- Ayarlar: Günlük Bildirim anahtarı
+- Güvenlik: App Check artık zorunlu (enforced) — Firestore/Auth/Functions doğrulanmış istemci ister
+- Bulut özellikleri (liderlik, bulut kayıt, geri bildirim) App Check köprüsüyle uyumlu
 - Kararlılık ve performans iyileştirmeleri

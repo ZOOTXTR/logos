@@ -15,11 +15,14 @@ function RootStack() {
   const router = useRouter();
 
   useEffect(() => {
-    // Authenticate anonymously in the background via Firebase
-    ensureAnonymousAuth();
-    initAppCheck();
-    // app-level currentUser'ı da kur (multiplayer/liderlik/referral buna bağlı)
-    initAuth().catch(() => {});
+    // App Check'i ÖNCE kur (native sağlayıcı + JS SDK köprüsü), sonra auth/Firestore
+    // çağrıları yap — aksi halde enforcement istekleri token'sız kalabilir.
+    initAppCheck().finally(() => {
+      // Authenticate anonymously in the background via Firebase
+      ensureAnonymousAuth();
+      // app-level currentUser'ı da kur (multiplayer/liderlik/referral buna bağlı)
+      initAuth().catch(() => {});
+    });
     // First-launch onboarding gate
     storageGet('gq_onboarded').then((v) => {
       if (v !== 'true') router.replace('/onboarding');

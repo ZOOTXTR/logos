@@ -1,6 +1,5 @@
-What's new (v2.0.2)
+What's new (v2.0.3)
 
-- Security: Google Play Integrity / Firebase App Check protection against tampered clients
-- Feedback submission now reports errors
-- Settings: Daily notifications toggle
+- Security: App Check is now enforced — Firestore/Auth/Functions require a verified client
+- Cloud features (leaderboard, cloud save, feedback) aligned with the App Check bridge
 - Stability and performance improvements
